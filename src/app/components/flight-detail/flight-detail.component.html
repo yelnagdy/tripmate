@@ -1,0 +1,92 @@
+<div class="fd-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <a routerLink="/main/home" class="bc-link">Home</a>
+    <i class="fas fa-chevron-right bc-sep" aria-hidden="true"></i>
+    <span class="bc-current">Flight Details</span>
+  </nav>
+
+  <div class="route-crumb" aria-label="Route">
+    <span class="route-city">{{ fromCity() }}</span>
+    <i class="fas fa-chevron-right route-sep" aria-hidden="true"></i>
+    <span class="route-city">{{ toCity() }}</span>
+  </div>
+
+  <!-- Hero image -->
+  <div class="hero-wrap">
+    <img
+      [src]="heroImage()"
+      alt="Flight destination"
+      class="hero-img" />
+  </div>
+
+  <!-- Economy features section -->
+  <section class="features-section" aria-labelledby="features-heading">
+
+    <!-- Header row: title + class filter -->
+    <div class="features-header">
+      <h2 id="features-heading" class="features-title">Basic Economy Features</h2>
+
+      <div class="class-filters" role="group" aria-label="Select cabin class">
+        @for (opt of classOptions; track opt.key) {
+          <label class="class-chip" [class.class-chip--active]="isClassActive(opt.key)">
+            <input
+              type="checkbox"
+              class="visually-hidden"
+              [checked]="isClassActive(opt.key)"
+              (change)="toggleClass(opt.key)"
+              [attr.aria-label]="opt.label" />
+            <span class="chip-box" aria-hidden="true">
+              @if (isClassActive(opt.key)) {
+                <i class="fas fa-check chip-check"></i>
+              }
+            </span>
+            <span class="chip-label">{{ opt.label }}</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Gallery thumbnails -->
+    <div class="gallery-strip" role="list" aria-label="Flight cabin images">
+      @for (img of galleryImages(); track img; let i = $index) {
+        <button
+          type="button"
+          role="listitem"
+          class="thumb-btn"
+          [class.thumb-btn--active]="activeGalleryIndex() === i"
+          (click)="setGalleryImage(i)"
+          [attr.aria-label]="'View cabin image ' + (i + 1)"
+          [attr.aria-pressed]="activeGalleryIndex() === i">
+          <img
+            [src]="img"
+            [alt]="'Cabin image ' + (i + 1)"
+            class="thumb-img"
+            loading="lazy" />
+        </button>
+      }
+    </div>
+
+  </section>
+
+  <!-- Flight options -->
+  <div class="flights-list" aria-label="Available flights">
+    @for (flight of allFlights(); track flight.id) {
+      <app-flight-card
+        [flight]="flight"
+        [isSelected]="isFlightSelected(flight)"
+        (book)="onBookFlight($event)">
+      </app-flight-card>
+    }
+  </div>
+
+</div>
+
+<!-- Booking dialog (3-step stepper) -->
+@if (dialogOpen() && activeBooking()) {
+  <app-booking-dialog
+    [data]="activeBooking()!"
+    (closeDialog)="closeBookingDialog()">
+  </app-booking-dialog>
+}

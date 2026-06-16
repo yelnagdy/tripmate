@@ -1,1 +1,55 @@
-<p>favourite works!</p>
+<div class="fav-page">
+
+  <h1 class="page-title">Favourites</h1>
+
+  <!-- Tabs -->
+  <div class="tabs-wrap" role="tablist" aria-label="Favourite categories">
+
+    <button
+      type="button"
+      role="tab"
+      class="tab-btn"
+      [class.tab-btn--active]="activeTab() === 'packages'"
+      [attr.aria-selected]="activeTab() === 'packages'"
+      (click)="setTab('packages')">
+      <span class="tab-label">Packages</span>
+      <span class="tab-count">{{ packagesCount() }} marked</span>
+    </button>
+
+    <button
+      type="button"
+      role="tab"
+      class="tab-btn"
+      [class.tab-btn--active]="activeTab() === 'places'"
+      [attr.aria-selected]="activeTab() === 'places'"
+      (click)="setTab('places')">
+      <span class="tab-label">Places</span>
+      <span class="tab-count">{{ placesCount() }} marked</span>
+    </button>
+
+  </div>
+
+  <!-- Card list -->
+  <div
+    class="fav-list"
+    role="tabpanel"
+    [attr.aria-label]="activeTab() === 'packages' ? 'Favourite packages' : 'Favourite places'">
+
+    @if (activeItems().length) {
+      @for (item of activeItems(); track item.id) {
+        <app-favourite-card
+          [item]="item"
+          (viewPlace)="onViewPlace($event)"
+          (remove)="onRemove($event)">
+        </app-favourite-card>
+      }
+    } @else {
+      <div class="empty-state" role="status" aria-live="polite">
+        <i class="fas fa-heart-broken" aria-hidden="true"></i>
+        No {{ activeTab() === 'packages' ? 'packages' : 'places' }} saved yet.
+      </div>
+    }
+
+  </div>
+
+</div>

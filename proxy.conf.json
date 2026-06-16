@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "https://dk7tnnm6-7265.uks1.devtunnels.ms",
+    "secure": false,
+    "changeOrigin": true,
+    "headers": {
+      "ngrok-skip-browser-warning": "true"
+    },
+    "logLevel": "debug"
+  }
+}

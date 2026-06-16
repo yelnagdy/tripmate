@@ -1,0 +1,43 @@
+<article
+  class="flight-card"
+  [class.flight-card--selected]="isSelected()"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="flight().departureCity + ' to ' + flight().arrivalCity + ', ' + flight().pricePerPerson + ' dollars per person'"
+  [attr.aria-pressed]="isSelected()"
+  (click)="book.emit(flight())"
+  (keydown.enter)="book.emit(flight())"
+  (keydown.space)="$event.preventDefault(); book.emit(flight())">
+
+  <!-- On-time badge -->
+  <p class="on-time" [class.on-time--high]="flight().onTimePercent >= 95">
+    {{ flight().onTimePercent }}% on time
+  </p>
+
+  <hr class="divider" />
+
+  <!-- Flight row -->
+  <div class="flight-row">
+
+    <!-- Departure -->
+    <div class="endpoint endpoint--left">
+      <span class="time">{{ flight().departureTime }}</span>
+      <span class="city">{{ flight().departureCity }}</span>
+    </div>
+
+    <!-- Center: plane icon + meta -->
+    <div class="flight-center">
+      <i class="fas fa-plane flight-icon" aria-hidden="true"></i>
+      <span class="duration">{{ flight().duration }}</span>
+      <span class="price">${{ flight().pricePerPerson }}<span class="per"> /person</span></span>
+    </div>
+
+    <!-- Arrival -->
+    <div class="endpoint endpoint--right">
+      <span class="time">{{ flight().arrivalTime }}</span>
+      <span class="city">{{ flight().arrivalCity }}</span>
+    </div>
+
+  </div>
+
+</article>

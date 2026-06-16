@@ -1,0 +1,79 @@
+<article class="trip-card">
+
+  <!-- ── Image area ─────────────────────────────── -->
+  <div class="card-img-area">
+    <!-- Replace image src with your actual trip photo asset -->
+    <img
+      class="card-img"
+      [src]="trip().image"
+      [alt]="trip().title"
+      loading="lazy" />
+
+    @if (trip().badge) {
+      <span class="card-badge badge-{{ trip().badgeColor ?? 'teal' }}">
+        {{ trip().badge }}
+      </span>
+    }
+
+    <button
+      class="fav-btn"
+      type="button"
+      [attr.aria-pressed]="trip().isFavorite"
+      [attr.aria-label]="trip().isFavorite ? 'Remove from favourites' : 'Add to favourites'"
+      (click)="onToggleFavorite()">
+      <i class="fa-heart"
+         [class.fas]="trip().isFavorite"
+         [class.far]="!trip().isFavorite"
+         [class.active]="trip().isFavorite"
+         aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- ── Card body ──────────────────────────────── -->
+  <div class="card-body">
+
+    <p class="card-location">
+      <i class="fas fa-location-dot" aria-hidden="true"></i>
+      {{ trip().location }}
+    </p>
+
+    <h3 class="card-title">{{ trip().title }}</h3>
+
+    <div class="price-row">
+      @if (trip().originalPrice) {
+        <del class="old-price">${{ trip().originalPrice!.toFixed(2) }}</del>
+      }
+      <strong class="cur-price">${{ trip().price.toFixed(2) }}</strong>
+    </div>
+
+    @if (trip().isPromotional && countdown()) {
+      <p class="promo-label">Promotional Offers</p>
+      <div class="countdown" aria-label="Offer countdown">
+        <div class="cd-box">
+          <span class="cd-val">{{ pad(countdown()!.days) }}</span>
+          <span class="cd-key">dd</span>
+        </div>
+        <span class="cd-sep" aria-hidden="true">:</span>
+        <div class="cd-box">
+          <span class="cd-val">{{ pad(countdown()!.hours) }}</span>
+          <span class="cd-key">hh</span>
+        </div>
+        <span class="cd-sep" aria-hidden="true">:</span>
+        <div class="cd-box">
+          <span class="cd-val">{{ pad(countdown()!.minutes) }}</span>
+          <span class="cd-key">mm</span>
+        </div>
+        <span class="cd-sep" aria-hidden="true">:</span>
+        <div class="cd-box">
+          <span class="cd-val">{{ pad(countdown()!.seconds) }}</span>
+          <span class="cd-key">ss</span>
+        </div>
+      </div>
+    }
+
+    <button class="book-btn" type="button" (click)="onBookNow()">
+      Book Now
+    </button>
+
+  </div>
+</article>

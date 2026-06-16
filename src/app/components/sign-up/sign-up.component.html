@@ -1,1 +1,110 @@
-<p>sign-up works!</p>
+﻿<section class="signup-section">
+  <div class="signup-container">
+    <div class="signup-card">
+      <div class="signup-header">
+        <h2 class="h3">create an account</h2>
+        @if (restext) {<p class="alert alert-danger p-2 text-center rounded w-50 mx-auto">{{ restext }}</p>}
+      </div>
+      <div class="signup-grid">
+        <div class="signup-form-column">
+          <form [formGroup]="RegisterForm" (ngSubmit)="RegisterUser()">
+            <div class="mb-3">
+              <label for="username" class="form-label">name</label>
+              <input formControlName="name" type="text" class="form-control" id="username" placeholder="Enter your username" />
+              @if (RegisterForm.get('name')?.errors && RegisterForm.get('name')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (RegisterForm.get('name')?.getError('required')) {
+                    <p class="m-2">Name is required</p>
+                  } @else if (RegisterForm.get('name')?.getError('minlength')) {
+                    <p class="m-2">Name length at least 3</p>
+                  } @else if (RegisterForm.get('name')?.getError('maxlength')) {
+                    <p class="m-2">Name length must be max 20</p>
+                  }
+                </div>
+              }
+            </div>
+
+             <div class="mb-3">
+              <label for="fullname" class="form-label">full name</label>
+              <input formControlName="fullname" type="text" class="form-control" id="fullname" placeholder="Enter your full name" />
+              @if (RegisterForm.get('fullname')?.errors && RegisterForm.get('fullname')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (RegisterForm.get('fullname')?.getError('required')) {
+                    <p class="m-2">Full name is required</p>
+                  } @else if (RegisterForm.get('fullname')?.getError('minlength')) {
+                    <p class="m-2">Full name length at least 3</p>
+                  } @else if (RegisterForm.get('fullname')?.getError('maxlength')) {
+                    <p class="m-2">Full name length must be max 50</p>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter your email" />
+              @if (RegisterForm.get('email')?.errors && RegisterForm.get('email')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (RegisterForm.get('email')?.getError('required')) {
+                    <p class="m-2">Email is required</p>
+                  } @else if (RegisterForm.get('email')?.getError('email')) {
+                    <p class="m-2">Email format is not correct</p>
+                  }
+                </div>
+              }
+            </div>
+              
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input formControlName="password" type="password" class="form-control" id="password" placeholder="Enter your password" />
+              @if (RegisterForm.get('password')?.errors && RegisterForm.get('password')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (RegisterForm.get('password')?.getError('required')) {
+                    <p class="m-2">Password is required</p>
+                  }
+                    @else if (RegisterForm.get('password')?.getError('minlength')) {
+                        <p class="m-2">Password length at least 6</p>
+                    } @else if (RegisterForm.get('password')?.getError('maxlength')) {
+                        <p class="m-2">Password length must be max 20</p>
+                    }
+                </div>
+              }
+            </div>
+
+               <div class="mb-3">
+              <label for="tel" class="form-label">Phone Number</label>
+              <input formControlName="tel" type="tel" class="form-control" id="tel" placeholder="Enter your phone number" />
+              @if (RegisterForm.get('tel')?.errors && RegisterForm.get('tel')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (RegisterForm.get('tel')?.getError('required')) {
+                    <p class="m-2">Phone number is required</p>
+                  }
+                    @else if (RegisterForm.get('tel')?.getError('minlength')) {
+                        <p class="m-2">Phone number length at least 6</p>
+                    } @else if (RegisterForm.get('tel')?.getError('maxlength')) {
+                        <p class="m-2">Phone number length must be max 20</p>
+                    }
+                </div>
+              }
+            </div>
+      
+      
+            <button  type="submit" class="btn btn-primary signup-submit">create account
+                @if (loading) {<span><i class="fa-solid fa-circle-notch fa-spin"></i></span>}
+            </button>
+
+        </form>
+        
+            <div class="my-2 text-center">
+            <p>Already have account?
+               <a routerLink="/auth/login" style="cursor: pointer; color: #0d6efd; text-decoration: none; font-weight: 500;">Log in</a></p>
+            </div>
+        </div>
+        <div class="signup-image-column">
+          <img src="assets/images/logo.png" alt="Sign Up Visual" class="signup-image" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

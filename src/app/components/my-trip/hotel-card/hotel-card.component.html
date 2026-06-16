@@ -1,0 +1,12 @@
+<article
+  class="hotel-card"
+  [style.--hotel-img]="'url(' + hotel().image + ')'"
+  (click)="book.emit(hotel())"
+  [attr.aria-label]="hotel().name + ' — $' + hotel().pricePerNight + ' per night'">
+
+  <div class="hotel-overlay">
+    <h3 class="hotel-name">{{ hotel().name }}</h3>
+    <p class="hotel-price">${{ hotel().pricePerNight }}</p>
+  </div>
+
+</article>

@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary p-0">
+  <div class="container-fluid navbar-fixed ">
+    <a class="navbar-brand" routerLink="login">
+      <img src="../../../assets/images/logo.png" alt="tripmate-Logo" class="navbar-logo "/>
+
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/main/home" routerLinkActive="active-link">home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/main/backages" routerLinkActive="active-link">packages</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/main/place" routerLinkActive="active-link">place</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/main/favourite" routerLinkActive="active-link">favourite</a>
+        </li>
+         <li class="nav-item">
+          <a class="nav-link" routerLink="/main/my-trip" routerLinkActive="active-link">my-trip</a>
+        </li>
+         <li class="nav-item">
+          <a class="nav-link" routerLink="/main/my-profile" routerLinkActive="active-link">my-profile</a>
+        </li>
+    </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link cursor-pointer"  (click)="logout()">sign out</a>
+        </li>
+        
+      </ul>
+      
+    </div>
+  </div>
+</nav>
+
+
+

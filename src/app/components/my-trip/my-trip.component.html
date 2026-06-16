@@ -1,1 +1,94 @@
-<p>my-trip works!</p>
+<!-- Tab bar -->
+<nav class="tab-bar" role="tablist" aria-label="Trip categories">
+
+  <button
+    type="button"
+    role="tab"
+    class="tab-btn"
+    [class.tab-btn--active]="activeTab() === 'packages'"
+    [attr.aria-selected]="activeTab() === 'packages'"
+    (click)="setTab('packages')">
+    Packages
+  </button>
+
+  <button
+    type="button"
+    role="tab"
+    class="tab-btn"
+    [class.tab-btn--active]="activeTab() === 'flights'"
+    [attr.aria-selected]="activeTab() === 'flights'"
+    (click)="setTab('flights')">
+    Flights
+  </button>
+
+  <button
+    type="button"
+    role="tab"
+    class="tab-btn"
+    [class.tab-btn--active]="activeTab() === 'hotels'"
+    [attr.aria-selected]="activeTab() === 'hotels'"
+    (click)="setTab('hotels')">
+    Hotels
+  </button>
+
+</nav>
+
+<!-- Tab content -->
+<div
+  class="tab-content"
+  role="tabpanel"
+  [attr.aria-label]="activeTab() + ' tab'">
+
+  <!-- Packages -->
+  @if (activeTab() === 'packages') {
+    @if (packages().length) {
+      @for (pkg of packages(); track pkg.id) {
+        <app-favourite-card
+          [item]="pkg"
+          (viewPlace)="onViewPackage($event)"
+          (remove)="onTogglePackageFav($event)">
+        </app-favourite-card>
+      }
+    } @else {
+      <div class="empty-state">
+        <i class="fas fa-box-open" aria-hidden="true"></i>
+        No packages added yet.
+      </div>
+    }
+  }
+
+  <!-- Flights -->
+  @if (activeTab() === 'flights') {
+    @if (flights().length) {
+      @for (flight of flights(); track flight.id) {
+        <app-flight-card
+          [flight]="flight"
+          (book)="onBookFlight($event)">
+        </app-flight-card>
+      }
+    } @else {
+      <div class="empty-state">
+        <i class="fas fa-plane-slash" aria-hidden="true"></i>
+        No flights booked yet.
+      </div>
+    }
+  }
+
+  <!-- Hotels -->
+  @if (activeTab() === 'hotels') {
+    @if (hotels().length) {
+      @for (hotel of hotels(); track hotel.id) {
+        <app-hotel-card
+          [hotel]="hotel"
+          (book)="onBookHotel($event)">
+        </app-hotel-card>
+      }
+    } @else {
+      <div class="empty-state">
+        <i class="fas fa-hotel" aria-hidden="true"></i>
+        No hotels booked yet.
+      </div>
+    }
+  }
+
+</div>

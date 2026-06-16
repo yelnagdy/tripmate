@@ -1,0 +1,222 @@
+:host {
+  --card-radius:   12px;
+  --card-shadow:   0 4px 18px rgba(0, 0, 0, 0.09);
+  --badge-teal:    #00acc1;
+  --badge-orange:  #f57c00;
+  --badge-blue:    #1565c0;
+  --fav-active:    #e53935;
+  --location-clr:  #757575;
+  --title-clr:     #1a1a2e;
+  --old-price-clr: #9e9e9e;
+  --cur-price-clr: #1a1a2e;
+  --promo-clr:     #00acc1;
+  --cd-bg:         #f5f5f5;
+  --cd-text:       #1a1a2e;
+  --btn-bg:        #1565c0;
+  --btn-hover:     #0d47a1;
+  display: block;
+  height: 100%;
+}
+
+/* ── Card shell ───────────────────────────────────────────── */
+.trip-card {
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.trip-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Image area ───────────────────────────────────────────── */
+.card-img-area {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.trip-card:hover .card-img {
+  transform: scale(1.04);
+}
+
+/* Badge (e.g. "Gorgeous") */
+.card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 0.22rem 0.65rem;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+.badge-teal   { background-color: var(--badge-teal); }
+.badge-orange { background-color: var(--badge-orange); }
+.badge-blue   { background-color: var(--badge-blue); }
+
+/* Favourite button */
+.fav-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.fav-btn:hover { background: #fff; }
+
+.fav-btn:focus-visible {
+  outline: 2px solid var(--btn-bg);
+  outline-offset: 2px;
+}
+
+.fav-btn .fa-heart { color: #ccc; font-size: 0.82rem; transition: color 0.2s; }
+.fav-btn .fa-heart.active { color: var(--fav-active); }
+
+/* ── Card body ────────────────────────────────────────────── */
+.card-body {
+  padding: 0.85rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.3rem;
+}
+
+.card-location {
+  font-size: 0.72rem;
+  color: var(--location-clr);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--title-clr);
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Price ────────────────────────────────────────────────── */
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+
+.old-price {
+  font-size: 0.72rem;
+  color: var(--old-price-clr);
+  text-decoration: line-through;
+}
+
+.cur-price {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cur-price-clr);
+}
+
+/* ── Promotional countdown ────────────────────────────────── */
+.promo-label {
+  font-size: 0.68rem;
+  color: var(--promo-clr);
+  font-weight: 600;
+  margin: 0.25rem 0 0.15rem;
+  letter-spacing: 0.2px;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.cd-box {
+  background: var(--cd-bg);
+  border-radius: 5px;
+  padding: 0.18rem 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 30px;
+}
+
+.cd-val {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cd-text);
+  line-height: 1;
+}
+
+.cd-key {
+  font-size: 0.55rem;
+  color: var(--location-clr);
+  line-height: 1.2;
+}
+
+.cd-sep {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cd-text);
+  line-height: 1;
+  align-self: flex-start;
+  padding-top: 2px;
+}
+
+/* ── Book Now button ──────────────────────────────────────── */
+.book-btn {
+  margin-top: auto;
+  padding-top: 0.6rem;
+  background: var(--btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.book-btn:hover { background: var(--btn-hover); }
+
+.book-btn:focus-visible {
+  outline: 2px solid var(--btn-bg);
+  outline-offset: 2px;
+}

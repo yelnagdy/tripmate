@@ -1,0 +1,71 @@
+<section class="why-section" aria-labelledby="why-heading">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="row align-items-center g-4 g-lg-5">
+
+      <!-- ── Left: copy + app buttons ────────────────────── -->
+      <div class="col-12 col-lg-6">
+        <p class="why-label">Why Choose Us</p>
+        <h2 id="why-heading" class="why-heading">
+          Dare to live the lift<br />you've always wanted
+        </h2>
+        <p class="why-desc">
+          Discover how you can offset your adventure's carbon emissions
+          and support the sustainable initiatives practiced by our
+          operations worldwide.
+        </p>
+        <div class="app-btns" role="list">
+          <!-- Replace href="#" with real store links -->
+          <a href="#"
+             class="app-btn"
+             role="listitem"
+             aria-label="Get TripMate on Google Play"
+             target="_blank"
+             rel="noopener noreferrer">
+            <img
+              src="assets/images/get-google-play.png"
+              alt="Get it on Google Play"
+              class="store-badge" />
+          </a>
+          <a href="#"
+             class="app-btn"
+             role="listitem"
+             aria-label="Download TripMate on the App Store"
+             target="_blank"
+             rel="noopener noreferrer">
+            <img
+              src="assets/images/get-apple-store.png"
+              alt="Download on the App Store"
+              class="store-badge" />
+          </a>
+        </div>
+      </div>
+
+      <!-- ── Right: 2×2 feature cards ────────────────────── -->
+      <div class="col-12 col-lg-6">
+        <div class="features-grid">
+          @for (feature of features(); track feature.id) {
+            <article
+              class="feature-card"
+              [style.--f-bg]="feature.cardBg">
+
+              @if (feature.image) {
+                <img
+                  [src]="feature.image"
+                  [alt]="feature.title"
+                  class="feature-photo" />
+              }
+
+              <div class="feature-body">
+                <i [class]="feature.icon + ' feature-icon'" aria-hidden="true"></i>
+                <h3 class="feature-title">{{ feature.title }}</h3>
+                <p class="feature-desc">{{ feature.description }}</p>
+              </div>
+
+            </article>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

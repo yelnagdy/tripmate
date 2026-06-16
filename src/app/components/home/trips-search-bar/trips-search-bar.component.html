@@ -1,0 +1,92 @@
+<div class="search-wrapper">
+  <label for="trip-search" class="visually-hidden">Search trips</label>
+
+  <div class="search-bar" [class.search-bar--open]="panelOpen()">
+    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+
+    <input
+      id="trip-search"
+      type="search"
+      class="search-input"
+      placeholder="Search by title or destination…"
+      [value]="query()"
+      (input)="onInput($any($event.target).value)"
+      aria-label="Search trips" />
+
+    @if (query()) {
+      <button class="clear-btn" type="button" (click)="clearQuery()" aria-label="Clear search">
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
+    }
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <button
+      class="filter-btn"
+      [class.filter-btn--active]="activeCount() > 0"
+      type="button"
+      aria-label="Open filters"
+      (click)="openPanel()">
+      <i class="fas fa-sliders-h" aria-hidden="true"></i>
+      @if (activeCount() > 0) {
+        <span class="filter-badge">{{ activeCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <!-- ── Filter Panel ─────────────────────────────────────── -->
+  @if (panelOpen()) {
+    <div class="filter-backdrop" (click)="closePanel()"></div>
+
+    <div class="filter-panel" role="dialog" aria-label="Filter options">
+      <div class="filter-panel__header">
+        <span class="filter-panel__title">Filter Trips</span>
+        <button class="filter-panel__close" type="button" (click)="closePanel()" aria-label="Close filters">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Price range -->
+      <div class="filter-section">
+        <p class="filter-section__label">Price range</p>
+        <div class="filter-options">
+          @for (opt of priceOptions; track opt.label) {
+            <label class="filter-radio">
+              <input
+                type="radio"
+                name="price"
+                [value]="opt.value"
+                [checked]="draft().maxPrice === opt.value"
+                (change)="setMaxPrice(opt.value)" />
+              <span class="filter-radio__dot"></span>
+              {{ opt.label }}
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="filter-section">
+        <p class="filter-section__label">Show only</p>
+        <div class="filter-options">
+          <label class="filter-check">
+            <input type="checkbox" [checked]="draft().onlyPromotional" (change)="togglePromo()" />
+            <span class="filter-check__box"></span>
+            Promotional deals
+          </label>
+          <label class="filter-check">
+            <input type="checkbox" [checked]="draft().onlyFavorites" (change)="toggleFavorites()" />
+            <span class="filter-check__box"></span>
+            My favorites
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="filter-panel__actions">
+        <button class="btn-clear" type="button" (click)="clearFilter()">Clear all</button>
+        <button class="btn-apply" type="button" (click)="applyFilter()">Apply filters</button>
+      </div>
+    </div>
+  }
+</div>

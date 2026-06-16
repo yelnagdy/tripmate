@@ -5,14 +5,18 @@ import { FavouriteComponent } from "./components/favourite/favourite.component";
 import { FooterComponent } from "./components/footer/footer.component";
 import { LoginComponent } from "./components/login/login.component";
 import { MyTripComponent } from "./components/my-trip/my-trip.component";
-import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
+import { NavMainComponent } from "./components/nav-main/nav-main.component";
 import { PlaceComponent } from "./components/place/place.component";
 import { HomeComponent } from "./components/home/home.component";
 import { SignUpComponent } from "./components/sign-up/sign-up.component";
+import { MyProfileComponent } from "./components/my-profile/my-profile.component";
+import { NavAuthComponent } from "./components/nav-auth/nav-auth.component";
+import { AuthComponent } from "./layouts/auth/auth.component";
+import { MainComponent } from "./layouts/main/main.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, BackagesComponent, FavouriteComponent, FooterComponent, LoginComponent, MyTripComponent, NavBarComponent, PlaceComponent, HomeComponent, SignUpComponent],
+  imports: [RouterOutlet,FooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

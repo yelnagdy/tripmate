@@ -1,0 +1,85 @@
+<section class="ng-section" aria-labelledby="ng-heading">
+  <div class="container-fluid px-4 px-md-5">
+
+    <!-- Section header -->
+    <div class="ng-header">
+      <div>
+        <h2 id="ng-heading" class="ng-title">News, Tips &amp; Guides</h2>
+        <p class="ng-subtitle">Favorite destinations based on customer reviews</p>
+      </div>
+      <button class="view-more-btn" (click)="viewMore.emit()" aria-label="View all articles">
+        View More <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="row g-4">
+      @for (article of articles(); track article.id) {
+        <div class="col-12 col-sm-6 col-lg-4">
+          <article class="article-card" [attr.aria-label]="article.title">
+
+            <!-- Image + badge -->
+            <div class="card-img-wrap">
+              <img
+                [src]="article.image"
+                [alt]="article.title"
+                class="card-img"
+                loading="lazy" />
+              <span
+                class="cat-badge cat-badge--{{ article.categoryColor }}"
+                [attr.aria-label]="'Category: ' + article.category">
+                {{ article.category }}
+              </span>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body">
+
+              <!-- Meta row -->
+              <div class="meta-row" aria-label="Article details">
+                <span class="meta-item">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  <time>{{ article.date }}</time>
+                </span>
+                <span class="meta-sep" aria-hidden="true">•</span>
+                <span class="meta-item">
+                  <i class="fas fa-clock" aria-hidden="true"></i>
+                  {{ article.readTime }}
+                </span>
+                <span class="meta-sep" aria-hidden="true">•</span>
+                <span class="meta-item">
+                  <i class="far fa-comment-dots" aria-hidden="true"></i>
+                  {{ article.comments }} Comments
+                </span>
+              </div>
+
+              <!-- Title -->
+              <h3 class="article-title">{{ article.title }}</h3>
+
+              <!-- Author row -->
+              <div class="author-row">
+                <div class="author-info">
+                  <img
+                    [src]="article.author.avatar"
+                    [alt]="article.author.name"
+                    class="author-avatar"
+                    width="32"
+                    height="32" />
+                  <span class="author-name">{{ article.author.name }}</span>
+                </div>
+                <a
+                  href="#"
+                  class="keep-reading"
+                  [attr.aria-label]="'Keep reading: ' + article.title">
+                  Keep Reading <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+              </div>
+
+            </div>
+          </article>
+        </div>
+      }
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,83 @@
+<article class="fav-card" [attr.aria-label]="item().name">
+
+  <!-- Photo -->
+  <div class="fav-img-col">
+    <img
+      [src]="item().image"
+      [alt]="item().name"
+      class="fav-img"
+      loading="lazy" />
+    <span class="img-count">
+      <i class="fas fa-images" aria-hidden="true"></i>
+      {{ item().imageCount }} Images
+    </span>
+  </div>
+
+  <!-- Body -->
+  <div class="fav-body">
+
+    <!-- Top: info + price -->
+    <div class="fav-top-row">
+
+      <!-- Info -->
+      <div class="fav-info">
+        <p class="fav-location">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          {{ item().location }}
+        </p>
+
+        <div class="fav-stars" [attr.aria-label]="item().hotelStars + ' star hotel'">
+          @for (star of stars; track star) {
+            <i
+              [class]="star <= item().hotelStars ? 'fas fa-star' : 'far fa-star'"
+              aria-hidden="true">
+            </i>
+          }
+          <span class="hotel-label">{{ item().hotelStars }} Star Hotel</span>
+        </div>
+
+        <p class="fav-amenities">
+          <i class="fas fa-shield-alt" aria-hidden="true"></i>
+          {{ item().amenities }}+ Amenities
+        </p>
+
+        <p class="fav-review">
+          <span class="review-score">{{ item().reviewScore }}</span>
+          <span class="review-label">{{ item().reviewLabel }}</span>
+          <span class="review-count">{{ item().reviewCount }} reviews</span>
+        </p>
+      </div>
+
+      <!-- Price -->
+      <div class="fav-price">
+        <p class="price-from">starting from</p>
+        <p class="price-amount">
+          ${{ item().pricePerNight }}<span class="price-unit">/night</span>
+        </p>
+        <p class="price-tax">excl. tax</p>
+      </div>
+
+    </div>
+
+    <!-- Bottom: heart + CTA -->
+    <div class="fav-actions">
+      <button
+        type="button"
+        class="remove-btn"
+        (click)="remove.emit(item().id)"
+        aria-label="Remove from favourites">
+        <i class="fas fa-heart" aria-hidden="true"></i>
+      </button>
+
+      <button
+        type="button"
+        class="view-btn"
+        (click)="viewPlace.emit(item())"
+        [attr.aria-label]="'View ' + item().name">
+        View Place
+      </button>
+    </div>
+
+  </div>
+
+</article>

@@ -1,0 +1,222 @@
+<!-- Backdrop -->
+<div class="bd-backdrop" (click)="closeDialog.emit()" aria-hidden="true"></div>
+
+<!-- Dialog shell -->
+<div class="bd-shell" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+  <!-- ── STEP 1 : Confirmation ─────────────────────────────── -->
+  @if (currentStep() === 1) {
+    <div class="bd-inner">
+
+      <div class="bd-head">
+        <button type="button" class="bd-back" aria-label="Close" (click)="goBack()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <h2 class="bd-title">Confirmation</h2>
+      </div>
+
+      <div class="info-card">
+        <p class="card-section">Your Flight</p>
+
+        <div class="info-row">
+          <div class="info-cell">
+            <span class="info-label">Date :</span>
+            <span class="info-value">{{ data().date }}</span>
+          </div>
+          <button type="button" class="edit-link">Edit</button>
+        </div>
+
+        <div class="info-row">
+          <div class="info-cell">
+            <span class="info-label">From :</span>
+            <span class="info-value">{{ data().from }}</span>
+          </div>
+          <button type="button" class="edit-link">Edit</button>
+        </div>
+
+        <div class="info-row">
+          <div class="info-cell">
+            <span class="info-label">To:</span>
+            <span class="info-value">{{ data().to }}</span>
+          </div>
+          <button type="button" class="edit-link">Edit</button>
+        </div>
+
+        <div class="info-row">
+          <div class="info-cell">
+            <span class="info-label">Flight :</span>
+            <span class="info-value">{{ data().flight }}</span>
+          </div>
+          <button type="button" class="edit-link">Edit</button>
+        </div>
+
+        <div class="info-row">
+          <div class="info-cell">
+            <span class="info-label">Guests :</span>
+            <span class="info-value">{{ guests() }} Guests</span>
+          </div>
+          <div class="guest-counter" role="group" aria-label="Number of guests">
+            <button
+              type="button"
+              class="counter-btn"
+              aria-label="Decrease guests"
+              (click)="decrementGuests()">−</button>
+            <span class="counter-val" aria-live="polite">{{ guests() }}</span>
+            <button
+              type="button"
+              class="counter-btn"
+              aria-label="Increase guests"
+              (click)="incrementGuests()">+</button>
+          </div>
+        </div>
+
+        <div class="total-row">
+          <span class="total-label">Total :</span>
+          <span class="total-value">${{ total() }}</span>
+        </div>
+      </div>
+
+      <button type="button" class="action-btn" (click)="onContinue()">Continue</button>
+    </div>
+  }
+
+  <!-- ── STEP 2 : Payment ──────────────────────────────────── -->
+  @if (currentStep() === 2) {
+    <div class="bd-inner">
+
+      <div class="bd-head">
+        <button type="button" class="bd-back" aria-label="Back" (click)="goBack()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <h2 class="bd-title">Payment</h2>
+      </div>
+
+      <form [formGroup]="paymentForm" (ngSubmit)="onPay()" novalidate>
+        <div class="info-card">
+
+          <!-- Payment method pill -->
+          <div class="method-pill">
+            <i class="fas fa-credit-card" aria-hidden="true"></i>
+            <span>Credit Card</span>
+          </div>
+
+          <!-- Card number -->
+          <div class="pay-field">
+            <label class="pay-label" for="cardNumber">Card Number</label>
+            <input
+              id="cardNumber"
+              type="text"
+              class="pay-input"
+              [class.pay-input--err]="hasError('cardNumber')"
+              formControlName="cardNumber"
+              placeholder="1234567890121234"
+              maxlength="16"
+              inputmode="numeric" />
+            @if (hasError('cardNumber')) {
+              <span class="err-msg">16-digit card number required</span>
+            }
+          </div>
+
+          <!-- Expiry + CVV -->
+          <div class="pay-row">
+            <div class="pay-field">
+              <label class="pay-label" for="expiry">Ex Date</label>
+              <input
+                id="expiry"
+                type="text"
+                class="pay-input"
+                [class.pay-input--err]="hasError('expiry')"
+                formControlName="expiry"
+                placeholder="MM/YY"
+                maxlength="5" />
+              @if (hasError('expiry')) {
+                <span class="err-msg">MM/YY</span>
+              }
+            </div>
+            <div class="pay-field">
+              <label class="pay-label" for="cvv">CVV</label>
+              <input
+                id="cvv"
+                type="text"
+                class="pay-input"
+                [class.pay-input--err]="hasError('cvv')"
+                formControlName="cvv"
+                placeholder="123"
+                maxlength="3"
+                inputmode="numeric" />
+              @if (hasError('cvv')) {
+                <span class="err-msg">3 digits</span>
+              }
+            </div>
+          </div>
+
+          <!-- Country + Zip -->
+          <div class="pay-row">
+            <div class="pay-field">
+              <label class="pay-label" for="country">Country</label>
+              <input
+                id="country"
+                type="text"
+                class="pay-input"
+                [class.pay-input--err]="hasError('country')"
+                formControlName="country"
+                placeholder="BD" />
+            </div>
+            <div class="pay-field">
+              <label class="pay-label" for="zip">Zip Code</label>
+              <input
+                id="zip"
+                type="text"
+                class="pay-input"
+                [class.pay-input--err]="hasError('zip')"
+                formControlName="zip"
+                placeholder="12345" />
+              @if (hasError('zip')) {
+                <span class="err-msg">Required</span>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <button type="submit" class="action-btn">Pay ${{ total() }}</button>
+      </form>
+    </div>
+  }
+
+  <!-- ── STEP 3 : Congratulations ─────────────────────────── -->
+  @if (currentStep() === 3) {
+    <div class="bd-inner congrats-inner">
+
+      <button type="button" class="bd-back" aria-label="Back" (click)="goBack()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <div class="congrats-body">
+
+        <div class="stars-ring" aria-hidden="true">
+          <span class="cstar cs1">✦</span>
+          <span class="cstar cs2">✦</span>
+          <span class="cstar cs3">✦</span>
+          <span class="cstar cs4">✦</span>
+          <span class="cstar cs5">✦</span>
+          <span class="cstar cs6">✦</span>
+          <span class="cstar cs7">✦</span>
+          <span class="cstar cs8">✦</span>
+        </div>
+
+        <h2 class="congrats-title">Congratulations!</h2>
+
+        <p class="congrats-sub">
+          You tour has been booked! You will get your tickets on your mail or check your profile
+        </p>
+
+        <button type="button" class="action-btn action-btn--sm" (click)="backToHome()">
+          Back to home
+        </button>
+
+      </div>
+    </div>
+  }
+
+</div>

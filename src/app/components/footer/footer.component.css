@@ -1,0 +1,262 @@
+/* ── Design tokens ─────────────────────────────────────────────── */
+:host {
+  --f-accent:  #336fe8;
+  --f-success: #16a34a;
+  --f-error:   #dc2626;
+  --f-border:  #d1d5db;
+  --f-bg:      #f0f3f2;
+  --f-text:    #1a1a2e;
+  --f-muted:   #6b7280;
+  --f-radius:  8px;
+  display: block;
+}
+
+/* ── Footer shell ──────────────────────────────────────────────── */
+.tripmate-footer {
+  background-color: var(--f-bg);
+  padding: 2rem 0 1.5rem;
+}
+
+/* ── Heading ───────────────────────────────────────────────────── */
+.footer-heading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--f-text);
+  margin: 0 0 0.3rem;
+}
+
+.footer-sub {
+  font-size: 0.82rem;
+  color: var(--f-muted);
+  margin: 0 0 1.1rem;
+  line-height: 1.6;
+}
+
+.footer-sub__highlight {
+  color: var(--f-accent);
+  font-weight: 600;
+}
+
+/* ── Share form ────────────────────────────────────────────────── */
+.share-form { margin-bottom: 0; }
+
+/* Input + button side-by-side row */
+.share-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+/* Input wrapper — holds the border + focus ring */
+.share-input-wrap {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid var(--f-border);
+  border-radius: var(--f-radius);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: var(--f-accent);
+    box-shadow: 0 0 0 3px rgba(51, 111, 232, 0.13);
+  }
+
+  &--error {
+    border-color: var(--f-error) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+  }
+
+  &--success {
+    border-color: var(--f-success) !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
+  }
+}
+
+.share-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.7rem 1rem;
+  font-size: 0.88rem;
+  color: var(--f-text);
+  font-family: inherit;
+  border-radius: var(--f-radius);
+
+  &::placeholder { color: #9ca3af; }
+}
+
+/* Submit button */
+.share-btn {
+  flex-shrink: 0;
+  background: var(--f-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--f-radius);
+  padding: 0.7rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #2558c9;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) { transform: translateY(0); }
+
+  &:disabled,
+  &--loading {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--f-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Feedback strip ────────────────────────────────────────────── */
+.share-feedback {
+  min-height: 1.4rem;
+  margin-top: 0.45rem;
+  padding-left: 0.1rem;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.feedback--error {
+  color: var(--f-error);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  i { font-size: 0.75rem; }
+}
+
+.feedback--success {
+  color: var(--f-success);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  i { font-size: 0.75rem; }
+}
+
+/* ── Divider ───────────────────────────────────────────────────── */
+.footer-divider {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 1.25rem 0;
+}
+
+/* ── Bottom row ────────────────────────────────────────────────── */
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+}
+
+.footer-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--f-text);
+  display: inline;
+  margin-right: 0.6rem;
+  white-space: nowrap;
+}
+
+/* Payment partners */
+.payment-partners {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.partner-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.partner-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s, filter 0.2s;
+  filter: grayscale(15%);
+
+  &:hover { transform: scale(1.1); filter: grayscale(0%); }
+}
+
+/* App download */
+.app-download {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.store-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.store-badge-link {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--f-accent);
+    outline-offset: 2px;
+  }
+}
+
+.store-badge {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .payment-partners,
+  .app-download { flex-direction: column; align-items: flex-start; }
+
+  .footer-label { display: block; margin-right: 0; margin-bottom: 0.4rem; }
+}
+
+@media (max-width: 480px) {
+  .share-row { flex-direction: column; }
+  .share-btn { width: 100%; justify-content: center; }
+}

@@ -1,0 +1,308 @@
+<div class="profile-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-row">
+    <h1 class="page-title">My Profile</h1>
+    <p class="breadcrumb">Home / My Profile</p>
+  </div>
+
+  <!-- Card wrapper -->
+  <div class="profile-card">
+
+    <!-- ── Left sidebar ──────────────────────────────────────── -->
+    <aside class="sidebar">
+
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <img
+          [src]="isEditing() ? draft().avatar : profile().avatar"
+          [alt]="profile().name"
+          class="avatar-img"
+          width="80"
+          height="80" />
+
+        <button
+          type="button"
+          class="avatar-edit"
+          [attr.aria-label]="isEditing() ? 'Change avatar' : 'Edit profile'"
+          (click)="isEditing() ? avatarInput.click() : enterEdit()">
+          <i class="fas fa-pen"></i>
+        </button>
+
+        <!-- Hidden file input for avatar upload -->
+        <input
+          #avatarInput
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+          (change)="onAvatarSelected($event)" />
+      </div>
+
+      <h2 class="sidebar-name">{{ profile().name }}</h2>
+
+      <div class="sidebar-meta">
+        <span><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ profile().location }}</span>
+        <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ profile().joinDate }}</span>
+      </div>
+
+      <!-- Sidebar nav -->
+      <button
+        type="button"
+        class="sidebar-nav-btn"
+        [class.active]="activeView() === 'profile'"
+        (click)="setView('profile')">
+        Profile Informations
+      </button>
+
+    </aside>
+
+    <!-- ── Right content ─────────────────────────────────────── -->
+    <main class="content-area">
+
+      <!-- Top action buttons (visible on profile view) -->
+      @if (activeView() === 'profile') {
+        <div class="top-actions">
+          <button
+            type="button"
+            class="action-btn action-btn--outline"
+            (click)="setView('add-post')">
+            <i class="fas fa-th" aria-hidden="true"></i>
+            add post
+          </button>
+          <button
+            type="button"
+            class="action-btn action-btn--outline"
+            (click)="setView('my-posts')">
+            <i class="fas fa-bookmark" aria-hidden="true"></i>
+            My posts
+          </button>
+        </div>
+      }
+
+      <!-- ── View: Profile Informations ────────────────────── -->
+      @if (activeView() === 'profile') {
+        <div class="view-profile">
+
+          <!-- Account section -->
+          <section aria-labelledby="account-heading">
+            <h3 id="account-heading" class="section-heading">Account</h3>
+
+            <div class="field-group">
+              <label class="field-label" for="field-name">Name</label>
+              @if (isEditing()) {
+                <input
+                  id="field-name"
+                  type="text"
+                  class="field-input"
+                  placeholder="Enter your name"
+                  [value]="draft().name"
+                  (input)="setDraft('name', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ profile().name }}</div>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="field-email">Email</label>
+              @if (isEditing()) {
+                <input
+                  id="field-email"
+                  type="email"
+                  class="field-input"
+                  placeholder="Enter your email"
+                  [value]="draft().email"
+                  (input)="setDraft('email', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ profile().email }}</div>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="field-location">Location</label>
+              @if (isEditing()) {
+                <input
+                  id="field-location"
+                  type="text"
+                  class="field-input"
+                  placeholder="Enter your location"
+                  [value]="draft().location"
+                  (input)="setDraft('location', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ profile().location }}</div>
+              }
+            </div>
+          </section>
+
+          <!-- Preferences section -->
+          <section aria-labelledby="prefs-heading" class="prefs-section">
+            <h3 id="prefs-heading" class="section-heading">Preferences</h3>
+
+            <div class="field-group">
+              <label class="field-label" for="field-country">Country</label>
+              @if (isEditing()) {
+                <input
+                  id="field-country"
+                  type="text"
+                  class="field-input"
+                  placeholder="Enter your country"
+                  [value]="draft().country"
+                  (input)="setDraft('country', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ preferences().country }}</div>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="field-currency">Currency</label>
+              @if (isEditing()) {
+                <input
+                  id="field-currency"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. EGP, USD"
+                  [value]="draft().currency"
+                  (input)="setDraft('currency', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ preferences().currency }}</div>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="field-language">Language</label>
+              @if (isEditing()) {
+                <input
+                  id="field-language"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. English, Arabic"
+                  [value]="draft().language"
+                  (input)="setDraft('language', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ preferences().language }}</div>
+              }
+            </div>
+          </section>
+
+          <!-- Save / Cancel -->
+          @if (isEditing()) {
+            <div class="edit-actions">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+              <button type="button" class="btn-save"   (click)="saveProfile()">Save Changes</button>
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ── View: Add Post ─────────────────────────────────── -->
+      @if (activeView() === 'add-post') {
+        <div class="view-add-post">
+
+          <div class="back-row">
+            <button type="button" class="back-btn" (click)="setView('profile')">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+            </button>
+          </div>
+
+          <h3 class="section-heading">Media Upload</h3>
+          <p class="section-sub">Add photo!</p>
+
+          <form (submit)="onSubmitPost()" novalidate>
+
+            <!-- Upload dropzone -->
+            <label for="file-upload" class="upload-zone" aria-label="Upload photo">
+              @if (previewUrl()) {
+                <img [src]="previewUrl()" alt="Preview" class="upload-preview" />
+              } @else {
+                <i class="fas fa-camera upload-icon" aria-hidden="true"></i>
+                <button
+                  type="button"
+                  class="browse-btn"
+                  onclick="document.getElementById('file-upload').click()">
+                  Browse files
+                </button>
+              }
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              class="visually-hidden"
+              (change)="onFileSelected($event)" />
+
+            <!-- Text fields -->
+            <div class="post-fields">
+              <input
+                type="text"
+                class="post-input"
+                placeholder="Title"
+                [value]="postTitle()"
+                (input)="postTitle.set($any($event.target).value)"
+                aria-label="Post title" />
+
+              <input
+                type="text"
+                class="post-input"
+                placeholder="Location"
+                [value]="postLocation()"
+                (input)="postLocation.set($any($event.target).value)"
+                aria-label="Post location" />
+
+              <textarea
+                class="post-textarea"
+                placeholder="Write your experience Story"
+                [value]="postStory()"
+                (input)="postStory.set($any($event.target).value)"
+                rows="3"
+                aria-label="Experience story">
+              </textarea>
+            </div>
+
+            <!-- Star rating -->
+            <div class="rating-row">
+              <p class="rating-label">How much you rate this experience</p>
+              <div
+                class="stars-input"
+                role="radiogroup"
+                aria-label="Rate your experience"
+                (mouseleave)="clearHover()">
+                @for (star of stars; track star) {
+                  <button
+                    type="button"
+                    class="star-btn"
+                    [class.star-btn--filled]="star <= activeRating()"
+                    (click)="setRating(star)"
+                    (mouseenter)="hoverStar(star)"
+                    [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')">
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Share Post</button>
+
+          </form>
+        </div>
+      }
+
+      <!-- ── View: My Posts ─────────────────────────────────── -->
+      @if (activeView() === 'my-posts') {
+        <div class="view-my-posts">
+          <div class="back-row">
+            <button type="button" class="back-btn" (click)="setView('profile')">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+            </button>
+          </div>
+          <h3 class="section-heading">My Posts</h3>
+          <div class="empty-posts">
+            <i class="fas fa-images" aria-hidden="true"></i>
+            <p>No posts yet. Share your first travel experience!</p>
+          </div>
+        </div>
+      }
+
+    </main>
+
+  </div>
+</div>

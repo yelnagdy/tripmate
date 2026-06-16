@@ -1,0 +1,82 @@
+<section class="testi-section" aria-labelledby="testi-heading">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="row align-items-center g-4 g-lg-5">
+
+      <!-- Left: copy + navigation -->
+      <div class="col-12 col-lg-5">
+        <div class="testi-logo" aria-hidden="true">
+          <i class="fas fa-paper-plane testi-logo-icon"></i>
+        </div>
+
+        <h2 id="testi-heading" class="testi-heading">
+          What our clients are<br />saying about us?
+        </h2>
+        <p class="testi-desc">
+          Discover how you can offset your adventure's carbon emissions
+          and support the sustainable initiatives practiced by our
+          operations worldwide.
+        </p>
+
+        <!-- Prev / Next -->
+        <div class="testi-nav" role="group" aria-label="Testimonial navigation">
+          <button
+            class="nav-btn nav-btn--prev"
+            (click)="prev()"
+            aria-label="Previous testimonial">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button
+            class="nav-btn nav-btn--next"
+            (click)="next()"
+            aria-label="Next testimonial">
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: active testimonial card -->
+      <div class="col-12 col-lg-7">
+        <div class="cards-viewport" aria-live="polite" aria-atomic="true">
+          @if (active(); as t) {
+            <article class="testi-card" [attr.aria-label]="'Review by ' + t.name">
+
+              <!-- Avatar -->
+              <div class="testi-avatar-wrap">
+                <img
+                  [src]="t.avatar"
+                  [alt]="t.name"
+                  class="testi-avatar"
+                  width="72"
+                  height="72" />
+              </div>
+
+              <!-- Body -->
+              <div class="testi-card-body">
+                <!-- Stars -->
+                <div class="testi-stars" [attr.aria-label]="t.rating + ' out of 5 stars'">
+                  @for (star of stars; track star) {
+                    <i
+                      [class]="star <= t.rating ? 'fas fa-star' : 'far fa-star'"
+                      aria-hidden="true">
+                    </i>
+                  }
+                </div>
+
+                <p class="testi-text">"{{ t.text }}"</p>
+
+                <div class="testi-author">
+                  <span class="testi-name">{{ t.name }}</span>
+                  @if (t.role) {
+                    <span class="testi-role">{{ t.role }}</span>
+                  }
+                </div>
+              </div>
+
+            </article>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,48 @@
+<section class="hiw-section" aria-labelledby="hiw-heading">
+  <div class="container-fluid px-4 px-md-5">
+
+    <!-- Heading -->
+    <div class="hiw-header">
+      <h2 id="hiw-heading" class="hiw-title">How It Work?</h2>
+      <p class="hiw-subtitle">Competitive fares for your route, specific searches.</p>
+    </div>
+
+    <div class="row align-items-center g-4 g-lg-5">
+
+      <!-- Photo collage -->
+      <div class="col-12 col-lg-5">
+        <div class="photo-collage" aria-hidden="true">
+          <img src="assets/images/hiw-photo-1.jpeg" alt="" class="collage-img collage-img--main" />
+          <img src="assets/images/hiw-photo-2.jpeg" alt="" class="collage-img collage-img--tr" />
+          <img src="assets/images/hiw-photo-3.jpeg" alt="" class="collage-img collage-img--br" />
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="col-12 col-lg-7">
+        <ol class="steps-list" aria-label="How TripMate works — 3 steps">
+          @for (step of steps(); track step.id) {
+            <li class="step-item">
+              <div class="step-card" [style.--s-bg]="step.iconBg">
+
+                <div class="step-icon-wrap" aria-hidden="true">
+                  <i [class]="step.icon"></i>
+                </div>
+
+                <div class="step-body">
+                  <h3 class="step-title">{{ step.title }}</h3>
+                  <p class="step-desc">{{ step.description }}</p>
+                  <a href="#" class="step-link" [attr.aria-label]="'Learn more about ' + step.title">
+                    Learn More →
+                  </a>
+                </div>
+
+              </div>
+            </li>
+          }
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>

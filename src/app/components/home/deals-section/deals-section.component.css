@@ -1,0 +1,152 @@
+/* ── Design tokens ─────────────────────────────────────────────── */
+:host {
+  --section-bg:    #f4f6f9;
+  --heading-color: #1a1a2e;
+  --overlay-start: rgba(10, 15, 40, 0.15);
+  --overlay-end:   rgba(10, 15, 40, 0.72);
+  --card-radius:   14px;
+  --card-shadow:   0 6px 28px rgba(0, 0, 0, 0.22);
+  --btn-bg:        #1565c0;
+  --btn-hover:     #0d47a1;
+  --btn-radius:    6px;
+  display: block;
+}
+
+/* ── Section wrapper ─────────────────────────────────────────── */
+.deals-section {
+  background-color: var(--section-bg);
+  padding: 3rem 0 3.5rem;
+}
+
+.deals-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.3px;
+}
+
+/* ── Grid ────────────────────────────────────────────────────── */
+.deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+  gap: 1.25rem;
+}
+
+/* ── Individual deal card ─────────────────────────────────────── */
+.deal-card {
+  position: relative;
+  min-height: 200px;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  background-image: var(--card-bg);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: flex-end;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  cursor: default;
+}
+
+.deal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.32);
+}
+
+/* Gradient overlay (bottom-heavy, matching Figma) */
+.deal-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    var(--overlay-end)   0%,
+    var(--overlay-start) 100%
+  );
+  border-radius: var(--card-radius);
+}
+
+/* ── Card text area ──────────────────────────────────────────── */
+.deal-body {
+  position: relative;
+  z-index: 2;
+  padding: 1.5rem 1.75rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.deal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.deal-desc {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.55rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Book Now button ─────────────────────────────────────────── */
+.deal-btn {
+  background-color: var(--btn-bg);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--btn-radius);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.42rem 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+.deal-btn:hover {
+  background-color: var(--btn-hover);
+  transform: scale(1.03);
+}
+
+.deal-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .deals-section {
+    padding: 2rem 0 2.5rem;
+  }
+
+  .deal-card {
+    min-height: 170px;
+  }
+
+  .deal-title {
+    font-size: 1.15rem;
+  }
+
+  .deals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .deal-card {
+    min-height: 150px;
+  }
+
+  .deal-title {
+    font-size: 1rem;
+  }
+
+  .deal-body {
+    padding: 1.1rem 1.2rem 1.2rem;
+  }
+}

@@ -1,0 +1,17 @@
+.navbar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-logo {
+  height: 45px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+}

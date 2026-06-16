@@ -1,0 +1,84 @@
+<article class="place-card" [attr.aria-label]="place().name">
+
+  <!-- Photo -->
+  <div class="card-img-col">
+    <img
+      [src]="place().image"
+      [alt]="place().name"
+      class="card-img"
+      loading="lazy" />
+    <span class="img-count">
+      <i class="fas fa-images" aria-hidden="true"></i>
+      {{ place().imageCount }} Images
+    </span>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <!-- Top: info + price -->
+    <div class="card-top-row">
+
+      <!-- Info -->
+      <div class="card-info">
+        <p class="place-location">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          {{ place().location }}
+        </p>
+
+        <div class="place-stars" [attr.aria-label]="place().hotelStars + ' star hotel'">
+          @for (star of stars; track star) {
+            <i
+              [class]="star <= place().hotelStars ? 'fas fa-star' : 'far fa-star'"
+              aria-hidden="true">
+            </i>
+          }
+          <span class="hotel-label">{{ place().hotelStars }} Star Hotel</span>
+        </div>
+
+        <p class="place-amenities">
+          <i class="fas fa-shield-alt" aria-hidden="true"></i>
+          {{ place().amenities }}+ Amenities
+        </p>
+
+        <p class="place-review">
+          <span class="review-score">{{ place().reviewScore }}</span>
+          <span class="review-label">{{ place().reviewLabel }}</span>
+          <span class="review-count">{{ place().reviewCount }} reviews</span>
+        </p>
+      </div>
+
+      <!-- Price -->
+      <div class="card-price">
+        <p class="price-from">starting from</p>
+        <p class="price-amount">
+          ${{ place().pricePerNight }}<span class="price-unit">/night</span>
+        </p>
+        <p class="price-tax">excl. tax</p>
+      </div>
+
+    </div>
+
+    <!-- Actions: heart + view -->
+    <div class="card-actions">
+      <button
+        type="button"
+        class="fav-btn"
+        [class.fav-btn--active]="place().isFavorite"
+        (click)="toggleFavorite.emit(place().id)"
+        [attr.aria-label]="(place().isFavorite ? 'Remove from' : 'Add to') + ' favourites'">
+        <i [class]="place().isFavorite ? 'fas fa-heart' : 'far fa-heart'" aria-hidden="true"></i>
+      </button>
+
+      <button
+        type="button"
+        class="view-btn"
+        (click)="viewPlace.emit(place())"
+        [attr.aria-label]="'View ' + place().name">
+        View Place
+      </button>
+    </div>
+
+  </div>
+
+</article>

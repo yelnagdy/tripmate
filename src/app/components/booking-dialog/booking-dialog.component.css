@@ -1,0 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+:host {
+  --accent:    #3b5bdb;
+  --danger:    #e53935;
+  --border:    #e5e7eb;
+  --title-clr: #1a1a2e;
+  --body-clr:  #6b7280;
+  --card-bg:   #fff;
+  --page-bg:   #f0f0f0;
+}
+
+/* ── Backdrop ───────────────────────────────────────────────── */
+.bd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 900;
+}
+
+/* ── Dialog shell ───────────────────────────────────────────── */
+.bd-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 901;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.bd-inner {
+  pointer-events: all;
+  background: var(--page-bg);
+  border-radius: 18px;
+  width: min(420px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Header row ─────────────────────────────────────────────── */
+.bd-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bd-back {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--title-clr);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.bd-back:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.bd-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  margin: 0;
+}
+
+/* ── Info card (white) ──────────────────────────────────────── */
+.info-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+}
+
+.card-section {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  margin: 0 0 0.1rem;
+}
+
+/* ── Info rows ──────────────────────────────────────────────── */
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-of-type { border-bottom: none; padding-bottom: 0; }
+
+.info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.info-label {
+  font-size: 0.72rem;
+  color: var(--body-clr);
+}
+
+.info-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--title-clr);
+}
+
+.edit-link {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+/* ── Guest counter ──────────────────────────────────────────── */
+.guest-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.counter-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card-bg);
+  color: var(--title-clr);
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.counter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.counter-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ── Total row ──────────────────────────────────────────────── */
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.total-label {
+  font-size: 0.75rem;
+  color: var(--body-clr);
+}
+
+.total-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--title-clr);
+}
+
+/* ── Action button ──────────────────────────────────────────── */
+.action-btn {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.action-btn:hover { background: #2f4ac4; transform: translateY(-1px); }
+
+.action-btn--sm { width: auto; padding: 0.55rem 1.5rem; }
+
+/* ── Payment: method pill ───────────────────────────────────── */
+.method-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--title-clr);
+  background: #f9fafb;
+  font-weight: 600;
+  align-self: center;
+
+  i { color: var(--body-clr); }
+}
+
+/* ── Payment fields ─────────────────────────────────────────── */
+.pay-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.pay-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.pay-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--body-clr);
+}
+
+.pay-input {
+  border: none;
+  border-bottom: 1.5px solid var(--border);
+  padding: 0.35rem 0.1rem;
+  font-size: 0.82rem;
+  color: var(--title-clr);
+  background: transparent;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.pay-input:focus      { border-bottom-color: var(--accent); }
+.pay-input--err       { border-bottom-color: var(--danger); }
+
+.err-msg {
+  font-size: 0.68rem;
+  color: var(--danger);
+}
+
+/* ── Congratulations screen ─────────────────────────────────── */
+.congrats-inner {
+  min-height: 340px;
+  justify-content: flex-start;
+}
+
+.congrats-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  gap: 1rem;
+  position: relative;
+  padding: 1rem 0 0.5rem;
+}
+
+/* Star ring */
+.stars-ring {
+  position: relative;
+  width: 180px;
+  height: 100px;
+  margin-bottom: -1.5rem;
+}
+
+.cstar {
+  position: absolute;
+  color: #f59e0b;
+  font-size: 1.1rem;
+  animation: twinkle 1.6s ease-in-out infinite alternate;
+}
+
+.cs1 { top: 0;   left: 20px;  font-size: 0.8rem; animation-delay: 0s; }
+.cs2 { top: 0;   left: 50%;   transform: translateX(-50%); font-size: 1.3rem; animation-delay: 0.2s; }
+.cs3 { top: 0;   right: 20px; font-size: 0.8rem; animation-delay: 0.4s; }
+.cs4 { top: 30px; left: 0;    font-size: 1rem;   animation-delay: 0.6s; }
+.cs5 { top: 30px; right: 0;   font-size: 1rem;   animation-delay: 0.8s; }
+.cs6 { top: 60px; left: 30px; font-size: 0.7rem; animation-delay: 0.3s; }
+.cs7 { top: 60px; right: 30px;font-size: 0.7rem; animation-delay: 0.5s; }
+.cs8 { top: 15px; left: 38%;  font-size: 0.65rem;animation-delay: 0.9s; }
+
+@keyframes twinkle {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to   { opacity: 1;   transform: scale(1.15); }
+}
+
+.congrats-title {
+  font-family: 'Dancing Script', 'Brush Script MT', cursive;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.congrats-sub {
+  font-size: 0.82rem;
+  color: var(--body-clr);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 280px;
+}

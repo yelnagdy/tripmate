@@ -1,0 +1,137 @@
+:host {
+  --heading-clr: #1a1a2e;
+  --label-clr:   #00acc1;
+  --body-clr:    #555;
+  --card-radius: 14px;
+  display: block;
+}
+
+/* ── Section ───────────────────────────────────────────────── */
+.why-section {
+  background: #fff;
+  padding: 3rem 0 3.5rem;
+}
+
+/* ── Left copy ─────────────────────────────────────────────── */
+.why-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--label-clr);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0 0 0.55rem;
+}
+
+.why-heading {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--heading-clr);
+  line-height: 1.25;
+  margin: 0 0 1rem;
+}
+
+.why-desc {
+  font-size: 0.84rem;
+  color: var(--body-clr);
+  line-height: 1.7;
+  max-width: 420px;
+  margin: 0 0 1.75rem;
+}
+
+/* ── App store buttons ─────────────────────────────────────── */
+.app-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.app-btn {
+  display: inline-block;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.app-btn:hover { opacity: 0.82; transform: translateY(-2px); }
+
+.store-badge {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* ── Features 2×2 grid ─────────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.feature-card {
+  border-radius: var(--card-radius);
+  background-color: var(--f-bg, #f5f5f5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 155px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.feature-photo {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.feature-body {
+  padding: 0.75rem 0.9rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.2rem;
+}
+
+.feature-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.feature-desc {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Cards with light background need dark text (e.g. cream card) */
+.feature-card.light-card .feature-icon,
+.feature-card.light-card .feature-title  { color: #1a1a2e; }
+.feature-card.light-card .feature-desc   { color: #555; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .feature-card { min-height: 130px; }
+}
+
+@media (max-width: 399.98px) {
+  .features-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,32 @@
+<section class="deals-section" aria-labelledby="deals-heading">
+  <div class="container-fluid px-4 px-md-5">
+
+    <h2 id="deals-heading" class="deals-heading">Hot Deals</h2>
+
+    <div class="deals-grid">
+      @for (deal of deals(); track deal.id) {
+        <article
+          class="deal-card"
+          [style.--card-bg]="'url(' + deal.backgroundImage + ')'">
+
+          <!-- Dark gradient overlay -->
+          <div class="deal-overlay" aria-hidden="true"></div>
+
+          <div class="deal-body">
+            <h3 class="deal-title">{{ deal.title }}</h3>
+            <p class="deal-desc">{{ deal.description }}</p>
+            <button
+              class="deal-btn"
+              type="button"
+              [attr.aria-label]="'Book deal: ' + deal.title"
+              (click)="onBookNow(deal)">
+              {{ deal.ctaLabel }}
+            </button>
+          </div>
+
+        </article>
+      }
+    </div>
+
+  </div>
+</section>

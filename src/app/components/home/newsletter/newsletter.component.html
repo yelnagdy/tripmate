@@ -1,0 +1,49 @@
+<section class="nl-section" aria-label="Newsletter subscription">
+  <div class="container-fluid px-4 px-md-5">
+
+    <div class="nl-card">
+
+      <!-- Left: form -->
+      <div class="nl-form-side">
+        <span class="nl-label">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+          Join our newsletter
+        </span>
+
+        <h2 class="nl-heading">
+          Subscribe to see secret deals<br />
+          prices drop the moment you sign up!
+        </h2>
+
+        <form class="nl-form" (submit)="onSubmit($event)" novalidate>
+          <label for="nl-email" class="visually-hidden">Email address</label>
+          <input
+            id="nl-email"
+            type="email"
+            class="nl-input"
+            placeholder="Your email"
+            [value]="email()"
+            (input)="onInput($any($event.target).value)"
+            autocomplete="email"
+            required
+            aria-required="true" />
+          <button type="submit" class="nl-btn">Subscribe Now</button>
+        </form>
+
+        <p class="nl-disclaimer">
+          No ads. No trials. No commitments.
+        </p>
+      </div>
+
+      <!-- Right: decorative photo -->
+      <div class="nl-photo-side" aria-hidden="true">
+        <img
+          src="assets/images/newsletter-bg.jpeg"
+          alt=""
+          class="nl-photo" />
+      </div>
+
+    </div>
+
+  </div>
+</section>

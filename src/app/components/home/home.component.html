@@ -1,1 +1,40 @@
-<p>home works!</p>
+<app-hero-banner></app-hero-banner>
+
+<app-deals-section
+  [deals]="deals()"
+  (bookNow)="onBookDeal($event)">
+</app-deals-section>
+
+<div class="container-fluid px-4 px-md-5 pt-3">
+  <app-trips-search-bar
+    (search)="onSearch($event)"
+    (filterChange)="onFilterChange($event)">
+  </app-trips-search-bar>
+</div>
+
+<app-special-offers
+  [trips]="filteredTrips()"
+  (bookNow)="onBookTrip($event)"
+  (toggleFavorite)="onToggleFavorite($event)">
+</app-special-offers>
+
+<app-why-choose-us
+  [features]="features()">
+</app-why-choose-us>
+
+<app-how-it-works
+  [steps]="steps()">
+</app-how-it-works>
+
+<app-testimonials
+  [testimonials]="testimonials()">
+</app-testimonials>
+
+<app-news-guides
+  [articles]="articles()"
+  (viewMore)="onViewMoreArticles()">
+</app-news-guides>
+
+<app-newsletter
+  (subscribe)="onNewsletterSubscribe($event)">
+</app-newsletter>

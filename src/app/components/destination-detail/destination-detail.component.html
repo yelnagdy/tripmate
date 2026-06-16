@@ -1,0 +1,155 @@
+<div class="dd-page">
+
+  <!-- Title + breadcrumb -->
+  <div class="dd-header">
+    <div>
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <a routerLink="/main/home" class="bc-link">Home</a>
+        <i class="fas fa-chevron-right bc-sep" aria-hidden="true"></i>
+        <span class="bc-current">Hotel Details</span>
+      </nav>
+      <h1 class="dd-title">{{ destination().name }}</h1>
+      <p class="dd-route">{{ destination().destination }}</p>
+    </div>
+    <!-- Decorative blob -->
+    <div class="header-blob" aria-hidden="true"></div>
+  </div>
+
+  <!-- Hero image -->
+  <div class="hero-wrap">
+    <img
+      [src]="destination().heroImage"
+      [alt]="destination().name"
+      class="hero-img"
+      loading="eager" />
+  </div>
+
+  <!-- Trip info + Booking sidebar -->
+  <div class="content-row">
+
+    <!-- Trip details -->
+    <div class="trip-info">
+      <div class="info-row">
+        <span class="info-key">Destinations :</span>
+        <span class="info-val">{{ destination().destination }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Duration :</span>
+        <span class="info-val">{{ destination().duration }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Best Trip :</span>
+        <span class="info-val info-val--accent">{{ destination().bestTrip }}</span>
+      </div>
+    </div>
+
+    <!-- Booking sidebar -->
+    <aside class="booking-card" aria-label="Start booking">
+      <p class="booking-label">Start Booking</p>
+      <p class="booking-price">
+        ${{ destination().pricePerNight | number:'1.2-2' }}<span class="booking-unit"> /night</span>
+      </p>
+      <button
+        type="button"
+        class="book-btn"
+        (click)="onBookNow()">
+        Book Now
+      </button>
+    </aside>
+
+  </div>
+
+  <!-- Ideas for trip -->
+  <section class="ideas-section" aria-labelledby="ideas-heading">
+    <h2 id="ideas-heading" class="section-title">Ideas For Trip!</h2>
+    <p class="section-sub">Get some ideas for your trip</p>
+
+    @for (post of destination().ideas; track post.id) {
+      <article class="idea-card">
+        <img
+          [src]="post.image"
+          [alt]="post.title"
+          class="idea-img"
+          loading="lazy" />
+
+        <div class="idea-meta">
+          <img [src]="post.authorAvatar" [alt]="post.authorName" class="idea-avatar" />
+          <span class="idea-author">{{ post.authorName }}</span>
+          <span class="idea-dot" aria-hidden="true">·</span>
+          <span class="idea-time">{{ post.timeAgo }}</span>
+          <span class="idea-dot" aria-hidden="true">·</span>
+          <span class="idea-read">{{ post.readTime }}</span>
+        </div>
+
+        <h3 class="idea-title">{{ post.title }}</h3>
+        <p class="idea-excerpt">{{ post.excerpt }}</p>
+      </article>
+    }
+  </section>
+
+  <!-- Community reviews -->
+  <section class="reviews-section" aria-labelledby="reviews-heading">
+    <h2 id="reviews-heading" class="section-title">Community Reviews</h2>
+
+    <!-- Rating summary -->
+    <div class="rating-summary">
+
+      <!-- Overall score -->
+      <div class="overall-score">
+        <span class="score-num">{{ destination().overallRating }}</span>
+        <div class="score-stars" [attr.aria-label]="destination().overallRating + ' out of 5'">
+          @for (star of stars; track star) {
+            <i
+              [class]="star <= destination().overallRating ? 'fas fa-star' : 'far fa-star'"
+              aria-hidden="true">
+            </i>
+          }
+        </div>
+      </div>
+
+      <!-- Rating bars -->
+      <div class="rating-bars">
+        @for (bar of destination().ratingBars; track bar.stars) {
+          <div class="bar-row">
+            <span class="bar-label">{{ bar.stars }}★</span>
+            <div class="bar-track" role="progressbar" [attr.aria-valuenow]="bar.percentage" aria-valuemin="0" aria-valuemax="100">
+              <div class="bar-fill" [style.width.%]="bar.percentage"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Individual reviews -->
+    <div class="reviews-list">
+      @for (review of visibleReviews(); track review.id) {
+        <article class="review-card">
+          <div class="review-header">
+            <img [src]="review.authorAvatar" [alt]="review.authorName" class="review-avatar" />
+            <div class="review-meta">
+              <span class="review-name">{{ review.authorName }}</span>
+              <span class="review-time">{{ review.timeAgo }}</span>
+            </div>
+          </div>
+          <div class="review-stars" [attr.aria-label]="review.rating + ' out of 5'">
+            @for (star of stars; track star) {
+              <i [class]="star <= review.rating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+            }
+          </div>
+          <p class="review-text">{{ review.text }}</p>
+        </article>
+      }
+    </div>
+
+    @if (!showAllReviews() && destination().reviews.length > 2) {
+      <button
+        type="button"
+        class="show-more-btn"
+        (click)="showAllReviews.set(true)">
+        Show more reviews
+      </button>
+    }
+
+  </section>
+</div>

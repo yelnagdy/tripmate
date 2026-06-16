@@ -1,1 +1,55 @@
-<p>login works!</p>
+<section class="signup-section">
+  <div class="signup-container">
+    <div class="signup-card">
+      <div class="signup-header">
+          @if (restext) {<p class="alert alert-danger p-2 text-center rounded w-50 mx-auto">{{ restext }}</p>}
+        <h2 class="h3">Log in to TripMate</h2>
+      </div>
+      <div class="signup-grid">
+        <div class="signup-form-column">
+          <form [formGroup]="LoginForm" (ngSubmit)="LoginUser()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter your email" />
+              @if (LoginForm.get('email')?.errors && LoginForm.get('email')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
+                  @if (LoginForm.get('email')?.getError('required')) {
+                    <p class="m-2">Email is required</p>
+                  } @else if (LoginForm.get('email')?.getError('email')) {
+                    <p class="m-2">Email format is not correct</p>
+                  }
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input formControlName="password" type="password" class="form-control" id="password" placeholder="Enter your password" />
+              @if (LoginForm.get('password')?.errors && LoginForm.get('password')?.touched) {
+                <div class="alert alert-warning my-2 p-2 fs 6 fw-bold rounded-2">
+                  @if (LoginForm.get('password')?.getError('required')) {
+                    <p class="m-2">Password is required</p>
+                  } 
+                    @else if (LoginForm.get('password')?.getError('minlength')) {
+                        <p class="m-2">Password length at least 6</p>
+                    } @else if (LoginForm.get('password')?.getError('maxlength')) {
+                        <p class="m-2">Password length must be max 20</p>
+                    }
+                </div>
+              }
+            </div>
+            <button  type="submit" class="btn btn-primary signup-submit">login
+                @if (loading) {<span><i class="fa-solid fa-circle-notch fa-spin"></i></span>}
+            </button>
+
+        </form>
+        
+            <p class="signup-login-link ms-2 text-center">Don't have an account? 
+                <a routerLink="/auth/signup" style="cursor: pointer; color: #0d6efd; text-decoration: none; font-weight: 500;">Sign Up</a></p>
+        </div>
+        <div class="signup-image-column">
+          <img src="../../../assets/images/logo.png" alt="Sign Up Visual" class="signup-image" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

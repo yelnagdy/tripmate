@@ -1,1 +1,103 @@
-<p>footer works!</p>
+﻿<footer class="tripmate-footer">
+  <div class="container">
+
+    <!-- ── Heading ───────────────────────────────────────────── -->
+    <h2 class="footer-heading">Get The tripmate web</h2>
+    <p class="footer-sub">
+      We Will Send You a Link, Open it on
+      <span class="footer-sub__highlight">Your Phone</span>
+      to download the app
+    </p>
+
+    <!-- ── Email form ────────────────────────────────────────── -->
+    <form
+      class="share-form"
+      novalidate
+      (submit)="onSubmit($event)"
+      aria-label="Share app download link">
+
+      <!-- Input + button row -->
+      <div class="share-row">
+        <div
+          class="share-input-wrap"
+          [class.share-input-wrap--error]="emailError()"
+          [class.share-input-wrap--success]="success()">
+          <input
+            id="footer-email"
+            type="email"
+            class="share-input"
+            placeholder="Email"
+            autocomplete="email"
+            [value]="email()"
+            [attr.aria-invalid]="emailError() ? 'true' : 'false'"
+            aria-describedby="share-feedback"
+            (input)="onInput($event)"
+            (blur)="onBlur()" />
+        </div>
+
+        <button
+          type="submit"
+          class="share-btn"
+          [class.share-btn--loading]="submitting()"
+          [disabled]="submitting()"
+          [attr.aria-busy]="submitting()">
+
+          @if (submitting()) {
+            <i class="fas fa-circle-notch fa-spin me-1" aria-hidden="true"></i>
+            <span>Sending…</span>
+          } @else {
+            <span>Share web Link</span>
+          }
+        </button>
+      </div>
+
+      <!-- Validation / success feedback -->
+      <div id="share-feedback" aria-live="polite" aria-atomic="true" class="share-feedback">
+        @if (emailError()) {
+          <span class="feedback--error">
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+            {{ emailError() }}
+          </span>
+        } @else if (success()) {
+          <span class="feedback--success">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            Link sent! Check your inbox.
+          </span>
+        }
+      </div>
+
+    </form>
+
+    <hr class="footer-divider" />
+
+    <!-- ── Bottom row ────────────────────────────────────────── -->
+    <div class="footer-bottom">
+
+      <!-- Payment partners -->
+      <div class="payment-partners">
+        <span class="footer-label">Payment partners</span>
+        <div class="partner-logos">
+          <img src="assets/images/amazon-pay.png"             alt="Amazon Pay"       class="partner-logo" />
+          <img src="assets/images/American-Express-Color.png" alt="American Express" class="partner-logo" />
+          <img src="assets/images/paypal.png"                 alt="PayPal"           class="partner-logo" />
+          <img src="assets/images/mastercard.webp"            alt="Mastercard"       class="partner-logo" />
+        </div>
+      </div>
+
+      <!-- App store badges -->
+      <div class="app-download">
+        <span class="footer-label">Get Deliveries with tripmate</span>
+        <div class="store-badges">
+          <a href="#" class="store-badge-link" aria-label="Get it on Google Play">
+            <img src="assets/images/get-google-play.png" alt="Google Play" class="store-badge" />
+          </a>
+          <a href="#" class="store-badge-link" aria-label="Download on the App Store">
+            <img src="assets/images/get-apple-store.png" alt="App Store" class="store-badge" />
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</footer>

@@ -1,0 +1,93 @@
+<article class="pkg-card" [attr.aria-label]="pkg().title">
+
+  <!-- Image column -->
+  <div class="pkg-img-col">
+    <img
+      [src]="pkg().image"
+      alt="{{ pkg().title }}"
+      title="{{ pkg().title }}"
+      class="pkg-img"
+      loading="lazy" />
+
+    <span class="pkg-badge">{{ pkg().category }}</span>
+
+    <button
+      type="button"
+      class="fav-btn"
+      [class.fav-btn--active]="pkg().isFavorite"
+      (click)="toggleFavorite.emit(pkg().id)"
+      [attr.aria-label]="(pkg().isFavorite ? 'Remove from' : 'Add to') + ' favourites'">
+      <i [class]="pkg().isFavorite ? 'fas fa-heart' : 'far fa-heart'" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- Content column -->
+  <div class="pkg-body">
+
+    <div class="pkg-main-row">
+
+      <!-- Left: details -->
+      <div class="pkg-details">
+        <h3 class="pkg-title">{{ pkg().title }}</h3>
+
+        <!-- Star rating -->
+        <div class="pkg-stars" [attr.aria-label]="pkg().rating + ' out of 5 stars'">
+          @for (star of stars; track star) {
+            <i
+              [class]="star <= pkg().rating ? 'fas fa-star' : 'far fa-star'"
+              aria-hidden="true">
+            </i>
+          }
+          <span class="review-count">({{ pkg().reviewCount }})</span>
+        </div>
+
+        <!-- Info rows -->
+        <ul class="info-list" aria-label="Package details">
+          <li class="info-item">
+            <i class="fas fa-hotel" aria-hidden="true"></i>
+            <span>{{ hotelLabel() }}</span>
+          </li>
+          <li class="info-item">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+            <span>{{ pkg().days }} {{ pkg().days === 1 ? 'day' : 'days' }}</span>
+          </li>
+          <li class="info-item">
+            <i class="fas fa-users" aria-hidden="true"></i>
+            <span>{{ pkg().groupSize }}</span>
+          </li>
+        </ul>
+
+        <!-- Tags -->
+        <div class="tags-row" aria-label="Tags">
+          @for (tag of pkg().tags; track tag) {
+            <span class="pkg-tag">{{ tag }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Right: price -->
+      <div class="pkg-price-col">
+        <p class="price-label">Starting From</p>
+        @if (pkg().originalPrice) {
+          <del class="price-original">${{ pkg().originalPrice }}</del>
+        }
+        <p class="price-current">
+          ${{ pkg().price }}<span class="price-per">/person</span>
+        </p>
+        <p class="price-note">per day</p>
+      </div>
+
+    </div>
+
+    <!-- View More button -->
+    <button
+      type="button"
+      class="view-more-btn"
+      (click)="viewMore.emit(pkg())"
+      [attr.aria-label]="'View details for ' + pkg().title">
+      View More
+    </button>
+
+  </div>
+
+</article>

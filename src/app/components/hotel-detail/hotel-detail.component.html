@@ -1,0 +1,92 @@
+<div class="hd-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <a routerLink="/main/home" class="bc-link">Home</a>
+    <i class="fas fa-chevron-right bc-sep" aria-hidden="true"></i>
+    <span class="bc-current">Hotel Details</span>
+  </nav>
+
+  <!-- Title -->
+  <div class="hd-title-block">
+    <h1 class="hd-name">{{ hotel().name }}</h1>
+    <p class="hd-type">{{ hotel().type }}</p>
+  </div>
+
+  <!-- Photo grid -->
+  <div class="photo-grid" aria-label="Hotel photos">
+    <img
+      [src]="hotel().heroImage"
+      [alt]="hotel().name"
+      class="photo-main"
+      loading="eager" />
+    <div class="photo-side">
+      @for (img of hotel().sideImages; track img) {
+        <img
+          [src]="img"
+          [alt]="hotel().name + ' room'"
+          class="photo-side-img"
+          loading="lazy" />
+      }
+    </div>
+  </div>
+
+  <!-- Content + Booking sidebar -->
+  <div class="content-row">
+
+    <!-- About -->
+    <div class="about-col">
+      <h2 class="section-title">About the place</h2>
+      <p class="about-text">{{ hotel().about }}</p>
+    </div>
+
+    <!-- Booking sidebar -->
+    <aside class="booking-card" aria-label="Booking options">
+      <p class="booking-label">Start Booking</p>
+      <p class="booking-price">
+        ${{ hotel().pricePerNight }}<span class="booking-unit"> /night</span>
+      </p>
+      <button
+        type="button"
+        class="book-btn"
+        (click)="onBookNow()">
+        Book Now
+      </button>
+    </aside>
+
+  </div>
+
+  <!-- Amenities -->
+  <div class="amenities-row" aria-label="Amenities">
+    @for (a of hotel().amenities; track a.label) {
+      <div class="amenity-item">
+        <i [class]="a.icon + ' amenity-icon'" aria-hidden="true"></i>
+        <span class="amenity-label">{{ a.label }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Discover section -->
+  <div class="discover-section">
+    <div class="discover-grid">
+      @for (card of hotel().discoverCards; track card.id) {
+        <div class="discover-card">
+          <img
+            [src]="card.image"
+            [alt]="card.name"
+            class="discover-img"
+            loading="lazy" />
+          <p class="discover-name">{{ card.name }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Booking dialog -->
+@if (dialogOpen()) {
+  <app-booking-dialog
+    [data]="bookingData()"
+    (closeDialog)="closeDialog()">
+  </app-booking-dialog>
+}

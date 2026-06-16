@@ -1,0 +1,22 @@
+<section class="offers-section" aria-labelledby="offers-heading">
+  <div class="container-fluid px-4 px-md-5">
+
+    <header class="offers-header">
+      <h2 id="offers-heading" class="offers-title">Special Offers</h2>
+      <p class="offers-subtitle">Discover the World's Treasures</p>
+    </header>
+
+    <div class="row g-3 g-lg-4">
+      @for (trip of trips(); track trip.id) {
+        <div class="col-12 col-sm-6 col-lg-4">
+          <app-trip-card
+            [trip]="trip"
+            (bookNow)="onBookNow($event)"
+            (toggleFavorite)="onToggleFavorite($event)">
+          </app-trip-card>
+        </div>
+      }
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,303 @@
+:host {
+  --accent:    #3b5bdb;
+  --title-clr: #1a1a2e;
+  --body-clr:  #6b7280;
+  --border:    #e5e7eb;
+  display: block;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* ── Page wrapper ──────────────────────────────────────────── */
+.places-page {
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* ── Heading ───────────────────────────────────────────────── */
+.page-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  margin: 0 0 1rem;
+}
+
+/* ── Search area (wraps bar + panel + chips) ───────────────── */
+.search-area {
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+/* ── Search bar ────────────────────────────────────────────── */
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  transition: border-color 0.2s;
+}
+
+.search-wrap:focus-within { border-color: var(--accent); }
+
+.search-icon {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  color: var(--title-clr);
+  background: transparent;
+}
+
+.search-input::placeholder { color: #9ca3af; }
+
+/* ── Clear search (×) ──────────────────────────────────────── */
+.clear-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 0.1rem 0.2rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.clear-btn:hover { color: var(--title-clr); }
+
+/* ── Filter icon button ────────────────────────────────────── */
+.filter-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 1rem;
+  padding: 0.1rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.filter-btn:hover         { color: var(--accent); }
+.filter-btn--active       { color: var(--accent); }
+
+.filter-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 1.5px solid #f9fafb;
+}
+
+/* ── Filter panel ──────────────────────────────────────────── */
+.filter-panel {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-section { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Category checkboxes */
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.cat-option {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--body-clr);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cat-option input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* Max price input */
+.price-input {
+  width: 100%;
+  max-width: 180px;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--title-clr);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.price-input:focus { border-color: var(--accent); }
+
+/* Rating options */
+.rating-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.rating-option {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: var(--body-clr);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.rating-option input[type="radio"] { display: none; }
+
+.rating-option--active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #eff3ff;
+  font-weight: 600;
+}
+
+.rating-option:hover:not(.rating-option--active) {
+  border-color: #9ca3af;
+  color: var(--title-clr);
+}
+
+/* Panel action buttons */
+.filter-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn-clear-filter {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  color: var(--body-clr);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-clear-filter:hover { border-color: #999; color: var(--title-clr); }
+
+.btn-apply-filter {
+  padding: 0.45rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-apply-filter:hover { opacity: 0.85; }
+
+/* ── Active filter chips ───────────────────────────────────── */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.75rem;
+  background: #eff3ff;
+  color: var(--accent);
+  border: 1px solid #c7d2fe;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.chip-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.chip-remove:hover { opacity: 1; }
+
+/* ── Results count ─────────────────────────────────────────── */
+.results-count {
+  font-size: 0.78rem;
+  color: var(--body-clr);
+  margin: 0 0 0.85rem;
+}
+
+.results-count strong {
+  color: var(--title-clr);
+  font-weight: 700;
+}
+
+/* ── Places list ───────────────────────────────────────────── */
+.places-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #9ca3af;
+  font-size: 0.88rem;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  color: #d1d5db;
+}

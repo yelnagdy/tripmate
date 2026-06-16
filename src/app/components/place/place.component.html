@@ -1,1 +1,144 @@
-<p>place works!</p>
+<div class="places-page">
+
+  <h1 class="page-title">Popular Places</h1>
+
+  <!-- Search area -->
+  <div class="search-area">
+
+    <div class="search-wrap" role="search">
+      <i class="fas fa-search search-icon" aria-hidden="true"></i>
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search"
+        aria-label="Search places"
+        [value]="searchQuery()"
+        (input)="onSearch($any($event.target).value)" />
+
+      @if (searchQuery()) {
+        <button type="button" class="clear-btn" aria-label="Clear search" (click)="clearSearch()">
+          <i class="fas fa-times"></i>
+        </button>
+      }
+
+      <button
+        type="button"
+        class="filter-btn"
+        [class.filter-btn--active]="activeFilterCount() > 0"
+        aria-label="Toggle filter panel"
+        (click)="toggleFilterPanel()">
+        <i class="fas fa-sliders-h"></i>
+        @if (activeFilterCount() > 0) {
+          <span class="filter-dot" aria-hidden="true"></span>
+        }
+      </button>
+    </div>
+
+    <!-- Filter panel -->
+    @if (filterOpen()) {
+      <div class="filter-panel" role="region" aria-label="Filter options">
+
+        <!-- Country / Category -->
+        <div class="filter-section">
+          <p class="filter-label">Country</p>
+          <div class="category-list">
+            @for (cat of allCategories(); track cat) {
+              <label class="cat-option">
+                <input
+                  type="checkbox"
+                  [checked]="draftFilter().categories.includes(cat)"
+                  (change)="toggleDraftCategory(cat)" />
+                {{ cat }}
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Max price -->
+        <div class="filter-section">
+          <p class="filter-label">Max Price / Night ($)</p>
+          <input
+            type="number"
+            class="price-input"
+            placeholder="e.g. 200"
+            [value]="draftFilter().maxPrice ?? ''"
+            (input)="setDraftMaxPrice($any($event.target).value)"
+            min="0" />
+        </div>
+
+        <!-- Hotel stars -->
+        <div class="filter-section">
+          <p class="filter-label">Hotel Stars</p>
+          <div class="rating-options">
+            @for (r of ratingOptions; track r) {
+              <label class="rating-option" [class.rating-option--active]="draftFilter().minRating === r">
+                <input
+                  type="radio"
+                  name="place-rating"
+                  [checked]="draftFilter().minRating === r"
+                  (change)="setDraftMinRating(r)" />
+                {{ r }}+ ★
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="filter-actions">
+          <button type="button" class="btn-clear-filter" (click)="clearFilter()">Clear Filters</button>
+          <button type="button" class="btn-apply-filter" (click)="applyFilter()">Apply</button>
+        </div>
+
+      </div>
+    }
+
+    <!-- Active filter chips -->
+    @if (activeFilterCount() > 0) {
+      <div class="chips-row" aria-label="Active filters">
+        @for (cat of activeFilter().categories; track cat) {
+          <span class="chip">
+            {{ cat }}
+            <button type="button" class="chip-remove" [attr.aria-label]="'Remove ' + cat" (click)="removeCategoryChip(cat)">×</button>
+          </span>
+        }
+        @if (activeFilter().maxPrice !== null) {
+          <span class="chip">
+            Max ${{ activeFilter().maxPrice }}
+            <button type="button" class="chip-remove" aria-label="Remove price filter" (click)="removeMaxPriceChip()">×</button>
+          </span>
+        }
+        @if (activeFilter().minRating !== null) {
+          <span class="chip">
+            {{ activeFilter().minRating }}+ ★
+            <button type="button" class="chip-remove" aria-label="Remove rating filter" (click)="removeRatingChip()">×</button>
+          </span>
+        }
+      </div>
+    }
+
+  </div>
+
+  <!-- Results count -->
+  <p class="results-count" role="status" aria-live="polite">
+    Showing <strong>{{ filteredPlaces().length }}</strong> of {{ places().length }} places
+  </p>
+
+  <!-- Places list -->
+  <div class="places-list" aria-label="Places results">
+    @if (filteredPlaces().length) {
+      @for (place of filteredPlaces(); track place.id) {
+        <app-place-card
+          [place]="place"
+          (viewPlace)="onViewPlace($event)"
+          (toggleFavorite)="onToggleFavorite($event)">
+        </app-place-card>
+      }
+    } @else {
+      <div class="empty-state" role="status" aria-live="polite">
+        <i class="fas fa-map-marker-slash" aria-hidden="true"></i>
+        No places match your search.
+      </div>
+    }
+  </div>
+
+</div>
