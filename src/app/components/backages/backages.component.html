@@ -119,13 +119,20 @@
   </div>
 
   <!-- Results count -->
-  <p class="results-count" role="status" aria-live="polite">
-    Showing <strong>{{ filteredPackages().length }}</strong> of {{ packages().length }} packages
-  </p>
+  @if (!loading()) {
+    <p class="results-count" role="status" aria-live="polite">
+      Showing <strong>{{ filteredPackages().length }}</strong> of {{ packages().length }} packages
+    </p>
+  }
 
   <!-- Package list -->
   <div class="pkg-list" aria-label="Package results">
-    @if (filteredPackages().length) {
+    @if (loading()) {
+      <div class="loading-state" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Loading packages...
+      </div>
+    } @else if (filteredPackages().length) {
       @for (pkg of filteredPackages(); track pkg.id) {
         <app-package-card
           [pkg]="pkg"

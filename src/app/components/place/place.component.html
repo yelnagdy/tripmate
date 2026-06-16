@@ -119,13 +119,20 @@
   </div>
 
   <!-- Results count -->
-  <p class="results-count" role="status" aria-live="polite">
-    Showing <strong>{{ filteredPlaces().length }}</strong> of {{ places().length }} places
-  </p>
+  @if (!loading()) {
+    <p class="results-count" role="status" aria-live="polite">
+      Showing <strong>{{ filteredPlaces().length }}</strong> of {{ places().length }} places
+    </p>
+  }
 
   <!-- Places list -->
   <div class="places-list" aria-label="Places results">
-    @if (filteredPlaces().length) {
+    @if (loading()) {
+      <div class="loading-state" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Loading places...
+      </div>
+    } @else if (filteredPlaces().length) {
       @for (place of filteredPlaces(); track place.id) {
         <app-place-card
           [place]="place"

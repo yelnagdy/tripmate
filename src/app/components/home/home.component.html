@@ -38,3 +38,10 @@
 <app-newsletter
   (subscribe)="onNewsletterSubscribe($event)">
 </app-newsletter>
+
+@if (dialogOpen() && activeBooking()) {
+  <app-booking-dialog
+    [data]="activeBooking()!"
+    (closeDialog)="closeDialog()">
+  </app-booking-dialog>
+}

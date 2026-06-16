@@ -8,7 +8,9 @@ import { HowItWorksComponent }    from './how-it-works/how-it-works.component';
 import { TestimonialsComponent }  from './testimonials/testimonials.component';
 import { NewsGuidesComponent }    from './news-guides/news-guides.component';
 import { NewsletterComponent }    from './newsletter/newsletter.component';
+import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 import { Language, TripFilter, PromoDeal, Trip, AppFeature, HowItWorksStep, Testimonial, Article } from '../../models/home.models';
+import { BookingData } from '../../models/detail.models';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +26,7 @@ import { Language, TripFilter, PromoDeal, Trip, AppFeature, HowItWorksStep, Test
     TestimonialsComponent,
     NewsGuidesComponent,
     NewsletterComponent,
+    BookingDialogComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -65,9 +68,21 @@ export class HomeComponent {
     },
   ]);
 
+  /* ── Booking dialog ─────────────────────────────────────── */
+  readonly dialogOpen    = signal(false);
+  readonly activeBooking = signal<BookingData | null>(null);
+
+  closeDialog(): void { this.dialogOpen.set(false); }
+
   onBookDeal(deal: PromoDeal): void {
-    // TODO: navigate to booking with deal context
-    console.log('Booking deal:', deal.title);
+    this.activeBooking.set({
+      date:           'Today',
+      from:           'Your Location',
+      to:             deal.title,
+      flight:         'Deal Package',
+      pricePerPerson: 299,
+    });
+    this.dialogOpen.set(true);
   }
 
   /* ── Trips ──────────────────────────────────────────────── */
@@ -127,8 +142,14 @@ export class HomeComponent {
   onFilterChange(f: TripFilter): void { this.activeFilter.set(f); }
 
   onBookTrip(trip: Trip): void {
-    // TODO: navigate to booking with trip context
-    console.log('Booking trip:', trip.title);
+    this.activeBooking.set({
+      date:           'Today',
+      from:           'Your Location',
+      to:             trip.location,
+      flight:         trip.title,
+      pricePerPerson: trip.price,
+    });
+    this.dialogOpen.set(true);
   }
 
   onToggleFavorite(tripId: number): void {

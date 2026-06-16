@@ -1,13 +1,14 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
-import { DestinationDetailData } from '../../models/detail.models';
+import { DestinationDetailData, BookingData } from '../../models/detail.models';
+import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 
 @Component({
   selector: 'app-destination-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, BookingDialogComponent],
   templateUrl: './destination-detail.component.html',
   styleUrl: './destination-detail.component.css',
 })
@@ -98,7 +99,19 @@ export class DestinationDetailComponent {
       ? this.destination().reviews
       : this.destination().reviews.slice(0, 2);
 
+  readonly dialogOpen    = signal(false);
+  readonly activeBooking = signal<BookingData | null>(null);
+
   onBookNow(): void {
-    console.log('Book destination:', this.destination().name);
+    this.activeBooking.set({
+      date:           'Today',
+      from:           'Your Location',
+      to:             this.destination().name,
+      flight:         'Direct Booking',
+      pricePerPerson: this.destination().pricePerNight || 299,
+    });
+    this.dialogOpen.set(true);
   }
+
+  closeDialog(): void { this.dialogOpen.set(false); }
 }

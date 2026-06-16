@@ -1,6 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { PackageCardComponent } from './package-card/package-card.component';
 import { Package } from '../../models/packages.models';
+import { PackageService } from '../../core/services/package.service';
+import { ApiPackage } from '../../models/api.models';
 
 interface PackageFilter {
   categories: string[];
@@ -8,24 +10,7 @@ interface PackageFilter {
   minRating: number | null;
 }
 
-@Component({
-  selector: 'app-backages',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PackageCardComponent],
-  templateUrl: './backages.component.html',
-  styleUrl: './backages.component.css',
-})
-export class BackagesComponent {
-
-  readonly searchQuery  = signal('');
-  readonly filterOpen   = signal(false);
-  readonly activeFilter = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
-  readonly draftFilter  = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
-
-  readonly ratingOptions: number[] = [3, 4, 5];
-
-  readonly packages = signal<Package[]>([
+const FALLBACK_PACKAGES: Package[] = [
     {
       id: 1,
       title: 'Romantic Paris Getaway',
@@ -143,7 +128,56 @@ export class BackagesComponent {
       originalPrice: 720,
       isFavorite: false,
     },
-  ]);
+];
+
+@Component({
+  selector: 'app-backages',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [PackageCardComponent],
+  templateUrl: './backages.component.html',
+  styleUrl: './backages.component.css',
+})
+export class BackagesComponent implements OnInit {
+
+  private readonly packageService = inject(PackageService);
+
+  readonly loading      = signal(true);
+  readonly searchQuery  = signal('');
+  readonly filterOpen   = signal(false);
+  readonly activeFilter = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
+  readonly draftFilter  = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
+  readonly packages     = signal<Package[]>([]);
+
+  readonly ratingOptions: number[] = [3, 4, 5];
+
+  ngOnInit(): void {
+    this.packageService.getAll().subscribe(apiData => {
+      if (apiData.length > 0) {
+        this.packages.set(apiData.map(p => this.mapToPackage(p)));
+      } else {
+        this.packages.set(FALLBACK_PACKAGES);
+      }
+      this.loading.set(false);
+    });
+  }
+
+  private mapToPackage(p: ApiPackage): Package {
+    return {
+      id:          p.id,
+      title:       p.title,
+      category:    'Travel',
+      image:       p.imageUrl || 'assets/images/pkg-paris.jpeg',
+      rating:      4,
+      reviewCount: 0,
+      hotelStars:  3,
+      days:        p.durationDays,
+      groupSize:   `Up to ${p.maxGuests}`,
+      tags:        ['Easy Travel'],
+      price:       p.price,
+      isFavorite:  false,
+    };
+  }
 
   readonly allCategories = computed(() =>
     [...new Set(this.packages().map(p => p.category))]

@@ -153,3 +153,10 @@
 
   </section>
 </div>
+
+@if (dialogOpen() && activeBooking()) {
+  <app-booking-dialog
+    [data]="activeBooking()!"
+    (closeDialog)="closeDialog()">
+  </app-booking-dialog>
+}
