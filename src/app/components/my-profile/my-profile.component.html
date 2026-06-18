@@ -6,6 +6,13 @@
     <p class="breadcrumb">Home / My Profile</p>
   </div>
 
+  @if (loading()) {
+    <div class="profile-loading">
+      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+      <p>Loading profile…</p>
+    </div>
+  } @else {
+
   <!-- Card wrapper -->
   <div class="profile-card">
 
@@ -38,11 +45,28 @@
           (change)="onAvatarSelected($event)" />
       </div>
 
-      <h2 class="sidebar-name">{{ profile().name }}</h2>
+      <h2 class="sidebar-name">{{ profile().name || 'My Profile' }}</h2>
 
       <div class="sidebar-meta">
-        <span><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ profile().location }}</span>
-        <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ profile().joinDate }}</span>
+        @if (profile().email) {
+          <span><i class="fas fa-envelope" aria-hidden="true"></i> {{ profile().email }}</span>
+        }
+        @if (profile().phone) {
+          <span><i class="fas fa-phone" aria-hidden="true"></i> {{ profile().phone }}</span>
+        }
+      </div>
+
+      <!-- Stats -->
+      <div class="sidebar-stats">
+        <div class="stat-item">
+          <span class="stat-value">{{ userStats.totalFavorites() }}</span>
+          <span class="stat-label">Favourites</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">{{ userStats.totalBookings() }}</span>
+          <span class="stat-label">Bookings</span>
+        </div>
       </div>
 
       <!-- Sidebar nav -->
@@ -85,7 +109,9 @@
 
           <!-- Account section -->
           <section aria-labelledby="account-heading">
-            <h3 id="account-heading" class="section-heading">Account</h3>
+            <div class="section-heading-row">
+              <h3 id="account-heading" class="section-heading">Account</h3>
+            </div>
 
             <div class="field-group">
               <label class="field-label" for="field-name">Name</label>
@@ -98,7 +124,7 @@
                   [value]="draft().name"
                   (input)="setDraft('name', $any($event.target).value)" />
               } @else {
-                <div class="field-value">{{ profile().name }}</div>
+                <div class="field-value">{{ profile().name || '—' }}</div>
               }
             </div>
 
@@ -113,45 +139,38 @@
                   [value]="draft().email"
                   (input)="setDraft('email', $any($event.target).value)" />
               } @else {
-                <div class="field-value">{{ profile().email }}</div>
+                <div class="field-value">{{ profile().email || '—' }}</div>
               }
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="field-location">Location</label>
+              <label class="field-label" for="field-phone">Phone</label>
               @if (isEditing()) {
                 <input
-                  id="field-location"
-                  type="text"
+                  id="field-phone"
+                  type="tel"
                   class="field-input"
-                  placeholder="Enter your location"
-                  [value]="draft().location"
-                  (input)="setDraft('location', $any($event.target).value)" />
+                  placeholder="Enter your phone number"
+                  [value]="draft().phone"
+                  (input)="setDraft('phone', $any($event.target).value)" />
               } @else {
-                <div class="field-value">{{ profile().location }}</div>
+                <div class="field-value">{{ profile().phone || '—' }}</div>
               }
             </div>
           </section>
 
           <!-- Preferences section -->
           <section aria-labelledby="prefs-heading" class="prefs-section">
-            <h3 id="prefs-heading" class="section-heading">Preferences</h3>
-
-            <div class="field-group">
-              <label class="field-label" for="field-country">Country</label>
-              @if (isEditing()) {
-                <input
-                  id="field-country"
-                  type="text"
-                  class="field-input"
-                  placeholder="Enter your country"
-                  [value]="draft().country"
-                  (input)="setDraft('country', $any($event.target).value)" />
-              } @else {
-                <div class="field-value">{{ preferences().country }}</div>
+            <div class="section-heading-row">
+              <h3 id="prefs-heading" class="section-heading">Travel Preferences</h3>
+              @if (!isEditingPrefs()) {
+                <button type="button" class="edit-inline-btn" (click)="enterEditPrefs()">
+                  <i class="fas fa-pen" aria-hidden="true"></i> Edit
+                </button>
               }
             </div>
 
+            <!-- Currency & Language: edited via profile save -->
             <div class="field-group">
               <label class="field-label" for="field-currency">Currency</label>
               @if (isEditing()) {
@@ -163,7 +182,7 @@
                   [value]="draft().currency"
                   (input)="setDraft('currency', $any($event.target).value)" />
               } @else {
-                <div class="field-value">{{ preferences().currency }}</div>
+                <div class="field-value">{{ preferences().currency || '—' }}</div>
               }
             </div>
 
@@ -178,43 +197,227 @@
                   [value]="draft().language"
                   (input)="setDraft('language', $any($event.target).value)" />
               } @else {
-                <div class="field-value">{{ preferences().language }}</div>
+                <div class="field-value">{{ preferences().language || '—' }}</div>
               }
             </div>
+
+            <!-- Trip type (read-only — needs ID mapping) -->
+            <div class="field-group">
+              <label class="field-label">Trip Type</label>
+              <div class="field-value">{{ preferences().tripType || '—' }}</div>
+            </div>
+
+            <!-- Season, budget, airlines: editable via preferences save -->
+            <div class="field-group">
+              <label class="field-label" for="field-season">Preferred Season</label>
+              @if (isEditingPrefs()) {
+                <input
+                  id="field-season"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. Summer, Winter"
+                  [value]="prefsDraft().season"
+                  (input)="setPrefsDraft('season', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ preferences().season || '—' }}</div>
+              }
+            </div>
+
+            <div class="field-group field-group--row">
+              <div class="field-half">
+                <label class="field-label" for="field-minbudget">Min Budget ($)</label>
+                @if (isEditingPrefs()) {
+                  <input
+                    id="field-minbudget"
+                    type="number"
+                    class="field-input"
+                    placeholder="0"
+                    [value]="prefsDraft().minBudget"
+                    (input)="setPrefsDraft('minBudget', $any($event.target).value)" />
+                } @else {
+                  <div class="field-value">{{ preferences().minBudget || '—' }}</div>
+                }
+              </div>
+              <div class="field-half">
+                <label class="field-label" for="field-maxbudget">Max Budget ($)</label>
+                @if (isEditingPrefs()) {
+                  <input
+                    id="field-maxbudget"
+                    type="number"
+                    class="field-input"
+                    placeholder="0"
+                    [value]="prefsDraft().maxBudget"
+                    (input)="setPrefsDraft('maxBudget', $any($event.target).value)" />
+                } @else {
+                  <div class="field-value">{{ preferences().maxBudget || '—' }}</div>
+                }
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="field-airlines">Preferred Airlines</label>
+              @if (isEditingPrefs()) {
+                <input
+                  id="field-airlines"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. EgyptAir, Emirates"
+                  [value]="prefsDraft().airlines"
+                  (input)="setPrefsDraft('airlines', $any($event.target).value)" />
+              } @else {
+                <div class="field-value">{{ preferences().airlines || '—' }}</div>
+              }
+            </div>
+
+            <!-- Preferences save / cancel -->
+            @if (isEditingPrefs()) {
+              @if (savePrefsError()) {
+                <p class="save-error">
+                  <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                  {{ savePrefsError() }}
+                </p>
+              }
+              <div class="edit-actions">
+                <button type="button" class="btn-cancel" [disabled]="savingPrefs()" (click)="cancelEditPrefs()">Cancel</button>
+                <button type="button" class="btn-save" [disabled]="savingPrefs()" (click)="savePreferences()">
+                  @if (savingPrefs()) {
+                    <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving…
+                  } @else {
+                    Save Preferences
+                  }
+                </button>
+              </div>
+            }
+
+            @if (savePrefsSuccess()) {
+              <p class="save-success">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                Preferences updated successfully!
+              </p>
+            }
           </section>
+
+          <!-- Recently Viewed -->
+          @if (recentItems().length > 0) {
+            <section aria-labelledby="recent-heading" class="recent-section">
+              <div class="section-heading-row">
+                <h3 id="recent-heading" class="section-heading">Recently Viewed</h3>
+              </div>
+              <div class="recent-scroll">
+                @for (item of recentItems(); track item.id) {
+                  <div class="recent-card">
+                    <div class="recent-img-wrap">
+                      <img
+                        [src]="item.imageUrl | safeUrl:'assets/images/fav-santorini.jpeg'"
+                        [alt]="item.name"
+                        class="recent-img"
+                        loading="lazy" />
+                      <span class="recent-price">${{ item.price }}</span>
+                    </div>
+                    <div class="recent-body">
+                      <p class="recent-name">{{ item.name }}</p>
+                      <p class="recent-location">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        {{ (item.city && item.city !== 'null') ? item.city + ', ' : '' }}{{ item.country }}
+                      </p>
+                      @if (item.rating > 0) {
+                        <p class="recent-rating">
+                          <i class="fas fa-star" aria-hidden="true"></i>
+                          {{ item.rating }}
+                        </p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
 
           <!-- Save / Cancel -->
           @if (isEditing()) {
+            @if (saveError()) {
+              <p class="save-error">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                {{ saveError() }}
+              </p>
+            }
             <div class="edit-actions">
-              <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
-              <button type="button" class="btn-save"   (click)="saveProfile()">Save Changes</button>
+              <button type="button" class="btn-cancel" [disabled]="saving()" (click)="cancelEdit()">Cancel</button>
+              <button type="button" class="btn-save" [disabled]="saving()" (click)="saveProfile()">
+                @if (saving()) {
+                  <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving…
+                } @else {
+                  Save Changes
+                }
+              </button>
             </div>
+          }
+
+          @if (saveSuccess()) {
+            <p class="save-success">
+              <i class="fas fa-check-circle" aria-hidden="true"></i>
+              Profile updated successfully!
+            </p>
           }
 
         </div>
       }
 
-      <!-- ── View: Add Post ─────────────────────────────────── -->
+      <!-- ── View: Add Post / Edit Post ───────────────────── -->
       @if (activeView() === 'add-post') {
         <div class="view-add-post">
 
           <div class="back-row">
-            <button type="button" class="back-btn" (click)="setView('profile')">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
-            </button>
+            @if (isEditMode()) {
+              <button type="button" class="back-btn" (click)="cancelPostEdit()">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to My Posts
+              </button>
+            } @else {
+              <button type="button" class="back-btn" (click)="setView('profile')">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+              </button>
+            }
           </div>
 
-          <h3 class="section-heading">Media Upload</h3>
-          <p class="section-sub">Add photo!</p>
+          <h3 class="section-heading">
+            {{ isEditMode() ? 'Edit Post' : 'Media Upload' }}
+          </h3>
+          @if (!isEditMode()) {
+            <p class="section-sub">Add photo!</p>
+          }
+
+          <!-- Offline banner -->
+          @if (!isOnline()) {
+            <div class="status-banner status-banner--offline" role="alert">
+              <i class="fas fa-wifi-slash" aria-hidden="true"></i>
+              You're offline — your draft will be saved locally when you try to share.
+            </div>
+          }
+
+          <!-- Draft restore banner -->
+          @if (hasPendingDraft() && !isEditMode()) {
+            <div class="status-banner status-banner--draft" role="status">
+              <i class="fas fa-file-alt" aria-hidden="true"></i>
+              <span>Unsaved draft from {{ draftSavedAt() || 'earlier' }}</span>
+              <div class="draft-actions">
+                <button type="button" class="draft-restore-btn" (click)="restoreDraft()">Restore</button>
+                <button type="button" class="draft-discard-btn" (click)="clearDraft()">Discard</button>
+              </div>
+            </div>
+          }
 
           <form (submit)="onSubmitPost()" novalidate>
 
             <!-- Upload dropzone -->
             <label for="file-upload" class="upload-zone" aria-label="Upload photo">
               @if (previewUrl()) {
-                <img [src]="previewUrl()" alt="Preview" class="upload-preview" />
+                <div class="upload-preview-wrap">
+                  <img [src]="previewUrl()" alt="Preview" class="upload-preview" />
+                  <span class="upload-change-hint">Click to change</span>
+                </div>
               } @else {
                 <i class="fas fa-camera upload-icon" aria-hidden="true"></i>
+                <span class="upload-hint">Drop an image or</span>
                 <button
                   type="button"
                   class="browse-btn"
@@ -235,7 +438,7 @@
               <input
                 type="text"
                 class="post-input"
-                placeholder="Title"
+                placeholder="Title *"
                 [value]="postTitle()"
                 (input)="postTitle.set($any($event.target).value)"
                 aria-label="Post title" />
@@ -243,14 +446,14 @@
               <input
                 type="text"
                 class="post-input"
-                placeholder="Location"
+                placeholder="Location *"
                 [value]="postLocation()"
                 (input)="postLocation.set($any($event.target).value)"
                 aria-label="Post location" />
 
               <textarea
                 class="post-textarea"
-                placeholder="Write your experience Story"
+                placeholder="Write your experience story *"
                 [value]="postStory()"
                 (input)="postStory.set($any($event.target).value)"
                 rows="3"
@@ -260,7 +463,7 @@
 
             <!-- Star rating -->
             <div class="rating-row">
-              <p class="rating-label">How much you rate this experience</p>
+              <p class="rating-label">How would you rate this experience?</p>
               <div
                 class="stars-input"
                 role="radiogroup"
@@ -280,7 +483,29 @@
               </div>
             </div>
 
-            <button type="submit" class="submit-btn">Share Post</button>
+            <!-- Feedback -->
+            @if (postError()) {
+              <p class="post-feedback post-feedback--err">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                {{ postError() }}
+              </p>
+            }
+            @if (postSuccess()) {
+              <p class="post-feedback post-feedback--ok">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                {{ isEditMode() ? 'Post updated!' : 'Post shared successfully!' }}
+              </p>
+            }
+
+            <button type="submit" class="submit-btn" [disabled]="postSubmitting()">
+              @if (postSubmitting()) {
+                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                {{ isEditMode() ? 'Saving…' : 'Sharing…' }}
+              } @else {
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                {{ isEditMode() ? 'Save Changes' : 'Share Post' }}
+              }
+            </button>
 
           </form>
         </div>
@@ -289,20 +514,110 @@
       <!-- ── View: My Posts ─────────────────────────────────── -->
       @if (activeView() === 'my-posts') {
         <div class="view-my-posts">
-          <div class="back-row">
-            <button type="button" class="back-btn" (click)="setView('profile')">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+
+          <div class="posts-header">
+            <div class="back-row">
+              <button type="button" class="back-btn" (click)="setView('profile')">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+              </button>
+            </div>
+            <button type="button" class="new-post-btn" (click)="setView('add-post')">
+              <i class="fas fa-plus" aria-hidden="true"></i> New Post
             </button>
           </div>
+
           <h3 class="section-heading">My Posts</h3>
-          <div class="empty-posts">
-            <i class="fas fa-images" aria-hidden="true"></i>
-            <p>No posts yet. Share your first travel experience!</p>
-          </div>
+
+          @if (postsLoading()) {
+            <div class="posts-loading">
+              <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+              <span>Loading posts…</span>
+            </div>
+          } @else if (myPosts().length === 0) {
+            <div class="empty-posts">
+              <i class="fas fa-images" aria-hidden="true"></i>
+              <p>No posts yet.</p>
+              <button type="button" class="empty-cta" (click)="setView('add-post')">
+                Share your first travel experience
+              </button>
+            </div>
+          } @else {
+            <div class="posts-grid">
+              @for (post of myPosts(); track post.postId) {
+                <div class="post-card">
+
+                  <!-- Image -->
+                  <div class="post-card-img-wrap">
+                    @if (post.imageUrl && post.imageUrl !== 'string') {
+                      <img [src]="post.imageUrl | safeUrl:'assets/images/place-manarola.jpeg'" [alt]="post.title" class="post-card-img" loading="lazy" />
+                    } @else {
+                      <div class="post-card-img-placeholder">
+                        <i class="fas fa-image" aria-hidden="true"></i>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Body -->
+                  <div class="post-card-body">
+                    <h4 class="post-card-title">{{ post.title }}</h4>
+
+                    <p class="post-card-location">
+                      <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                      {{ post.location }}
+                    </p>
+
+                    <!-- Stars -->
+                    <div class="post-card-stars" [attr.aria-label]="'Rating: ' + post.rating + ' stars'">
+                      @for (s of starsArray(5); track s) {
+                        <i
+                          class="fas fa-star post-card-star"
+                          [class.post-card-star--filled]="s <= post.rating"
+                          aria-hidden="true">
+                        </i>
+                      }
+                      <span class="post-card-rating-num">{{ post.rating }}/5</span>
+                    </div>
+
+                    <p class="post-card-desc">{{ post.description }}</p>
+
+                    <!-- Actions -->
+                    <div class="post-card-actions">
+                      <button
+                        type="button"
+                        class="post-action-btn post-action-btn--edit"
+                        (click)="startEditPost(post)">
+                        <i class="fas fa-pen" aria-hidden="true"></i> Edit
+                      </button>
+
+                      @if (deletingPostId() === post.postId) {
+                        <div class="delete-confirm">
+                          <span class="delete-confirm-msg">Delete this post?</span>
+                          <button type="button" class="delete-yes-btn" (click)="deleteMyPost(post.postId)">Yes</button>
+                          <button type="button" class="delete-no-btn"  (click)="cancelDelete()">No</button>
+                        </div>
+                      } @else {
+                        <button
+                          type="button"
+                          class="post-action-btn post-action-btn--delete"
+                          (click)="confirmDelete(post.postId)">
+                          <i class="fas fa-trash" aria-hidden="true"></i> Delete
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                </div>
+              }
+            </div>
+          }
+
         </div>
       }
 
     </main>
 
   </div>
+
+  } <!-- end @else loading -->
+
 </div>

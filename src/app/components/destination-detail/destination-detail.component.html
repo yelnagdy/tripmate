@@ -1,5 +1,10 @@
 <div class="dd-page">
 
+  <!-- Back button -->
+  <button type="button" class="dd-back-btn" (click)="goBack()">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+  </button>
+
   <!-- Title + breadcrumb -->
   <div class="dd-header">
     <div>
@@ -112,7 +117,7 @@
         @for (bar of destination().ratingBars; track bar.stars) {
           <div class="bar-row">
             <span class="bar-label">{{ bar.stars }}★</span>
-            <div class="bar-track" role="progressbar" [attr.aria-valuenow]="bar.percentage" aria-valuemin="0" aria-valuemax="100">
+            <div class="bar-track" role="progressbar" [attr.aria-label]="bar.stars + ' star ratings'" [attr.aria-valuenow]="bar.percentage" aria-valuemin="0" aria-valuemax="100">
               <div class="bar-fill" [style.width.%]="bar.percentage"></div>
             </div>
           </div>
@@ -150,6 +155,95 @@
         Show more reviews
       </button>
     }
+
+    <!-- Community posts from API -->
+    @if (communityPosts().length) {
+      <div class="community-posts">
+        <h3 class="cp-title">From the Community</h3>
+        @for (post of communityPosts(); track post.id) {
+          <article class="review-card">
+            <div class="review-header">
+              <div class="review-avatar cp-avatar">
+                <i class="fas fa-user" aria-hidden="true"></i>
+              </div>
+              <div class="review-meta">
+                <span class="review-name">{{ post.name }}</span>
+                <span class="review-time">{{ post.timeAgo }}</span>
+              </div>
+              @if (post.userId === currentUserId) {
+                <button
+                  type="button"
+                  class="cp-delete-btn"
+                  aria-label="Delete post"
+                  (click)="deletePost(post.id)">
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                </button>
+              }
+            </div>
+            <div class="review-stars">
+              @for (star of stars; track star) {
+                <i [class]="star <= post.rating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+              }
+            </div>
+            <p class="review-text">{{ post.text }}</p>
+          </article>
+        }
+      </div>
+    }
+
+    <!-- Write a review -->
+    <div class="write-review">
+      <h3 class="wr-title">Write a Review</h3>
+
+      <!-- Star picker -->
+      <div class="wr-stars" role="group" aria-label="Your rating">
+        @for (star of stars; track star) {
+          <button
+            type="button"
+            class="wr-star-btn"
+            [class.wr-star-btn--active]="star <= reviewDraft().rating"
+            [attr.aria-label]="'Rate ' + star + ' stars'"
+            (click)="setReviewRating(star)">
+            <i class="fas fa-star" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      <input
+        type="text"
+        class="wr-input"
+        placeholder="Review title"
+        [value]="reviewDraft().title"
+        (input)="setReviewTitle($any($event.target).value)" />
+
+      <textarea
+        class="wr-textarea"
+        placeholder="Share your experience…"
+        rows="3"
+        [value]="reviewDraft().description"
+        (input)="setReviewDesc($any($event.target).value)">
+      </textarea>
+
+      @if (reviewError()) {
+        <p class="wr-error">{{ reviewError() }}</p>
+      }
+
+      <button
+        type="button"
+        class="wr-submit-btn"
+        [disabled]="reviewSubmitting()"
+        (click)="submitReview()">
+        @if (reviewSubmitting()) {
+          <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Submitting…
+        } @else {
+          Submit Review
+        }
+      </button>
+
+      @if (reviewSuccess()) {
+        <p class="wr-success"><i class="fas fa-check-circle"></i> Review submitted!</p>
+      }
+    </div>
 
   </section>
 </div>

@@ -21,6 +21,7 @@ export class TripCardComponent {
 
   bookNow        = output<Trip>();
   toggleFavorite = output<number>();
+  viewTrip       = output<Trip>();
 
   // ticks every second — drives the countdown computed
   private readonly tick = toSignal(interval(1000), { initialValue: 0 });
@@ -49,5 +50,9 @@ export class TripCardComponent {
 
   onToggleFavorite(): void {
     this.toggleFavorite.emit(this.trip().id);
+  }
+
+  onViewTrip(): void {
+    this.viewTrip.emit(this.trip());
   }
 }

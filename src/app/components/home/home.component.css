@@ -1,1 +1,203 @@
 /* HomeComponent is a shell — all visual styles live in HeroBannerComponent */
+
+/* ── Smart Recommendations ─────────────────────────────────── */
+.smart-section {
+  padding: 2rem 1rem 1rem;
+  background: #f9fafb;
+}
+
+.smart-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.25rem;
+}
+
+.smart-sub {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0 0 1.25rem;
+}
+
+.smart-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-size: 0.88rem;
+}
+
+.smart-loading i {
+  margin-right: 0.5rem;
+  color: #3b5bdb;
+}
+
+.smart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* ── Smart card ─────────────────────────────────────────────── */
+.smart-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #e5e7eb;
+  padding: 1.1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.smart-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.sc-left {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.sc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  margin-bottom: 0.4rem;
+}
+
+.sc-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-location {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0 0 0.35rem;
+}
+
+.sc-location i { margin-right: 0.3rem; color: #3b5bdb; }
+
+.sc-activities {
+  font-size: 0.73rem;
+  color: #9ca3af;
+  margin: 0 0 0.35rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.sc-duration {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.sc-duration i { margin-right: 0.3rem; color: #3b5bdb; }
+
+/* Middle column */
+.sc-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  padding: 0 0.9rem;
+  min-width: 130px;
+}
+
+.sc-mini-section { display: flex; flex-direction: column; gap: 0.1rem; }
+
+.sc-mini-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0;
+}
+
+.sc-mini-label i { margin-right: 0.25rem; }
+
+.sc-mini-val {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-mini-price {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Right column */
+.sc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 90px;
+}
+
+.sc-price-from {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.sc-price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #3b5bdb;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.sc-price-unit {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  margin: 0 0 0.5rem;
+}
+
+.sc-book-btn {
+  background: #3b5bdb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.sc-book-btn:hover { opacity: 0.85; }
+
+.sc-badge-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #d97706;
+  margin-left: 0.3rem;
+}

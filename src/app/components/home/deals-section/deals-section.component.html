@@ -9,17 +9,26 @@
           class="deal-card"
           [style.--card-bg]="'url(' + deal.backgroundImage + ')'">
 
+          <!-- Stretch link — covers the whole card, z-index 1 -->
+          <button
+            class="deal-stretch-link"
+            type="button"
+            [attr.aria-label]="'View deal: ' + deal.title"
+            (click)="onView(deal)">
+          </button>
+
           <!-- Dark gradient overlay -->
           <div class="deal-overlay" aria-hidden="true"></div>
 
           <div class="deal-body">
             <h3 class="deal-title">{{ deal.title }}</h3>
             <p class="deal-desc">{{ deal.description }}</p>
+            <!-- z-index 2 — sits above the stretch link -->
             <button
               class="deal-btn"
               type="button"
               [attr.aria-label]="'Book deal: ' + deal.title"
-              (click)="onBookNow(deal)">
+              (click)="onView(deal)">
               {{ deal.ctaLabel }}
             </button>
           </div>

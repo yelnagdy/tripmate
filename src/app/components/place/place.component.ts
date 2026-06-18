@@ -1,8 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PlaceCardComponent } from './place-card/place-card.component';
 import { Place } from '../../models/place.models';
 import { DestinationService } from '../../core/services/destination.service';
-import { ApiDestination } from '../../models/api.models';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { CategoryService } from '../../core/services/category.service';
+import { ApiCategory, ApiDestination } from '../../models/api.models';
+import { safeUrl } from '../../core/utils/safe-url';
 
 interface PlaceFilter {
   categories: string[];
@@ -31,36 +35,67 @@ const FALLBACK_PLACES: Place[] = [
 })
 export class PlaceComponent implements OnInit {
 
-  private readonly destinationService = inject(DestinationService);
+  private readonly router              = inject(Router);
+  private readonly destinationService  = inject(DestinationService);
+  private readonly favoritesService    = inject(FavoritesService);
+  private readonly categoryService     = inject(CategoryService);
 
   /* ── State ──────────────────────────────────────────────────── */
-  readonly loading      = signal(true);
-  readonly searchQuery  = signal('');
-  readonly filterOpen   = signal(false);
-  readonly activeFilter = signal<PlaceFilter>({ categories: [], maxPrice: null, minRating: null });
-  readonly draftFilter  = signal<PlaceFilter>({ categories: [], maxPrice: null, minRating: null });
-  readonly places       = signal<Place[]>([]);
+  readonly loading            = signal(true);
+  readonly filterLoading      = signal(false);
+  readonly searchQuery        = signal('');
+  readonly filterOpen         = signal(false);
+  readonly activeFilter       = signal<PlaceFilter>({ categories: [], maxPrice: null, minRating: null });
+  readonly draftFilter        = signal<PlaceFilter>({ categories: [], maxPrice: null, minRating: null });
+  readonly places             = signal<Place[]>([]);
+  readonly serverFilterResult = signal<Place[] | null>(null);
+  readonly smartPlaces        = signal<Place[]>([]);
+  readonly apiCategories      = signal<ApiCategory[]>([]);
 
   readonly ratingOptions: number[] = [3, 4, 5];
 
   /* ── Load from API ──────────────────────────────────────────── */
   ngOnInit(): void {
+    const userId = this.getUserId();
+
     this.destinationService.getAll().subscribe(apiData => {
-      if (apiData.length > 0) {
-        this.places.set(apiData.map(d => this.mapToPlace(d)));
-      } else {
-        this.places.set(FALLBACK_PLACES);
-      }
+      const list = apiData.length > 0 ? apiData.map(d => this.mapToPlace(d)) : FALLBACK_PLACES;
+      this.places.set(list);
       this.loading.set(false);
+
+      // Hydrate isFavorite from API
+      const ids = list.map(p => p.id);
+      this.favoritesService.checkMany(ids, 'destination').subscribe(favMap => {
+        this.places.update(ps => ps.map(p => ({ ...p, isFavorite: favMap[p.id] ?? false })));
+      });
     });
+
+    if (userId) {
+      this.destinationService.getSmartRecommendations(userId, 5000).subscribe(apiData => {
+        this.smartPlaces.set(apiData.map(d => this.mapToPlace(d)));
+      });
+    }
+
+    this.categoryService.getAll().subscribe(cats => this.apiCategories.set(cats));
+  }
+
+  private getUserId(): number {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) return 0;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+      return parseInt(payload[claim] ?? '0', 10) || 0;
+    } catch { return 0; }
   }
 
   private mapToPlace(d: ApiDestination): Place {
+    const safeCity = (d.city && d.city !== 'null' && d.city !== 'undefined') ? d.city.trim() : '';
     return {
       id:           d.id,
       name:         d.name,
-      location:     `${d.country}, ${d.city}`,
-      image:        d.imageUrl || `assets/images/place-${d.city.toLowerCase()}.jpeg`,
+      location:     safeCity ? `${d.country}, ${safeCity}` : d.country,
+      image:        safeUrl(d.imageUrl, 'assets/images/place-manarola.jpeg'),
       imageCount:   5,
       hotelStars:   Math.min(5, Math.max(1, Math.round(d.rating))),
       amenities:    20,
@@ -80,9 +115,11 @@ export class PlaceComponent implements OnInit {
   }
 
   /* ── Computed ───────────────────────────────────────────────── */
-  readonly allCategories = computed(() =>
-    [...new Set(this.places().map(p => p.location.split(',')[0].trim()))]
-  );
+  readonly allCategories = computed(() => {
+    const api = this.apiCategories();
+    if (api.length) return api.map(c => c.name);
+    return [...new Set(this.places().map(p => p.location.split(',')[0].trim()))];
+  });
 
   readonly activeFilterCount = computed(() => {
     const f = this.activeFilter();
@@ -92,13 +129,16 @@ export class PlaceComponent implements OnInit {
   });
 
   readonly filteredPlaces = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
-    const f = this.activeFilter();
-    return this.places().filter(p => {
+    const q      = this.searchQuery().toLowerCase().trim();
+    const f      = this.activeFilter();
+    const base   = this.serverFilterResult() ?? this.places();
+
+    return base.filter(p => {
       const country     = p.location.split(',')[0].trim();
       const matchSearch = !q || p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q);
-      const matchCat    = f.categories.length === 0 || f.categories.includes(country);
-      const matchPrice  = f.maxPrice === null || p.pricePerNight <= f.maxPrice;
+      // Skip country/price filters client-side when server already filtered
+      const matchCat    = this.serverFilterResult() || f.categories.length === 0 || f.categories.includes(country);
+      const matchPrice  = this.serverFilterResult() || f.maxPrice === null || p.pricePerNight <= f.maxPrice;
       const matchRating = f.minRating === null || p.hotelStars >= f.minRating;
       return matchSearch && matchCat && matchPrice && matchRating;
     });
@@ -135,14 +175,36 @@ export class PlaceComponent implements OnInit {
   }
 
   applyFilter(): void {
-    this.activeFilter.set({ ...this.draftFilter(), categories: [...this.draftFilter().categories] });
+    const draft = this.draftFilter();
+    this.activeFilter.set({ ...draft, categories: [...draft.categories] });
     this.filterOpen.set(false);
+
+    const hasServerParams = draft.categories.length > 0 || draft.maxPrice !== null;
+    if (!hasServerParams) {
+      this.serverFilterResult.set(null);
+      return;
+    }
+
+    this.filterLoading.set(true);
+    this.destinationService.filter({
+      country:  draft.categories[0],           // API takes one country value
+      budget:   draft.maxPrice ?? undefined,
+    }).subscribe(apiData => {
+      if (apiData.length > 0) {
+        const mapped = apiData.map(d => this.mapToPlace(d));
+        this.serverFilterResult.set(mapped);
+      } else {
+        this.serverFilterResult.set(null);     // fall back to client-side
+      }
+      this.filterLoading.set(false);
+    });
   }
 
   clearFilter(): void {
     const empty: PlaceFilter = { categories: [], maxPrice: null, minRating: null };
     this.activeFilter.set(empty);
     this.draftFilter.set({ ...empty });
+    this.serverFilterResult.set(null);
     this.filterOpen.set(false);
   }
 
@@ -159,12 +221,30 @@ export class PlaceComponent implements OnInit {
   }
 
   onViewPlace(place: Place): void {
-    console.log('View place:', place.name);
+    this.router.navigate(['/main/destination-detail'], {
+      state: { destinationId: place.id, name: place.name, image: place.image, pricePerNight: place.pricePerNight, location: place.location }
+    });
   }
 
   onToggleFavorite(placeId: number): void {
+    const place = this.places().find(p => p.id === placeId);
+    if (!place) return;
+
+    const nowFavorite = !place.isFavorite;
     this.places.update(list =>
-      list.map(p => p.id === placeId ? { ...p, isFavorite: !p.isFavorite } : p)
+      list.map(p => p.id === placeId ? { ...p, isFavorite: nowFavorite } : p)
     );
+
+    const call = nowFavorite
+      ? this.favoritesService.add(placeId, 'destination')
+      : this.favoritesService.remove(placeId, 'destination');
+
+    call.subscribe(ok => {
+      if (!ok) {
+        this.places.update(list =>
+          list.map(p => p.id === placeId ? { ...p, isFavorite: !nowFavorite } : p)
+        );
+      }
+    });
   }
 }

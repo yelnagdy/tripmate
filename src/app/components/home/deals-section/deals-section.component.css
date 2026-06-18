@@ -46,7 +46,17 @@
   display: flex;
   align-items: flex-end;
   transition: transform 0.28s ease, box-shadow 0.28s ease;
-  cursor: default;
+  cursor: pointer;
+}
+
+/* Invisible full-card clickable button (stretch-link pattern) */
+.deal-stretch-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .deal-card:hover {
@@ -69,7 +79,7 @@
 /* ── Card text area ──────────────────────────────────────────── */
 .deal-body {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   padding: 1.5rem 1.75rem 1.6rem;
   display: flex;
   flex-direction: column;

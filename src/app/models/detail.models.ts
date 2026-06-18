@@ -4,6 +4,8 @@ export interface BookingData {
   to: string;
   flight: string;
   pricePerPerson: number;
+  destinationId?: number;
+  durationDays?: number;
 }
 
 export interface Amenity {

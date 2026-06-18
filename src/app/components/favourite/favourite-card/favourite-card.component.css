@@ -1,3 +1,37 @@
+.avg-rating {
+  font-size: 0.7rem;
+  color: #6b7280;
+  margin-left: 0.4rem;
+}
+
+.rating-success,
+.rating-error {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  margin: 0.25rem 0 0;
+  animation: fadeIn 0.2s ease;
+}
+
+.rating-success {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.rating-error {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 :host {
   --accent:     #3b5bdb;
   --star-clr:   #f59e0b;
@@ -10,12 +44,23 @@
 
 /* ── Card ──────────────────────────────────────────────────── */
 .fav-card {
+  position: relative;
   display: flex;
   background: #fff;
   border-radius: var(--card-radius);
   border: 1px solid #e5e7eb;
   overflow: hidden;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Invisible button that makes the whole card clickable */
+.fav-stretch-link {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .fav-card:hover {
@@ -183,6 +228,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  position: relative;
+  z-index: 2;
 }
 
 .remove-btn {

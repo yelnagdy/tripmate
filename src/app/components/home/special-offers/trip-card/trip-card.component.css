@@ -28,6 +28,7 @@
   flex-direction: column;
   height: 100%;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
 }
 
 .trip-card:hover {

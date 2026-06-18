@@ -1,12 +1,28 @@
 <article
   class="hotel-card"
   [style.--hotel-img]="'url(' + hotel().image + ')'"
-  (click)="book.emit(hotel())"
   [attr.aria-label]="hotel().name + ' — $' + hotel().pricePerNight + ' per night'">
+
+  <!-- Stretch-link: covers the whole card, opens detail page -->
+  <button
+    type="button"
+    class="hc-stretch-link"
+    [attr.aria-label]="'View details for ' + hotel().name"
+    (click)="viewPlace.emit(hotel())">
+  </button>
 
   <div class="hotel-overlay">
     <h3 class="hotel-name">{{ hotel().name }}</h3>
     <p class="hotel-price">${{ hotel().pricePerNight }}</p>
+    <div class="hotel-actions">
+      <button
+        type="button"
+        class="hc-book-btn"
+        [attr.aria-label]="'Book ' + hotel().name"
+        (click)="book.emit(hotel())">
+        Book Now
+      </button>
+    </div>
   </div>
 
 </article>

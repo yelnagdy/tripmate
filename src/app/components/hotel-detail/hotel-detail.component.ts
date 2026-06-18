@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Location } from '@angular/common';
 import { HotelDetailData, BookingData } from '../../models/detail.models';
 import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
+import { HotelNavState } from '../../core/services/navigation.service';
 
 @Component({
   selector: 'app-hotel-detail',
@@ -11,7 +13,9 @@ import { BookingDialogComponent } from '../booking-dialog/booking-dialog.compone
   templateUrl: './hotel-detail.component.html',
   styleUrl: './hotel-detail.component.css',
 })
-export class HotelDetailComponent {
+export class HotelDetailComponent implements OnInit {
+
+  private readonly location = inject(Location);
 
   readonly hotel = signal<HotelDetailData>({
     id: 1,
@@ -47,6 +51,21 @@ export class HotelDetailComponent {
       { id: 4, name: 'Snorkelling',     image: 'assets/images/discover-4.jpeg' },
     ],
   });
+
+  ngOnInit(): void {
+    const state = history.state as Partial<HotelNavState>;
+    if (state?.id) {
+      this.hotel.update(h => ({
+        ...h,
+        id:            state.id!,
+        name:          state.name  ?? h.name,
+        heroImage:     state.image ?? h.heroImage,
+        pricePerNight: state.pricePerNight ?? h.pricePerNight,
+      }));
+    }
+  }
+
+  goBack(): void { this.location.back(); }
 
   readonly dialogOpen   = signal(false);
   readonly bookingData  = signal<BookingData>({

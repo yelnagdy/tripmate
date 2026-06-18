@@ -1,0 +1,23 @@
+<div
+  class="star-rating"
+  [class.star-rating--interactive]="interactive()"
+  (mouseleave)="onMouseLeave()">
+
+  @for (star of stars(); track star) {
+    <button
+      type="button"
+      class="star"
+      [class.star--filled]="isFilled(star)"
+      [class.star--hover]="star <= hoverRating()"
+      [attr.aria-label]="'Rate ' + star + ' out of ' + maxStars() + ' stars'"
+      [disabled]="!interactive() || undefined"
+      (click)="onStarClick(star)"
+      (mouseenter)="onStarHover(star)">
+      <i class="fas fa-star" aria-hidden="true"></i>
+    </button>
+  }
+
+  @if (rating() > 0) {
+    <span class="star-rating__text">{{ rating() }}/{{ maxStars() }}</span>
+  }
+</div>

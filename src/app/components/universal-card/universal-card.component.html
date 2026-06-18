@@ -1,0 +1,40 @@
+<article class="uc-card">
+
+  @if (item().image) {
+    <div class="uc-img-wrap">
+      <img [src]="item().image" [alt]="item().name" class="uc-img" loading="lazy" />
+    </div>
+  }
+
+  <div class="uc-body">
+    <span class="uc-badge">{{ item().type }}</span>
+    <h3 class="uc-title">{{ item().name }}</h3>
+
+    @if (item().location) {
+      <p class="uc-location">
+        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        {{ item().location }}
+      </p>
+    }
+
+    @if (item().rating) {
+      <div class="uc-rating" [attr.aria-label]="item().rating + ' out of 5'">
+        <i class="fas fa-star" aria-hidden="true"></i>
+        {{ item().rating }}/5
+      </div>
+    }
+
+    @if (item().description) {
+      <p class="uc-desc">{{ item().description | slice:0:90 }}…</p>
+    }
+
+    @if (item().price) {
+      <p class="uc-price">${{ item().price }}<span class="uc-unit">/night</span></p>
+    }
+
+    <button type="button" class="uc-btn" (click)="onView()">
+      {{ buttonLabel() }}
+    </button>
+  </div>
+
+</article>

@@ -15,6 +15,7 @@ export class SpecialOffersComponent {
 
   bookNow        = output<Trip>();
   toggleFavorite = output<number>();
+  viewTrip       = output<Trip>();
 
   onBookNow(trip: Trip): void {
     this.bookNow.emit(trip);
@@ -22,5 +23,9 @@ export class SpecialOffersComponent {
 
   onToggleFavorite(tripId: number): void {
     this.toggleFavorite.emit(tripId);
+  }
+
+  onViewTrip(trip: Trip): void {
+    this.viewTrip.emit(trip);
   }
 }

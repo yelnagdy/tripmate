@@ -1,5 +1,13 @@
 <article class="pkg-card" [attr.aria-label]="pkg().title">
 
+  <!-- Stretch-link: makes the whole card navigate to detail -->
+  <button
+    type="button"
+    class="pkg-stretch-link"
+    [attr.aria-label]="'View details for ' + pkg().title"
+    (click)="viewMore.emit(pkg())">
+  </button>
+
   <!-- Image column -->
   <div class="pkg-img-col">
     <img
@@ -15,7 +23,7 @@
       type="button"
       class="fav-btn"
       [class.fav-btn--active]="pkg().isFavorite"
-      (click)="toggleFavorite.emit(pkg().id)"
+      (click)="$event.stopPropagation(); toggleFavorite.emit(pkg().id)"
       [attr.aria-label]="(pkg().isFavorite ? 'Remove from' : 'Add to') + ' favourites'">
       <i [class]="pkg().isFavorite ? 'fas fa-heart' : 'far fa-heart'" aria-hidden="true"></i>
     </button>
@@ -30,16 +38,32 @@
       <div class="pkg-details">
         <h3 class="pkg-title">{{ pkg().title }}</h3>
 
-        <!-- Star rating -->
-        <div class="pkg-stars" [attr.aria-label]="pkg().rating + ' out of 5 stars'">
-          @for (star of stars; track star) {
-            <i
-              [class]="star <= pkg().rating ? 'fas fa-star' : 'far fa-star'"
-              aria-hidden="true">
-            </i>
+        <!-- Star rating (interactive, live from API) -->
+        <div class="pkg-stars">
+          <app-star-rating
+            [rating]="displayRating()"
+            [interactive]="true"
+            (ratingChange)="onRatingChange($event)">
+          </app-star-rating>
+          @if (averageRating() > 0) {
+            <span class="avg-rating">{{ averageRating() }}/5</span>
           }
-          <span class="review-count">({{ pkg().reviewCount }})</span>
+          @if (ratingCount() > 0) {
+            <span class="review-count">{{ ratingCount() }} {{ ratingCount() === 1 ? 'review' : 'reviews' }}</span>
+          } @else if (pkg().reviewCount > 0) {
+            <span class="review-count">{{ pkg().reviewCount }} reviews</span>
+          }
         </div>
+        @if (ratingSuccess()) {
+          <p class="rating-feedback rating-feedback--ok">
+            <i class="fas fa-check-circle" aria-hidden="true"></i> Rating saved!
+          </p>
+        }
+        @if (ratingError()) {
+          <p class="rating-feedback rating-feedback--err">
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i> Could not save rating.
+          </p>
+        }
 
         <!-- Info rows -->
         <ul class="info-list" aria-label="Package details">

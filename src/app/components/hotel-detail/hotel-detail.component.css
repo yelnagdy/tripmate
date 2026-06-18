@@ -1,3 +1,19 @@
+.hd-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: #3b5bdb;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0;
+  margin-bottom: 0.75rem;
+  transition: opacity 0.15s;
+}
+.hd-back-btn:hover { opacity: 0.75; }
+
 :host {
   --accent:     #3b5bdb;
   --title-clr:  #1a1a2e;

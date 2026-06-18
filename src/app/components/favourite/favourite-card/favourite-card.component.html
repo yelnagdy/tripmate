@@ -1,5 +1,13 @@
 <article class="fav-card" [attr.aria-label]="item().name">
 
+  <!-- Stretch-link: makes the whole card navigate to detail -->
+  <button
+    type="button"
+    class="fav-stretch-link"
+    [attr.aria-label]="'View details for ' + item().name"
+    (click)="viewPlace.emit(item())">
+  </button>
+
   <!-- Photo -->
   <div class="fav-img-col">
     <img
@@ -26,15 +34,29 @@
           {{ item().location }}
         </p>
 
-        <div class="fav-stars" [attr.aria-label]="item().hotelStars + ' star hotel'">
-          @for (star of stars; track star) {
-            <i
-              [class]="star <= item().hotelStars ? 'fas fa-star' : 'far fa-star'"
-              aria-hidden="true">
-            </i>
+        <div class="fav-stars">
+          <app-star-rating
+            [rating]="userRating() || averageRating() || item().hotelStars"
+            [interactive]="true"
+            (ratingChange)="onRatingChange($event)">
+          </app-star-rating>
+          @if (averageRating() > 0) {
+            <span class="avg-rating">{{ averageRating() }}/5 avg</span>
           }
-          <span class="hotel-label">{{ item().hotelStars }} Star Hotel</span>
         </div>
+
+        @if (ratingSuccess()) {
+          <p class="rating-success">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            Rating saved!
+          </p>
+        }
+        @if (ratingError()) {
+          <p class="rating-error">
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+            Could not save rating.
+          </p>
+        }
 
         <p class="fav-amenities">
           <i class="fas fa-shield-alt" aria-hidden="true"></i>
@@ -42,9 +64,17 @@
         </p>
 
         <p class="fav-review">
-          <span class="review-score">{{ item().reviewScore }}</span>
+          @if (averageRating() > 0) {
+            <span class="review-score">{{ averageRating() }}</span>
+          } @else {
+            <span class="review-score">{{ item().reviewScore }}</span>
+          }
           <span class="review-label">{{ item().reviewLabel }}</span>
-          <span class="review-count">{{ item().reviewCount }} reviews</span>
+          @if (ratingCount() > 0) {
+            <span class="review-count">{{ ratingCount() }} {{ ratingCount() === 1 ? 'review' : 'reviews' }}</span>
+          } @else {
+            <span class="review-count">No reviews yet</span>
+          }
         </p>
       </div>
 

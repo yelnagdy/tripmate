@@ -1,4 +1,5 @@
-﻿import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { HeroBannerComponent }    from './hero-banner/hero-banner.component';
 import { DealsSectionComponent }  from './deals-section/deals-section.component';
 import { TripsSearchBarComponent } from './trips-search-bar/trips-search-bar.component';
@@ -11,6 +12,9 @@ import { NewsletterComponent }    from './newsletter/newsletter.component';
 import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 import { Language, TripFilter, PromoDeal, Trip, AppFeature, HowItWorksStep, Testimonial, Article } from '../../models/home.models';
 import { BookingData } from '../../models/detail.models';
+import { HomeApiService } from '../../core/services/home-api.service';
+import { ApiDestination } from '../../models/api.models';
+import { safeUrl } from '../../core/utils/safe-url';
 
 @Component({
   selector: 'app-home',
@@ -31,7 +35,36 @@ import { BookingData } from '../../models/detail.models';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+
+  private readonly router         = inject(Router);
+  private readonly homeApiService = inject(HomeApiService);
+
+  /* ── Home API data ───────────────────────────────────────── */
+  readonly homeLoading   = signal(true);
+  readonly recommended   = signal<ApiDestination[]>([]);
+  readonly popular       = signal<ApiDestination[]>([]);
+
+  ngOnInit(): void {
+    this.homeApiService.getData(2000, 'cairo').subscribe(data => {
+      this.recommended.set(data.recommended);
+      this.popular.set(data.popular);
+      this.homeLoading.set(false);
+    });
+  }
+
+  onViewDestination(dest: ApiDestination): void {
+    const safeCity = (dest.city && dest.city !== 'null' && dest.city !== 'undefined') ? dest.city.trim() : '';
+    this.router.navigate(['/main/destination-detail'], {
+      state: {
+        destinationId: dest.id,
+        name:          dest.name,
+        image:         safeUrl(dest.imageUrl, ''),
+        pricePerNight: dest.price,
+        location:      safeCity ? `${safeCity}, ${dest.country}` : dest.country,
+      },
+    });
+  }
 
   /* ── Language ───────────────────────────────────────────── */
   readonly languages = signal<Language[]>([
@@ -74,15 +107,18 @@ export class HomeComponent {
 
   closeDialog(): void { this.dialogOpen.set(false); }
 
-  onBookDeal(deal: PromoDeal): void {
-    this.activeBooking.set({
-      date:           'Today',
-      from:           'Your Location',
-      to:             deal.title,
-      flight:         'Deal Package',
-      pricePerPerson: 299,
+  onViewDeal(deal: PromoDeal): void {
+    this.router.navigate(['/main/item/destination', deal.id], {
+      state: {
+        item: {
+          id:          deal.id,
+          name:        deal.title,
+          type:        'destination',
+          description: deal.description,
+          image:       deal.backgroundImage,
+        },
+      },
     });
-    this.dialogOpen.set(true);
   }
 
   /* ── Trips ──────────────────────────────────────────────── */
@@ -141,15 +177,23 @@ export class HomeComponent {
   onSearch(q: string): void { this.searchQuery.set(q); }
   onFilterChange(f: TripFilter): void { this.activeFilter.set(f); }
 
-  onBookTrip(trip: Trip): void {
-    this.activeBooking.set({
-      date:           'Today',
-      from:           'Your Location',
-      to:             trip.location,
-      flight:         trip.title,
-      pricePerPerson: trip.price,
+  onViewTrip(trip: Trip): void {
+    this.router.navigate(['/main/item/package', trip.id], {
+      state: {
+        item: {
+          id:       trip.id,
+          name:     trip.title,
+          type:     'package',
+          location: trip.location,
+          price:    trip.price,
+          image:    trip.image,
+        },
+      },
     });
-    this.dialogOpen.set(true);
+  }
+
+  onBookTrip(trip: Trip): void {
+    this.onViewTrip(trip);
   }
 
   onToggleFavorite(tripId: number): void {
@@ -281,6 +325,15 @@ export class HomeComponent {
       author: { name: 'Emma Grey', avatar: 'assets/images/author-3.jpeg' },
     },
   ]);
+
+  ratingLabel(r: number): string {
+    if (r >= 4.5) return 'Excellent';
+    if (r >= 4.0) return 'Very Good';
+    if (r >= 3.0) return 'Good';
+    if (r >= 2.0) return 'Average';
+    if (r >  0)   return 'Poor';
+    return '';
+  }
 
   onViewMoreArticles(): void {
     // TODO: navigate to /blog

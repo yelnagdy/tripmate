@@ -16,9 +16,10 @@ import { PromoDeal } from '../../../models/home.models';
 export class DealsSectionComponent {
   deals = input.required<PromoDeal[]>();
 
-  bookNow = output<PromoDeal>();
+  bookNow  = output<PromoDeal>();
+  viewDeal = output<PromoDeal>();
 
-  onBookNow(deal: PromoDeal): void {
-    this.bookNow.emit(deal);
+  onView(deal: PromoDeal): void {
+    this.viewDeal.emit(deal);
   }
 }

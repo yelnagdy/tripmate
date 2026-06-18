@@ -2,7 +2,7 @@
 
 <app-deals-section
   [deals]="deals()"
-  (bookNow)="onBookDeal($event)">
+  (viewDeal)="onViewDeal($event)">
 </app-deals-section>
 
 <div class="container-fluid px-4 px-md-5 pt-3">
@@ -15,8 +15,95 @@
 <app-special-offers
   [trips]="filteredTrips()"
   (bookNow)="onBookTrip($event)"
-  (toggleFavorite)="onToggleFavorite($event)">
+  (toggleFavorite)="onToggleFavorite($event)"
+  (viewTrip)="onViewTrip($event)">
 </app-special-offers>
+
+<!-- ── Recommended for You ────────────────────────────────── -->
+@if (homeLoading()) {
+  <div class="smart-loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    Finding the best trips for you…
+  </div>
+} @else {
+
+  @if (recommended().length) {
+    <section class="smart-section">
+      <h2 class="smart-title">Recommended for You</h2>
+      <p class="smart-sub">Personalised picks based on your budget from Cairo</p>
+      <div class="smart-list">
+        @for (dest of recommended(); track dest.id) {
+          <div class="smart-card" (click)="onViewDestination(dest)">
+            <div class="sc-left">
+              @if (dest.rating) {
+                <div class="sc-badge">
+                  <i class="fas fa-star"></i> {{ dest.rating }}
+                  @if (ratingLabel(dest.rating)) {
+                    <span class="sc-badge-label">{{ ratingLabel(dest.rating) }}</span>
+                  }
+                </div>
+              }
+              <h3 class="sc-name">{{ dest.name }}</h3>
+              <p class="sc-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ (dest.city && dest.city !== 'null') ? dest.city + ', ' : '' }}{{ dest.country }}
+              </p>
+              @if (dest.activities && dest.activities !== 'string' && dest.activities !== 'null') {
+                <p class="sc-activities">{{ dest.activities }}</p>
+              }
+              <p class="sc-duration"><i class="fas fa-calendar-alt"></i> {{ dest.durationDays }} days</p>
+            </div>
+            <div class="sc-right">
+              <p class="sc-price-from">from</p>
+              <p class="sc-price">${{ dest.price }}</p>
+              <p class="sc-price-unit">per person</p>
+              <button type="button" class="sc-book-btn" (click)="$event.stopPropagation(); onViewDestination(dest)">Book Now</button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (popular().length) {
+    <section class="smart-section">
+      <h2 class="smart-title">Popular Destinations</h2>
+      <p class="smart-sub">Top-rated trips loved by travellers</p>
+      <div class="smart-list">
+        @for (dest of popular(); track dest.id) {
+          <div class="smart-card" (click)="onViewDestination(dest)">
+            <div class="sc-left">
+              @if (dest.rating) {
+                <div class="sc-badge">
+                  <i class="fas fa-star"></i> {{ dest.rating }}
+                  @if (ratingLabel(dest.rating)) {
+                    <span class="sc-badge-label">{{ ratingLabel(dest.rating) }}</span>
+                  }
+                </div>
+              }
+              <h3 class="sc-name">{{ dest.name }}</h3>
+              <p class="sc-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ (dest.city && dest.city !== 'null') ? dest.city + ', ' : '' }}{{ dest.country }}
+              </p>
+              @if (dest.activities && dest.activities !== 'string' && dest.activities !== 'null') {
+                <p class="sc-activities">{{ dest.activities }}</p>
+              }
+              <p class="sc-duration"><i class="fas fa-calendar-alt"></i> {{ dest.durationDays }} days</p>
+            </div>
+            <div class="sc-right">
+              <p class="sc-price-from">from</p>
+              <p class="sc-price">${{ dest.price }}</p>
+              <p class="sc-price-unit">per person</p>
+              <button type="button" class="sc-book-btn" (click)="$event.stopPropagation(); onViewDestination(dest)">Book Now</button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+}
 
 <app-why-choose-us
   [features]="features()">

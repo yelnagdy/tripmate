@@ -1,0 +1,114 @@
+@if (loading()) {
+  <div class="ud-loading" role="status" aria-live="polite">
+    <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+    <span>Loading…</span>
+  </div>
+} @else if (!item()) {
+  <div class="ud-empty">
+    <i class="fas fa-compass" aria-hidden="true"></i>
+    <p>No details available.</p>
+    <button type="button" class="ud-back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+    </button>
+  </div>
+} @else {
+  @if (item(); as it) {
+
+  <div class="ud-page">
+
+    <button type="button" class="ud-back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
+    </button>
+
+    <!-- Header -->
+    <div class="ud-header">
+      <span class="ud-type-badge">{{ it.type | uppercase }}</span>
+      <h1 class="ud-title">{{ it.name }}</h1>
+      @if (it.location) {
+        <p class="ud-location">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          {{ it.location }}
+        </p>
+      }
+    </div>
+
+    <!-- Hero image -->
+    @if (it.image) {
+      <div class="ud-hero-wrap">
+        <img [src]="it.image" [alt]="it.name" class="ud-hero" loading="eager" />
+      </div>
+    }
+
+    <!-- Body + sidebar -->
+    <div class="ud-layout">
+
+      <!-- Main content -->
+      <div class="ud-main">
+
+        <!-- Rating -->
+        @if (it.rating) {
+          <div class="ud-rating" [attr.aria-label]="it.rating + ' out of 5'">
+            @for (s of stars; track s) {
+              <i [class]="s <= it.rating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+            }
+            <span class="ud-rating-num">{{ it.rating }}/5</span>
+          </div>
+        }
+
+        <!-- Description -->
+        @if (it.description) {
+          <section class="ud-section">
+            <h2 class="ud-section-title">About</h2>
+            <p class="ud-body-text">{{ it.description }}</p>
+          </section>
+        }
+
+        <!-- Extra properties (duration, from/to, rooms, etc.) -->
+        @if (extraProps().length) {
+          <section class="ud-section">
+            <h2 class="ud-section-title">Details</h2>
+            <dl class="ud-props">
+              @for (prop of extraProps(); track prop.label) {
+                <div class="ud-prop-row">
+                  <dt class="ud-prop-label">{{ prop.label }}</dt>
+                  <dd class="ud-prop-value">{{ prop.value }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+        }
+
+      </div>
+
+      <!-- Booking sidebar -->
+      <aside class="ud-sidebar">
+        @if (it.price) {
+          <div class="ud-price-box">
+            <span class="ud-price-label">Starting from</span>
+            <p class="ud-price">${{ it.price }}<span class="ud-per">/night</span></p>
+            <span class="ud-tax">excl. tax</span>
+          </div>
+        }
+        <button type="button" class="ud-book-btn" (click)="openBooking()">
+          Book Now
+        </button>
+        <ul class="ud-perks">
+          <li><i class="fas fa-check-circle" aria-hidden="true"></i> Free cancellation</li>
+          <li><i class="fas fa-check-circle" aria-hidden="true"></i> Best price guarantee</li>
+          <li><i class="fas fa-check-circle" aria-hidden="true"></i> Instant confirmation</li>
+        </ul>
+      </aside>
+
+    </div>
+
+  </div>
+
+  }
+}
+
+@if (dialogOpen() && booking()) {
+  <app-booking-dialog
+    [data]="booking()!"
+    (closeDialog)="closeDialog()">
+  </app-booking-dialog>
+}

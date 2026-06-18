@@ -1,3 +1,25 @@
+<!-- Active booking banner -->
+@if (bookingDetails()) {
+  <div class="booking-banner">
+    <div class="bb-icon"><i class="fas fa-suitcase-rolling"></i></div>
+    <div class="bb-body">
+      <p class="bb-title">{{ bookingDetails()!.packageTitle ?? bookingDetails()!.destination ?? 'Your Booking' }}</p>
+      @if (bookingDetails()!.startDate) {
+        <p class="bb-dates">
+          <i class="fas fa-calendar-alt"></i>
+          {{ bookingDetails()!.startDate }} → {{ bookingDetails()!.endDate }}
+        </p>
+      }
+      @if (bookingDetails()!.totalPrice) {
+        <p class="bb-price">${{ bookingDetails()!.totalPrice }} total</p>
+      }
+    </div>
+    @if (bookingDetails()!.status) {
+      <span class="bb-status">{{ bookingDetails()!.status }}</span>
+    }
+  </div>
+}
+
 <!-- Tab bar -->
 <nav class="tab-bar" role="tablist" aria-label="Trip categories">
 
@@ -63,7 +85,8 @@
       @for (flight of flights(); track flight.id) {
         <app-flight-card
           [flight]="flight"
-          (book)="onBookFlight($event)">
+          (book)="onViewFlight($event)"
+          (viewPlace)="onViewFlight($event)">
         </app-flight-card>
       }
     } @else {
@@ -80,7 +103,8 @@
       @for (hotel of hotels(); track hotel.id) {
         <app-hotel-card
           [hotel]="hotel"
-          (book)="onBookHotel($event)">
+          (book)="onViewHotel($event)"
+          (viewPlace)="onViewHotel($event)">
         </app-hotel-card>
       }
     } @else {

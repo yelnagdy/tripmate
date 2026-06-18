@@ -12,6 +12,7 @@ import { MyProfileComponent }    from './components/my-profile/my-profile.compon
 import { FlightDetailComponent }      from './components/flight-detail/flight-detail.component';
 import { HotelDetailComponent }       from './components/hotel-detail/hotel-detail.component';
 import { DestinationDetailComponent } from './components/destination-detail/destination-detail.component';
+import { UniversalDetailComponent }   from './components/universal-detail/universal-detail.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -32,7 +33,8 @@ export const routes: Routes = [
         {path : 'my-profile',component:MyProfileComponent, title : 'My Profile'},
         {path : 'flight-detail/:id', component:FlightDetailComponent,     title : 'Flight Detail'},
         {path : 'hotel-detail',      component:HotelDetailComponent,      title : 'Hotel Detail'},
-        {path : 'destination-detail',component:DestinationDetailComponent, title : 'Destination Detail'}
+        {path : 'destination-detail',component:DestinationDetailComponent, title : 'Destination Detail'},
+        {path : 'item/:type/:id',    component:UniversalDetailComponent,   title : 'Details'}
     ]}
 
 ];

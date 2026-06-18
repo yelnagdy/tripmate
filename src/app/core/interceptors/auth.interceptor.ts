@@ -4,6 +4,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
+// Prevents multiple parallel 401 responses from triggering multiple redirects.
+let isRedirectingToLogin = false;
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
@@ -13,7 +16,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const token = sessionStorage.getItem('token');
-  console.log(`[Interceptor] ${req.method} ${req.url} — token: ${token ? '✔ attached' : '✘ none'}`);
 
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -21,11 +23,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401) {
-        console.warn('[Interceptor] 401 received — clearing token and redirecting to login');
+      if (err.status === 401 && !isRedirectingToLogin) {
+        isRedirectingToLogin = true;
         sessionStorage.removeItem('token');
-        router.createUrlTree(['/auth/login']);
-        router.navigate(['/auth/login']);
+        router.navigate(['/auth/login']).then(() => {
+          isRedirectingToLogin = false;
+        });
       }
       return throwError(() => err);
     })

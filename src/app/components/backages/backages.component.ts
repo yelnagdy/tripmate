@@ -2,7 +2,10 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } 
 import { PackageCardComponent } from './package-card/package-card.component';
 import { Package } from '../../models/packages.models';
 import { PackageService } from '../../core/services/package.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { NavigationService } from '../../core/services/navigation.service';
 import { ApiPackage } from '../../models/api.models';
+import { safeUrl } from '../../core/utils/safe-url';
 
 interface PackageFilter {
   categories: string[];
@@ -140,9 +143,12 @@ const FALLBACK_PACKAGES: Package[] = [
 })
 export class BackagesComponent implements OnInit {
 
-  private readonly packageService = inject(PackageService);
+  private readonly packageService   = inject(PackageService);
+  private readonly favoritesService = inject(FavoritesService);
+  private readonly navService       = inject(NavigationService);
 
   readonly loading      = signal(true);
+  readonly error        = signal<string | null>(null);
   readonly searchQuery  = signal('');
   readonly filterOpen   = signal(false);
   readonly activeFilter = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
@@ -153,13 +159,21 @@ export class BackagesComponent implements OnInit {
 
   ngOnInit(): void {
     this.packageService.getAll().subscribe(apiData => {
-      if (apiData.length > 0) {
-        this.packages.set(apiData.map(p => this.mapToPackage(p)));
-      } else {
-        this.packages.set(FALLBACK_PACKAGES);
-      }
+      const validApi = apiData.filter(p => this.isValidPackage(p));
+      const list = validApi.length > 0 ? validApi.map(p => this.mapToPackage(p)) : FALLBACK_PACKAGES;
+      this.packages.set(list);
       this.loading.set(false);
+
+      const ids = list.map(p => p.id);
+      this.favoritesService.checkMany(ids, 'packge').subscribe(favMap => {
+        this.packages.update(ps => ps.map(p => ({ ...p, isFavorite: favMap[p.id] ?? false })));
+      });
     });
+  }
+
+  private isValidPackage(p: ApiPackage): boolean {
+    const badValues = new Set(['string', 'null', 'undefined', '']);
+    return !badValues.has((p.title ?? '').toLowerCase().trim()) && p.price > 0;
   }
 
   private mapToPackage(p: ApiPackage): Package {
@@ -167,12 +181,12 @@ export class BackagesComponent implements OnInit {
       id:          p.id,
       title:       p.title,
       category:    'Travel',
-      image:       p.imageUrl || 'assets/images/pkg-paris.jpeg',
+      image:       safeUrl(p.imageUrl, 'assets/images/pkg-paris.jpeg'),
       rating:      4,
       reviewCount: 0,
       hotelStars:  3,
       days:        p.durationDays,
-      groupSize:   `Up to ${p.maxGuests}`,
+      groupSize:   p.maxGuests != null ? `Up to ${p.maxGuests} guests` : 'Group Tour',
       tags:        ['Easy Travel'],
       price:       p.price,
       isFavorite:  false,
@@ -258,12 +272,34 @@ export class BackagesComponent implements OnInit {
   }
 
   onViewMore(pkg: Package): void {
-    console.log('View package:', pkg.title);
+    this.navService.goToDestination({
+      destinationId: pkg.id,
+      name:          pkg.title,
+      image:         pkg.image,
+      pricePerNight: pkg.price,
+      location:      pkg.category,
+    });
   }
 
   onToggleFavorite(pkgId: number): void {
+    const pkg = this.packages().find(p => p.id === pkgId);
+    if (!pkg) return;
+
+    const nowFavorite = !pkg.isFavorite;
     this.packages.update(list =>
-      list.map(p => p.id === pkgId ? { ...p, isFavorite: !p.isFavorite } : p)
+      list.map(p => p.id === pkgId ? { ...p, isFavorite: nowFavorite } : p)
     );
+
+    const call = nowFavorite
+      ? this.favoritesService.add(pkgId, 'packge')
+      : this.favoritesService.remove(pkgId, 'packge');
+
+    call.subscribe(ok => {
+      if (!ok) {
+        this.packages.update(list =>
+          list.map(p => p.id === pkgId ? { ...p, isFavorite: !nowFavorite } : p)
+        );
+      }
+    });
   }
 }

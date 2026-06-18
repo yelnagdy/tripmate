@@ -25,11 +25,45 @@
   background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 55%);
 }
 
+/* Invisible button that makes the whole card clickable */
+.hc-stretch-link {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
+}
+
 .hotel-overlay {
   position: absolute;
   bottom: 1rem;
   left: 1.1rem;
+  right: 1.1rem;
+  z-index: 2;  /* sits above stretch-link */
 }
+
+.hotel-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.hc-book-btn {
+  padding: 0.3rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #3b5bdb;
+  color: #fff;
+  transition: opacity 0.15s;
+  position: relative;  /* stays above stretch-link */
+  z-index: 3;
+}
+
+.hc-book-btn:hover { opacity: 0.85; }
 
 .hotel-name {
   font-size: 1rem;

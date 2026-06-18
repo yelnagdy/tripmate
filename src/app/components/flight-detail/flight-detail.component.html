@@ -1,11 +1,17 @@
 <div class="fd-page">
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-    <a routerLink="/main/home" class="bc-link">Home</a>
-    <i class="fas fa-chevron-right bc-sep" aria-hidden="true"></i>
-    <span class="bc-current">Flight Details</span>
-  </nav>
+  <!-- Back + Breadcrumb -->
+  <div class="fd-nav-row">
+    <button type="button" class="fd-back-btn" (click)="goBack()" aria-label="Go back">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i>
+    </button>
+
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <a routerLink="/main/home" class="bc-link">Home</a>
+      <i class="fas fa-chevron-right bc-sep" aria-hidden="true"></i>
+      <span class="bc-current">Flight Details</span>
+    </nav>
+  </div>
 
   <div class="route-crumb" aria-label="Route">
     <span class="route-city">{{ fromCity() }}</span>
@@ -72,12 +78,20 @@
 
   <!-- Flight options -->
   <div class="flights-list" aria-label="Available flights">
-    @for (flight of allFlights(); track flight.id) {
-      <app-flight-card
-        [flight]="flight"
-        [isSelected]="isFlightSelected(flight)"
-        (book)="onBookFlight($event)">
-      </app-flight-card>
+    @if (loading()) {
+      <div class="fd-loading" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Loading flights…
+      </div>
+    } @else {
+      @for (flight of allFlights(); track flight.id) {
+        <app-flight-card
+          [flight]="flight"
+          [isSelected]="isFlightSelected(flight)"
+          (viewPlace)="selectFlight($event)"
+          (book)="onBookFlight($event)">
+        </app-flight-card>
+      }
     }
   </div>
 

@@ -9,6 +9,7 @@ import { Hotel } from '../../../models/my-trip.models';
   styleUrl: './hotel-card.component.css',
 })
 export class HotelCardComponent {
-  hotel = input.required<Hotel>();
-  book  = output<Hotel>();
+  hotel      = input.required<Hotel>();
+  book       = output<Hotel>();
+  viewPlace  = output<Hotel>();
 }

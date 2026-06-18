@@ -3,8 +3,12 @@ import {
   signal, computed, input, output, inject,
 } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BookingData } from '../../models/detail.models';
+import { BookingService } from '../../core/services/booking.service';
+
+type EditableField = 'date' | 'from' | 'to' | 'flight';
 
 type Step = 1 | 2 | 3;
 
@@ -12,7 +16,7 @@ type Step = 1 | 2 | 3;
   selector: 'app-booking-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormsModule],
   templateUrl: './booking-dialog.component.html',
   styleUrl: './booking-dialog.component.css',
 })
@@ -21,10 +25,40 @@ export class BookingDialogComponent {
   readonly data        = input.required<BookingData>();
   readonly closeDialog = output<void>();
 
-  private readonly router = inject(Router);
+  private readonly router          = inject(Router);
+  private readonly bookingService  = inject(BookingService);
 
   /* ── Step state ─────────────────────────────────────────────── */
   readonly currentStep = signal<Step>(1);
+  readonly paying      = signal(false);
+
+  /* ── Inline field editing ───────────────────────────────────── */
+  // Local overrides applied on top of the immutable input()
+  readonly overrides    = signal<Partial<BookingData>>({});
+  readonly editingField = signal<EditableField | null>(null);
+  readonly editDraft    = signal('');
+
+  // Merged view: input data + any saved overrides
+  readonly display = computed(() => ({ ...this.data(), ...this.overrides() }));
+
+  startEdit(field: EditableField): void {
+    this.editDraft.set(this.display()[field] as string);
+    this.editingField.set(field);
+  }
+
+  saveEdit(): void {
+    const field = this.editingField();
+    if (!field) return;
+    const value = this.editDraft().trim();
+    if (value) {
+      this.overrides.update(o => ({ ...o, [field]: value }));
+    }
+    this.editingField.set(null);
+  }
+
+  cancelEdit(): void {
+    this.editingField.set(null);
+  }
 
   /* ── Guests counter ─────────────────────────────────────────── */
   readonly guests = signal(2);
@@ -67,11 +101,18 @@ export class BookingDialogComponent {
   }
 
   onPay(): void {
-    if (this.paymentForm.valid) {
-      this.currentStep.set(3);
-    } else {
+    if (!this.paymentForm.valid) {
       this.paymentForm.markAllAsTouched();
+      return;
     }
+
+    const d = this.display();
+    this.paying.set(true);
+
+    this.bookingService.create(d.destinationId ?? 1, this.guests()).subscribe(() => {
+      this.paying.set(false);
+      this.currentStep.set(3);
+    });
   }
 
   backToHome(): void {

@@ -18,36 +18,84 @@
       <div class="info-card">
         <p class="card-section">Your Flight</p>
 
-        <div class="info-row">
+        <!-- Date -->
+        <div class="info-row" [class.info-row--editing]="editingField() === 'date'">
           <div class="info-cell">
             <span class="info-label">Date :</span>
-            <span class="info-value">{{ data().date }}</span>
+            @if (editingField() === 'date') {
+              <input class="edit-input" type="text" [ngModel]="editDraft()" (ngModelChange)="editDraft.set($event)" (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" autofocus />
+            } @else {
+              <span class="info-value">{{ display().date }}</span>
+            }
           </div>
-          <button type="button" class="edit-link">Edit</button>
+          @if (editingField() === 'date') {
+            <div class="edit-actions">
+              <button type="button" class="edit-save" (click)="saveEdit()">Save</button>
+              <button type="button" class="edit-cancel" (click)="cancelEdit()">✕</button>
+            </div>
+          } @else {
+            <button type="button" class="edit-link" (click)="startEdit('date')">Edit</button>
+          }
         </div>
 
-        <div class="info-row">
+        <!-- From -->
+        <div class="info-row" [class.info-row--editing]="editingField() === 'from'">
           <div class="info-cell">
             <span class="info-label">From :</span>
-            <span class="info-value">{{ data().from }}</span>
+            @if (editingField() === 'from') {
+              <input class="edit-input" type="text" [ngModel]="editDraft()" (ngModelChange)="editDraft.set($event)" (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" autofocus />
+            } @else {
+              <span class="info-value">{{ display().from }}</span>
+            }
           </div>
-          <button type="button" class="edit-link">Edit</button>
+          @if (editingField() === 'from') {
+            <div class="edit-actions">
+              <button type="button" class="edit-save" (click)="saveEdit()">Save</button>
+              <button type="button" class="edit-cancel" (click)="cancelEdit()">✕</button>
+            </div>
+          } @else {
+            <button type="button" class="edit-link" (click)="startEdit('from')">Edit</button>
+          }
         </div>
 
-        <div class="info-row">
+        <!-- To -->
+        <div class="info-row" [class.info-row--editing]="editingField() === 'to'">
           <div class="info-cell">
             <span class="info-label">To:</span>
-            <span class="info-value">{{ data().to }}</span>
+            @if (editingField() === 'to') {
+              <input class="edit-input" type="text" [ngModel]="editDraft()" (ngModelChange)="editDraft.set($event)" (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" autofocus />
+            } @else {
+              <span class="info-value">{{ display().to }}</span>
+            }
           </div>
-          <button type="button" class="edit-link">Edit</button>
+          @if (editingField() === 'to') {
+            <div class="edit-actions">
+              <button type="button" class="edit-save" (click)="saveEdit()">Save</button>
+              <button type="button" class="edit-cancel" (click)="cancelEdit()">✕</button>
+            </div>
+          } @else {
+            <button type="button" class="edit-link" (click)="startEdit('to')">Edit</button>
+          }
         </div>
 
-        <div class="info-row">
+        <!-- Flight -->
+        <div class="info-row" [class.info-row--editing]="editingField() === 'flight'">
           <div class="info-cell">
             <span class="info-label">Flight :</span>
-            <span class="info-value">{{ data().flight }}</span>
+            @if (editingField() === 'flight') {
+              <input class="edit-input" type="text" [ngModel]="editDraft()" (ngModelChange)="editDraft.set($event)" (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" autofocus />
+            } @else {
+              <span class="info-value">{{ display().flight }}</span>
+            }
           </div>
-          <button type="button" class="edit-link">Edit</button>
+          @if (editingField() === 'flight') {
+            <div class="edit-actions">
+              <button type="button" class="edit-save" (click)="saveEdit()">Save</button>
+              <button type="button" class="edit-cancel" (click)="cancelEdit()">✕</button>
+            </div>
+          } @else {
+            <button type="button" class="edit-link" (click)="startEdit('flight')">Edit</button>
+          }
         </div>
 
         <div class="info-row">
@@ -179,7 +227,14 @@
 
         </div>
 
-        <button type="submit" class="action-btn">Pay ${{ total() }}</button>
+        <button type="submit" class="action-btn" [disabled]="paying()">
+          @if (paying()) {
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            Processing…
+          } @else {
+            Pay ${{ total() }}
+          }
+        </button>
       </form>
     </div>
   }

@@ -12,4 +12,5 @@ export class FlightCardComponent {
   flight     = input.required<Flight>();
   isSelected = input(false);
   book       = output<Flight>();
+  viewPlace  = output<Flight>();
 }

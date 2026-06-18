@@ -135,6 +135,63 @@
   flex-shrink: 0;
 }
 
+/* ── Inline edit ────────────────────────────────────────────── */
+.info-row--editing {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  margin: 0 -0.5rem;
+}
+
+.edit-input {
+  flex: 1;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  outline: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--title-clr);
+  background: transparent;
+  padding: 0.1rem 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.edit-save {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 0.85; }
+}
+
+.edit-cancel {
+  background: transparent;
+  border: none;
+  color: var(--body-clr);
+  font-size: 0.85rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+
+  &:hover { color: var(--danger); }
+}
+
 /* ── Guest counter ──────────────────────────────────────────── */
 .guest-counter {
   display: flex;
@@ -204,7 +261,8 @@
   transition: background 0.2s, transform 0.15s;
 }
 
-.action-btn:hover { background: #2f4ac4; transform: translateY(-1px); }
+.action-btn:hover:not(:disabled) { background: #2f4ac4; transform: translateY(-1px); }
+.action-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
 .action-btn--sm { width: auto; padding: 0.55rem 1.5rem; }
 

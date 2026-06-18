@@ -118,6 +118,28 @@
 
   </div>
 
+  <!-- Smart Recommendations -->
+  @if (smartPlaces().length) {
+    <div class="smart-strip">
+      <h2 class="smart-strip-title">
+        <i class="fas fa-magic"></i> Recommended for You
+      </h2>
+      <div class="smart-strip-list">
+        @for (place of smartPlaces(); track place.id) {
+          <div class="smart-strip-card">
+            <img [src]="place.image" [alt]="place.name" class="ssc-img"
+                 onerror="this.onerror=null; this.src='assets/images/place-manarola.jpeg'" />
+            <div class="ssc-body">
+              <p class="ssc-name">{{ place.name }}</p>
+              <p class="ssc-loc"><i class="fas fa-map-marker-alt"></i> {{ place.location }}</p>
+              <p class="ssc-price">${{ place.pricePerNight }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Results count -->
   @if (!loading()) {
     <p class="results-count" role="status" aria-live="polite">

@@ -1,13 +1,8 @@
 <article
   class="flight-card"
   [class.flight-card--selected]="isSelected()"
-  role="button"
-  tabindex="0"
   [attr.aria-label]="flight().departureCity + ' to ' + flight().arrivalCity + ', ' + flight().pricePerPerson + ' dollars per person'"
-  [attr.aria-pressed]="isSelected()"
-  (click)="book.emit(flight())"
-  (keydown.enter)="book.emit(flight())"
-  (keydown.space)="$event.preventDefault(); book.emit(flight())">
+  (click)="viewPlace.emit(flight())">
 
   <!-- On-time badge -->
   <p class="on-time" [class.on-time--high]="flight().onTimePercent >= 95">
@@ -38,6 +33,16 @@
       <span class="city">{{ flight().arrivalCity }}</span>
     </div>
 
+  </div>
+
+  <div class="fc-actions">
+    <button
+      type="button"
+      class="fc-book-btn"
+      (click)="$event.stopPropagation(); book.emit(flight())"
+      [attr.aria-label]="'Book flight: ' + flight().departureCity + ' to ' + flight().arrivalCity">
+      Book
+    </button>
   </div>
 
 </article>

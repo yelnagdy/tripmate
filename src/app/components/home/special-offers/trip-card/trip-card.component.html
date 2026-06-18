@@ -1,4 +1,4 @@
-<article class="trip-card">
+<article class="trip-card" (click)="onViewTrip()">
 
   <!-- ── Image area ─────────────────────────────── -->
   <div class="card-img-area">
@@ -20,7 +20,7 @@
       type="button"
       [attr.aria-pressed]="trip().isFavorite"
       [attr.aria-label]="trip().isFavorite ? 'Remove from favourites' : 'Add to favourites'"
-      (click)="onToggleFavorite()">
+      (click)="$event.stopPropagation(); onToggleFavorite()">
       <i class="fa-heart"
          [class.fas]="trip().isFavorite"
          [class.far]="!trip().isFavorite"
@@ -71,7 +71,7 @@
       </div>
     }
 
-    <button class="book-btn" type="button" (click)="onBookNow()">
+    <button class="book-btn" type="button" (click)="$event.stopPropagation(); onViewTrip()">
       Book Now
     </button>
 

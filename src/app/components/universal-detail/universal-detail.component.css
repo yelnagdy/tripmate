@@ -1,0 +1,226 @@
+:host {
+  --accent:   #3b5bdb;
+  --heading:  #1a1a2e;
+  --body-clr: #6b7280;
+  display: block;
+}
+
+/* ── Loading / empty ─────────────────────────────────────────── */
+.ud-loading,
+.ud-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 40vh;
+  color: var(--body-clr);
+  font-size: 1rem;
+}
+
+.ud-loading i { font-size: 2rem; color: var(--accent); }
+.ud-empty  i  { font-size: 3rem; color: #d1d5db; }
+
+/* ── Page ────────────────────────────────────────────────────── */
+.ud-page {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+/* ── Back button ─────────────────────────────────────────────── */
+.ud-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  transition: opacity 0.15s;
+}
+.ud-back-btn:hover { opacity: 0.7; }
+
+/* ── Header ──────────────────────────────────────────────────── */
+.ud-header { margin-bottom: 1.25rem; }
+
+.ud-type-badge {
+  display: inline-block;
+  background: #eef2ff;
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.ud-title {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--heading);
+  margin: 0 0 0.4rem;
+}
+
+.ud-location {
+  font-size: 0.85rem;
+  color: var(--body-clr);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.ud-hero-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.ud-hero {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Layout ──────────────────────────────────────────────────── */
+.ud-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .ud-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Main ────────────────────────────────────────────────────── */
+.ud-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #f59e0b;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.ud-rating-num {
+  margin-left: 0.4rem;
+  font-weight: 700;
+  color: var(--heading);
+  font-size: 0.88rem;
+}
+
+.ud-section { margin-bottom: 1.75rem; }
+
+.ud-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--heading);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #eef2ff;
+}
+
+.ud-body-text {
+  font-size: 0.88rem;
+  color: var(--body-clr);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.ud-props { margin: 0; }
+
+.ud-prop-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.85rem;
+}
+
+.ud-prop-label { color: var(--body-clr); }
+.ud-prop-value { font-weight: 600; color: var(--heading); }
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.ud-sidebar {
+  position: sticky;
+  top: 1.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ud-price-box { text-align: center; }
+
+.ud-price-label {
+  font-size: 0.72rem;
+  color: var(--body-clr);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ud-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 0.25rem 0 0;
+}
+
+.ud-per {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--body-clr);
+}
+
+.ud-tax {
+  font-size: 0.72rem;
+  color: var(--body-clr);
+  display: block;
+}
+
+.ud-book-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ud-book-btn:hover { opacity: 0.85; }
+
+.ud-perks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ud-perks li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: #16a34a;
+  font-weight: 500;
+}

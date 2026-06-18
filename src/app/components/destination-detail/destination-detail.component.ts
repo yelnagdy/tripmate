@@ -1,8 +1,12 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, Location } from '@angular/common';
+import { Observable, catchError, of } from 'rxjs';
+import { safeUrl } from '../../core/utils/safe-url';
 import { DestinationDetailData, BookingData } from '../../models/detail.models';
 import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
+import { DestinationService } from '../../core/services/destination.service';
+import { PostService, PostResult } from '../../core/services/post.service';
 
 @Component({
   selector: 'app-destination-detail',
@@ -12,7 +16,69 @@ import { BookingDialogComponent } from '../booking-dialog/booking-dialog.compone
   templateUrl: './destination-detail.component.html',
   styleUrl: './destination-detail.component.css',
 })
-export class DestinationDetailComponent {
+export class DestinationDetailComponent implements OnInit {
+
+  private readonly location = inject(Location);
+  private readonly destinationService  = inject(DestinationService);
+  private readonly postService         = inject(PostService);
+
+  ngOnInit(): void {
+    const state = (history.state ?? {}) as {
+      destinationId?: number;
+      name?: string;
+      image?: string;
+      pricePerNight?: number;
+      location?: string;
+    };
+
+    const destinationId = state.destinationId ?? this.destination().id;
+
+    if (destinationId) {
+      // Apply quick preview from nav state immediately so the page isn't blank
+      if (state.name) {
+        this.destination.update(d => ({
+          ...d,
+          id:            destinationId,
+          name:          state.name!,
+          heroImage:     safeUrl(state.image, d.heroImage),
+          destination:   state.location || d.destination,
+          pricePerNight: state.pricePerNight ?? d.pricePerNight,
+        }));
+      }
+
+      // Then load full details from the API
+      this.destinationService.getById(destinationId).subscribe(api => {
+        if (!api) return;
+        this.destination.update(d => ({
+          ...d,
+          id:            api.id,
+          name:          api.name,
+          heroImage:     safeUrl(api.imageUrl, d.heroImage),
+          destination:   `${api.country}${api.city ? ' → ' + api.city : ''}`,
+          duration:      `${api.durationDays} days`,
+          pricePerNight: api.price,
+          overallRating: api.rating || d.overallRating,
+        }));
+      });
+
+      const userId = this.getUserId();
+      if (userId) {
+        this.destinationService.recordView(destinationId, userId).subscribe();
+      }
+    }
+
+    this.loadPosts();
+  }
+
+  private getUserId(): number {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) return 0;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+      return parseInt(payload[claim] ?? '0', 10) || 0;
+    } catch { return 0; }
+  }
 
   readonly destination = signal<DestinationDetailData>({
     id: 2,
@@ -94,10 +160,11 @@ export class DestinationDetailComponent {
 
   readonly stars: number[] = [1, 2, 3, 4, 5];
 
-  readonly visibleReviews = () =>
+  readonly visibleReviews = computed(() =>
     this.showAllReviews()
       ? this.destination().reviews
-      : this.destination().reviews.slice(0, 2);
+      : this.destination().reviews.slice(0, 2)
+  );
 
   readonly dialogOpen    = signal(false);
   readonly activeBooking = signal<BookingData | null>(null);
@@ -109,9 +176,110 @@ export class DestinationDetailComponent {
       to:             this.destination().name,
       flight:         'Direct Booking',
       pricePerPerson: this.destination().pricePerNight || 299,
+      destinationId:  this.destination().id,
+      durationDays:   5,
     });
     this.dialogOpen.set(true);
   }
 
   closeDialog(): void { this.dialogOpen.set(false); }
+
+  goBack(): void { this.location.back(); }
+
+  /* ── Community posts ────────────────────────────────────────── */
+  readonly communityPosts = signal<{ id: number; userId: number; name: string; text: string; rating: number; timeAgo: string }[]>([]);
+
+  readonly currentUserId = this.getUserId();
+
+  deletePost(postId: number): void {
+    this.communityPosts.update(list => list.filter(p => p.id !== postId));
+    this.postService.delete(postId).subscribe(ok => {
+      if (!ok) this.loadPosts(); // revert on failure
+    });
+  }
+
+  private loadPosts(): void {
+    const destName = this.destination().name.toLowerCase();
+    this.postService.getAll().subscribe(posts => {
+      const matched = posts
+        .filter(p => p.location.toLowerCase().includes(destName) || destName.includes(p.location.toLowerCase()))
+        .map(p => ({
+          id:      p.postId,
+          userId:  p.userId,
+          name:    `User #${p.userId}`,
+          text:    `${p.title} — ${p.description}`,
+          rating:  p.rating,
+          timeAgo: 'Recently',
+        }));
+      this.communityPosts.set(matched);
+    });
+  }
+
+  /* ── Review form ────────────────────────────────────────────── */
+  readonly reviewDraft      = signal({ title: '', description: '', rating: 0 });
+  readonly reviewSubmitting = signal(false);
+  readonly reviewSuccess    = signal(false);
+  readonly reviewError      = signal('');
+
+  setReviewRating(star: number): void {
+    this.reviewDraft.update(d => ({ ...d, rating: star }));
+  }
+
+  setReviewTitle(val: string): void {
+    this.reviewDraft.update(d => ({ ...d, title: val }));
+  }
+
+  setReviewDesc(val: string): void {
+    this.reviewDraft.update(d => ({ ...d, description: val }));
+  }
+
+  submitReview(): void {
+    const draft = this.reviewDraft();
+    if (!draft.rating)             { this.reviewError.set('Please select a star rating.'); return; }
+    if (!draft.title.trim())       { this.reviewError.set('Please add a title.'); return; }
+    if (!draft.description.trim()) { this.reviewError.set('Please write your review.'); return; }
+
+    const userId = this.getUserId();
+    if (!userId) { this.reviewError.set('Please log in to submit a review.'); return; }
+
+    this.reviewError.set('');
+    this.reviewSubmitting.set(true);
+
+    // Optimistic update: show the review immediately without waiting for the API
+    const optimisticId = -(Date.now());
+    this.communityPosts.update(list => [{
+      id:      optimisticId,
+      userId,
+      name:    'You',
+      text:    `${draft.title.trim()} — ${draft.description.trim()}`,
+      rating:  draft.rating,
+      timeAgo: 'Just now',
+    }, ...list]);
+
+    // Reset form state immediately so the user isn't blocked
+    this.reviewSubmitting.set(false);
+    this.reviewSuccess.set(true);
+    this.reviewDraft.set({ title: '', description: '', rating: 0 });
+    setTimeout(() => this.reviewSuccess.set(false), 4000);
+
+    // Background API call — doesn't block the UI
+    this.postService.create({
+      title:       draft.title.trim(),
+      location:    this.destination().name,
+      description: draft.description.trim(),
+      imageUrl:    '',
+      rating:      draft.rating,
+      userId,
+    }).pipe(
+      catchError((): Observable<PostResult> => of('api-error')),
+    ).subscribe({
+      next: (result: PostResult) => {
+        if (result === null) {
+          // Replace the optimistic entry with real server data
+          this.loadPosts();
+        }
+        // On failure the optimistic post stays visible for this session
+      },
+    });
+  }
 }

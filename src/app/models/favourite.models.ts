@@ -1,5 +1,7 @@
 export interface FavouriteItem {
   id: number;
+  destinationId?: number;
+  itemType: string;
   name: string;
   location: string;
   image: string;

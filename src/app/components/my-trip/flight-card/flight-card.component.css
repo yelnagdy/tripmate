@@ -11,14 +11,15 @@
   border-radius: 14px;
   padding: 1rem 1.4rem 1.25rem;
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
-  cursor: pointer;
   border: 2px solid transparent;
+  cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 
   &:hover { box-shadow: 0 4px 20px rgba(59, 91, 219, 0.15); transform: translateY(-1px); }
-  &:focus-visible { outline: 2px solid #3b5bdb; outline-offset: 2px; }
-  &--selected { border-color: #3b5bdb; box-shadow: 0 4px 20px rgba(59, 91, 219, 0.2); }
+  &:focus-within { outline: 2px solid #3b5bdb; outline-offset: 2px; }
 }
+
+.flight-card--selected { border-color: #3b5bdb; box-shadow: 0 4px 20px rgba(59, 91, 219, 0.2); }
 
 /* ── On-time ───────────────────────────────────────────────── */
 .on-time {
@@ -97,4 +98,24 @@
   font-size: 0.75rem;
   font-weight: 400;
   color: var(--body-clr);
+}
+
+.fc-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.85rem;
+}
+
+.fc-book-btn {
+  padding: 0.4rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.85; }
 }
