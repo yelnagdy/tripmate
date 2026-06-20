@@ -101,25 +101,30 @@
 
       <!-- Overall score -->
       <div class="overall-score">
-        <span class="score-num">{{ destination().overallRating }}</span>
-        <div class="score-stars" [attr.aria-label]="destination().overallRating + ' out of 5'">
+        <span class="score-num">{{ liveAverage() | number:'1.1-1' }}</span>
+        <div class="score-stars" [attr.aria-label]="liveAverage() + ' out of 5'">
           @for (star of stars; track star) {
             <i
-              [class]="star <= destination().overallRating ? 'fas fa-star' : 'far fa-star'"
+              [class]="star <= liveAverage() ? 'fas fa-star' : 'far fa-star'"
               aria-hidden="true">
             </i>
           }
         </div>
+        <span class="score-count">{{ liveReviewCount() }} {{ liveReviewCount() === 1 ? 'review' : 'reviews' }}</span>
       </div>
 
-      <!-- Rating bars -->
+      <!-- Rating bars — update live as new reviews arrive -->
       <div class="rating-bars">
-        @for (bar of destination().ratingBars; track bar.stars) {
+        @for (bar of liveBars(); track bar.stars) {
           <div class="bar-row">
             <span class="bar-label">{{ bar.stars }}★</span>
-            <div class="bar-track" role="progressbar" [attr.aria-label]="bar.stars + ' star ratings'" [attr.aria-valuenow]="bar.percentage" aria-valuemin="0" aria-valuemax="100">
+            <div class="bar-track" role="progressbar"
+                 [attr.aria-label]="bar.stars + ' star ratings'"
+                 [attr.aria-valuenow]="bar.percentage"
+                 aria-valuemin="0" aria-valuemax="100">
               <div class="bar-fill" [style.width.%]="bar.percentage"></div>
             </div>
+            <span class="bar-pct">{{ bar.percentage }}%</span>
           </div>
         }
       </div>

@@ -7,6 +7,7 @@ import { DestinationDetailData, BookingData } from '../../models/detail.models';
 import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 import { DestinationService } from '../../core/services/destination.service';
 import { PostService, PostResult } from '../../core/services/post.service';
+import { RatingService } from '../../core/services/rating.service';
 
 @Component({
   selector: 'app-destination-detail',
@@ -21,6 +22,7 @@ export class DestinationDetailComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly destinationService  = inject(DestinationService);
   private readonly postService         = inject(PostService);
+  private readonly ratingService       = inject(RatingService);
 
   ngOnInit(): void {
     const state = (history.state ?? {}) as {
@@ -68,11 +70,21 @@ export class DestinationDetailComponent implements OnInit {
     }
 
     this.loadPosts();
+
+    // Pre-fill the star rating if the user has already rated this destination
+    const destId = state.destinationId ?? this.destination().id;
+    if (destId) {
+      this.ratingService.getUserRating(destId, 'destination').subscribe(existing => {
+        if (existing > 0) {
+          this.reviewDraft.update(d => ({ ...d, rating: existing }));
+        }
+      });
+    }
   }
 
   private getUserId(): number {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       if (!token) return 0;
       const payload = JSON.parse(atob(token.split('.')[1]));
       const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
@@ -166,6 +178,31 @@ export class DestinationDetailComponent implements OnInit {
       : this.destination().reviews.slice(0, 2)
   );
 
+  /* ── Live review stats — recomputed whenever communityPosts changes ── */
+
+  private readonly allRatings = computed(() => [
+    ...this.destination().reviews.map(r => r.rating),
+    ...this.communityPosts().filter(p => p.rating > 0).map(p => p.rating),
+  ]);
+
+  readonly liveAverage = computed(() => {
+    const all = this.allRatings();
+    if (!all.length) return this.destination().overallRating;
+    const avg = all.reduce((s, r) => s + r, 0) / all.length;
+    return Math.round(avg * 10) / 10;
+  });
+
+  readonly liveReviewCount = computed(() => this.allRatings().length);
+
+  readonly liveBars = computed(() => {
+    const all = this.allRatings();
+    if (!all.length) return this.destination().ratingBars;
+    return [5, 4, 3, 2, 1].map(stars => ({
+      stars,
+      percentage: Math.round((all.filter(r => r === stars).length / all.length) * 100),
+    }));
+  });
+
   readonly dialogOpen    = signal(false);
   readonly activeBooking = signal<BookingData | null>(null);
 
@@ -245,40 +282,50 @@ export class DestinationDetailComponent implements OnInit {
     this.reviewError.set('');
     this.reviewSubmitting.set(true);
 
-    // Optimistic update: show the review immediately without waiting for the API
     const optimisticId = -(Date.now());
+    const title   = draft.title.trim();
+    const desc    = draft.description.trim();
+    const rating  = draft.rating;
+
+    // Optimistic update: add to community posts immediately so stats recompute
     this.communityPosts.update(list => [{
       id:      optimisticId,
       userId,
       name:    'You',
-      text:    `${draft.title.trim()} — ${draft.description.trim()}`,
-      rating:  draft.rating,
+      text:    `${title} — ${desc}`,
+      rating,
       timeAgo: 'Just now',
     }, ...list]);
 
-    // Reset form state immediately so the user isn't blocked
+    // Reset form immediately — UI is never blocked
     this.reviewSubmitting.set(false);
     this.reviewSuccess.set(true);
     this.reviewDraft.set({ title: '', description: '', rating: 0 });
     setTimeout(() => this.reviewSuccess.set(false), 4000);
 
-    // Background API call — doesn't block the UI
+    const destId = this.destination().id;
+
+    // Save rating to /api/ratings (drives Community Reviews stats on other users' views)
+    if (destId) {
+      this.ratingService.submit(destId, 'destination', rating).subscribe();
+    }
+
+    // Save review text to /api/Posts (drives the community posts list)
     this.postService.create({
-      title:       draft.title.trim(),
+      title,
       location:    this.destination().name,
-      description: draft.description.trim(),
+      description: desc,
       imageUrl:    '',
-      rating:      draft.rating,
+      rating,
       userId,
     }).pipe(
       catchError((): Observable<PostResult> => of('api-error')),
     ).subscribe({
       next: (result: PostResult) => {
         if (result === null) {
-          // Replace the optimistic entry with real server data
+          // Swap optimistic entry for real server data, preserving live stats
           this.loadPosts();
         }
-        // On failure the optimistic post stays visible for this session
       },
     });
   }

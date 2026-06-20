@@ -1,0 +1,142 @@
+@if (article(); as a) {
+<article class="detail-page">
+
+  <!-- ── Hero ───────────────────────────────────────────────── -->
+  <div class="hero" [style.background-image]="'url(' + a.image + ')'">
+    <div class="hero-overlay">
+      <button class="back-btn" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Back to News
+      </button>
+      <span class="badge hero-badge" [ngClass]="categoryClass(a.categoryColor)">{{ a.category }}</span>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+
+    <!-- ── Meta ──────────────────────────────────────────────── -->
+    <div class="meta-row">
+      <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ a.date }}</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-item"><i class="far fa-clock"></i> {{ a.readTime }} read</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-item"><i class="far fa-comment"></i> {{ a.comments }} comments</span>
+    </div>
+
+    <!-- ── Title ─────────────────────────────────────────────── -->
+    <h1 class="article-title">{{ a.title }}</h1>
+
+    @if (a.excerpt) {
+      <p class="excerpt">{{ a.excerpt }}</p>
+    }
+
+    <!-- ── Author ────────────────────────────────────────────── -->
+    <div class="author-card">
+      <img [src]="a.author.avatar" [alt]="a.author.name" class="author-avatar" />
+      <div class="author-info">
+        <span class="author-label">Written by</span>
+        <span class="author-name">{{ a.author.name }}</span>
+      </div>
+      <!-- Share buttons -->
+      <div class="share-btns">
+        <span class="share-label">Share:</span>
+        <button class="share-btn twitter" (click)="shareTwitter(a)" title="Share on Twitter">
+          <i class="fab fa-twitter"></i>
+        </button>
+        <button class="share-btn facebook" (click)="shareFacebook()" title="Share on Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </button>
+        <button class="share-btn copy" (click)="copyLink()" [class.copied]="copied()" title="Copy link">
+          <i class="fas" [class.fa-link]="!copied()" [class.fa-check]="copied()"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Article content ───────────────────────────────────── -->
+    <div class="article-body">
+      @if (a.content && a.content.length) {
+        @for (para of a.content; track $index) {
+          <p>{{ para }}</p>
+        }
+      } @else {
+        <p class="no-content">Full article content coming soon.</p>
+      }
+    </div>
+
+    <!-- ── Tags / bottom meta ────────────────────────────────── -->
+    <div class="bottom-meta">
+      <div class="tag-list">
+        <span class="tag">{{ a.category }}</span>
+        <span class="tag">Travel</span>
+        <span class="tag">TripMate</span>
+      </div>
+      <div class="share-btns">
+        <span class="share-label">Share:</span>
+        <button class="share-btn twitter" (click)="shareTwitter(a)" title="Share on Twitter">
+          <i class="fab fa-twitter"></i>
+        </button>
+        <button class="share-btn facebook" (click)="shareFacebook()" title="Share on Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </button>
+        <button class="share-btn copy" (click)="copyLink()" [class.copied]="copied()" title="Copy link">
+          <i class="fas" [class.fa-link]="!copied()" [class.fa-check]="copied()"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Author bio ─────────────────────────────────────────── -->
+    <div class="author-bio">
+      <img [src]="a.author.avatar" [alt]="a.author.name" class="bio-avatar" />
+      <div class="bio-text">
+        <span class="bio-label">About the author</span>
+        <strong class="bio-name">{{ a.author.name }}</strong>
+        <p class="bio-desc">
+          Passionate travel writer and explorer with a love for uncovering the stories that make
+          each destination unique. Shares tips, guides, and real experiences to help you travel
+          smarter and deeper.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Related articles ──────────────────────────────────── -->
+  @if (related().length) {
+    <div class="related-section">
+      <div class="related-inner">
+        <h2 class="related-title">Related Articles</h2>
+        <div class="related-grid">
+          @for (rel of related(); track rel.id) {
+            <div class="related-card" role="button" tabindex="0"
+                 (click)="goToArticle(rel.id)"
+                 (keydown.enter)="goToArticle(rel.id)">
+              <div class="related-img-wrap">
+                <img [src]="rel.image" [alt]="rel.title" class="related-img" loading="lazy" />
+                <span class="badge rel-badge" [ngClass]="categoryClass(rel.categoryColor)">{{ rel.category }}</span>
+              </div>
+              <div class="related-body">
+                <div class="related-meta">
+                  <span>{{ rel.date }}</span>
+                  <span class="meta-sep">·</span>
+                  <span>{{ rel.readTime }} read</span>
+                </div>
+                <h3 class="related-card-title">{{ rel.title }}</h3>
+                <div class="related-author">
+                  <img [src]="rel.author.avatar" [alt]="rel.author.name" class="rel-avatar" />
+                  <span>{{ rel.author.name }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+</article>
+} @else {
+  <div class="not-found">
+    <i class="fas fa-newspaper"></i>
+    <p>Article not found.</p>
+    <button class="back-btn" (click)="goBack()">Back to News</button>
+  </div>
+}

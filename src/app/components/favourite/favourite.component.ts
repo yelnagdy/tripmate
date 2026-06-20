@@ -5,7 +5,7 @@ import { FavouriteItem } from '../../models/favourite.models';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { DestinationService } from '../../core/services/destination.service';
 import { PackageService } from '../../core/services/package.service';
-import { forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { safeUrl } from '../../core/utils/safe-url';
 
 type Tab = 'packages' | 'places';
@@ -19,32 +19,6 @@ function favRatingLabel(r: number): string {
   return 'Good';
 }
 
-const FALLBACK_PACKAGES: FavouriteItem[] = [
-  {
-    id: 1, itemType: 'packge', name: 'Cinque Terre Magic', location: 'Italy, Manarola',
-    image: 'assets/images/fav-manarola.jpeg', imageCount: 5, hotelStars: 5,
-    amenities: 20, reviewScore: 4.2, reviewLabel: 'Very Good', reviewCount: 54, pricePerNight: 240,
-  },
-  {
-    id: 2, itemType: 'packge', name: 'Berlin City Break', location: 'Germany, Berlin',
-    image: 'assets/images/fav-berlin.jpeg', imageCount: 5, hotelStars: 5,
-    amenities: 20, reviewScore: 4.2, reviewLabel: 'Very Good', reviewCount: 54, pricePerNight: 104,
-  },
-];
-
-const FALLBACK_PLACES: FavouriteItem[] = [
-  {
-    id: 3, itemType: 'destination', name: 'Santorini Cliffside', location: 'Greece, Santorini',
-    image: 'assets/images/fav-santorini.jpeg', imageCount: 8, hotelStars: 5,
-    amenities: 25, reviewScore: 4.7, reviewLabel: 'Excellent', reviewCount: 112, pricePerNight: 320,
-  },
-  {
-    id: 4, itemType: 'destination', name: 'Paris Luxury Suite', location: 'France, Paris',
-    image: 'assets/images/fav-paris.jpeg', imageCount: 6, hotelStars: 5,
-    amenities: 30, reviewScore: 4.5, reviewLabel: 'Excellent', reviewCount: 87, pricePerNight: 410,
-  },
-];
-
 @Component({
   selector: 'app-favourite',
   standalone: true,
@@ -55,87 +29,88 @@ const FALLBACK_PLACES: FavouriteItem[] = [
 })
 export class FavouriteComponent implements OnInit {
 
-  private readonly router              = inject(Router);
-  private readonly favoritesService    = inject(FavoritesService);
-  private readonly destinationService  = inject(DestinationService);
-  private readonly packageService      = inject(PackageService);
+  private readonly router             = inject(Router);
+  private readonly favoritesService   = inject(FavoritesService);
+  private readonly destinationService = inject(DestinationService);
+  private readonly packageService     = inject(PackageService);
 
   readonly activeTab = signal<Tab>('packages');
   readonly loading   = signal(true);
+  readonly error     = signal(false);
 
   readonly packages = signal<FavouriteItem[]>([]);
   readonly places   = signal<FavouriteItem[]>([]);
 
-  readonly activeItems = computed(() =>
-    this.activeTab() === 'packages' ? this.packages() : this.places()
-  );
-  readonly packagesCount = computed(() => this.packages().length);
-  readonly placesCount   = computed(() => this.places().length);
+  readonly activeItems    = computed(() => this.activeTab() === 'packages' ? this.packages() : this.places());
+  readonly packagesCount  = computed(() => this.packages().length);
+  readonly placesCount    = computed(() => this.places().length);
 
   ngOnInit(): void {
     forkJoin({
       favs:         this.favoritesService.getAll(),
       destinations: this.destinationService.getAll(),
       packages:     this.packageService.getAll(),
-    }).subscribe(({ favs, destinations, packages }) => {
+    }).pipe(
+      catchError(() => of({ favs: [], destinations: [], packages: [] }))
+    ).subscribe(({ favs, destinations, packages }) => {
 
       const safeFavs  = favs         ?? [];
       const safeDests = destinations  ?? [];
       const safePkgs  = packages      ?? [];
 
       const destMap = Object.fromEntries(safeDests.map(d => [d.id, d]));
-      const pkgMap  = Object.fromEntries(safePkgs.map(p => [p.id, p]));
+      const pkgMap  = Object.fromEntries(safePkgs.map(p  => [p.id, p]));
 
-      const favPkgs  = safeFavs.filter(f => f.itemType === 'packge');
-      const favDests = safeFavs.filter(f => f.itemType === 'destination');
-
-      const mappedPkgs = favPkgs
-        .map(f => {
+      // Always show every API favorite — use whatever detail data is available,
+      // fall back to placeholder text when the package/destination isn't in the catalog.
+      const mappedPkgs: FavouriteItem[] = safeFavs
+        .filter(f => f.itemType === 'packge')
+        .reduce<FavouriteItem[]>((acc, f) => {
           const p = pkgMap[f.itemId];
-          if (!p) return null;
-          return {
+          acc.push({
             id:            f.favoriteId,
+            destinationId: f.itemId,   // actual package itemId — used by onRemove/navigation
             itemType:      'packge',
-            name:          p.title,
+            name:          p?.title                                               ?? `Package #${f.itemId}`,
             location:      'Travel Package',
-            image:         safeUrl(p.imageUrl, 'assets/images/fav-manarola.jpeg'),
+            image:         safeUrl(p?.imageUrl ?? '', 'assets/images/fav-manarola.jpeg'),
             imageCount:    5,
             hotelStars:    4,
             amenities:     15,
             reviewScore:   4.0,
             reviewLabel:   'Good',
             reviewCount:   0,
-            pricePerNight: p.price,
-          } satisfies FavouriteItem;
-        })
-        .filter((x): x is FavouriteItem => x !== null);
+            pricePerNight: p?.price                                               ?? 0,
+          });
+          return acc;
+        }, []);
 
-      const mappedPlaces = favDests
-        .map((f): FavouriteItem | null => {
-          const d = destMap[f.itemId];
-          if (!d) return null;
-          const safeCity = (d.city && d.city !== 'null' && d.city !== 'undefined') ? d.city.trim() : '';
-          const rating   = d.rating || 0;
-          return {
+      const mappedPlaces: FavouriteItem[] = safeFavs
+        .filter(f => f.itemType === 'destination')
+        .reduce<FavouriteItem[]>((acc, f) => {
+          const d        = destMap[f.itemId];
+          const safeCity = (d?.city && d.city !== 'null' && d.city !== 'undefined') ? d.city.trim() : '';
+          const rating   = d?.rating || 0;
+          acc.push({
             id:            f.favoriteId,
-            destinationId: d.id,
+            destinationId: d?.id ?? f.itemId,
             itemType:      'destination',
-            name:          d.name,
-            location:      safeCity ? `${d.country}, ${safeCity}` : d.country,
-            image:         safeUrl(d.imageUrl, 'assets/images/fav-santorini.jpeg'),
+            name:          d?.name                                                 ?? `Destination #${f.itemId}`,
+            location:      d ? (safeCity ? `${d.country}, ${safeCity}` : d.country) : 'Unknown Location',
+            image:         safeUrl(d?.imageUrl ?? '', 'assets/images/fav-santorini.jpeg'),
             imageCount:    5,
             hotelStars:    Math.min(5, Math.max(1, Math.round(rating))) || 4,
             amenities:     20,
             reviewScore:   rating || 4.0,
             reviewLabel:   favRatingLabel(rating),
             reviewCount:   0,
-            pricePerNight: d.price,
-          };
-        })
-        .filter((x): x is FavouriteItem => x !== null);
+            pricePerNight: d?.price ?? 0,
+          });
+          return acc;
+        }, []);
 
-      this.packages.set(mappedPkgs.length  ? mappedPkgs  : FALLBACK_PACKAGES);
-      this.places.set(mappedPlaces.length  ? mappedPlaces : FALLBACK_PLACES);
+      this.packages.set(mappedPkgs);
+      this.places.set(mappedPlaces);
       this.loading.set(false);
     });
   }
@@ -150,10 +125,21 @@ export class FavouriteComponent implements OnInit {
   }
 
   onRemove(itemId: number): void {
-    if (this.activeTab() === 'packages') {
-      this.packages.update(list => list.filter(p => p.id !== itemId));
+    const tab  = this.activeTab();
+    const list = tab === 'packages' ? this.packages() : this.places();
+    const item = list.find(p => p.id === itemId);
+    if (!item) return;
+
+    // Optimistic remove from UI
+    if (tab === 'packages') {
+      this.packages.update(l => l.filter(p => p.id !== itemId));
     } else {
-      this.places.update(list => list.filter(p => p.id !== itemId));
+      this.places.update(l => l.filter(p => p.id !== itemId));
     }
+
+    // Sync to API + localStorage in background
+    const apiType  = item.itemType as import('../../core/services/favorites.service').FavoriteItemType;
+    const realId   = item.destinationId ?? item.id;
+    this.favoritesService.remove(realId, apiType).subscribe();
   }
 }

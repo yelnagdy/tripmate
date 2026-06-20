@@ -117,7 +117,7 @@ export class BookingDialogComponent {
 
   backToHome(): void {
     this.closeDialog.emit();
-    this.router.navigate(['/main/home']);
+    this.router.navigate(['/main/my-trip']);
   }
 
   /* ── Field error helper ─────────────────────────────────────── */

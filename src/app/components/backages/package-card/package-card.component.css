@@ -244,11 +244,40 @@
   margin: 0;
 }
 
+/* ── Actions row ───────────────────────────────────────────── */
+.card-actions {
+  display: flex;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 2;
+}
+
 /* ── View More button ──────────────────────────────────────── */
 .view-more-btn {
-  position: relative;
-  z-index: 2;  /* stays above stretch-link */
-  width: 100%;
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.view-more-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.view-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ── Book Now button ───────────────────────────────────────── */
+.book-now-btn {
+  flex: 1;
   padding: 0.55rem;
   border-radius: 8px;
   border: none;
@@ -261,8 +290,8 @@
   transition: background 0.2s, transform 0.2s;
 }
 
-.view-more-btn:hover { background: #2f4ac4; transform: translateY(-1px); }
-.view-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.book-now-btn:hover { background: #2f4ac4; transform: translateY(-1px); }
+.book-now-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 575.98px) {

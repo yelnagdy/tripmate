@@ -35,7 +35,12 @@
     role="tabpanel"
     [attr.aria-label]="activeTab() === 'packages' ? 'Favourite packages' : 'Favourite places'">
 
-    @if (activeItems().length) {
+    @if (loading()) {
+      <div class="loading-state" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Loading your favourites…
+      </div>
+    } @else if (activeItems().length) {
       @for (item of activeItems(); track item.id) {
         <app-favourite-card
           [item]="item"

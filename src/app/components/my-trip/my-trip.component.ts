@@ -44,18 +44,6 @@ export class MyTripComponent implements OnInit {
   readonly packagesLoading = signal(true);
   readonly packages        = signal<FavouriteItem[]>([]);
 
-  private readonly FALLBACK_PACKAGES: FavouriteItem[] = [
-    {
-      id: 1, itemType: 'packge', name: 'Cinque Terre Magic', location: 'Italy, Manarola',
-      image: 'assets/images/place-manarola.jpeg', imageCount: 9, hotelStars: 5,
-      amenities: 20, reviewScore: 4.2, reviewLabel: 'Very Good', reviewCount: 54, pricePerNight: 240,
-    },
-    {
-      id: 2, itemType: 'packge', name: 'Berlin City Break', location: 'Germany, Berlin',
-      image: 'assets/images/place-berlin.jpeg', imageCount: 9, hotelStars: 5,
-      amenities: 20, reviewScore: 4.2, reviewLabel: 'Very Good', reviewCount: 54, pricePerNight: 104,
-    },
-  ];
 
   private mapBooking(b: ApiBooking): FavouriteItem {
     return {
@@ -165,7 +153,15 @@ export class MyTripComponent implements OnInit {
   ngOnInit(): void {
     this.hotelService.getByCity('italy').subscribe(apiData => {
       if (apiData.length > 0) {
-        this.hotels.set(apiData.map((h, i) => this.mapToHotel(h, i + 1)));
+        // Deduplicate by name (API sometimes returns the same property multiple times)
+        const seen = new Set<string>();
+        const unique = apiData.filter(h => {
+          const key = h.name.toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }).slice(0, 6);
+        this.hotels.set(unique.map((h, i) => this.mapToHotel(h, i + 1)));
       } else {
         this.hotels.set(FALLBACK_HOTELS);
       }
@@ -175,12 +171,9 @@ export class MyTripComponent implements OnInit {
     const userId = this.getUserId();
     if (userId) {
       this.bookingService.getByUser(userId).subscribe(bookings => {
-        this.packages.set(
-          bookings.length ? bookings.map(b => this.mapBooking(b)) : this.FALLBACK_PACKAGES
-        );
+        this.packages.set(bookings.map(b => this.mapBooking(b)));
         this.packagesLoading.set(false);
 
-        // Derive booking details from the most recent booking instead of a separate API call
         const latest = bookings[0];
         if (latest) {
           this.bookingDetails.set({
@@ -194,14 +187,13 @@ export class MyTripComponent implements OnInit {
         }
       });
     } else {
-      this.packages.set(this.FALLBACK_PACKAGES);
       this.packagesLoading.set(false);
     }
   }
 
   private getUserId(): number {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       if (!token) return 0;
       const payload = JSON.parse(atob(token.split('.')[1]));
       const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
@@ -209,12 +201,20 @@ export class MyTripComponent implements OnInit {
     } catch { return 0; }
   }
 
+  private static readonly HOTEL_IMAGES = [
+    'assets/images/hotel-beach.jpeg',
+    'assets/images/hotel-water-room.jpeg',
+    'assets/images/hotel-water-bath.jpeg',
+    'assets/images/hotel-water.jpeg',
+  ];
+
   private mapToHotel(h: ApiHotel, id: number): Hotel {
     const numericPrice = parseFloat(h.price.replace(/[$,]/g, ''));
+    const images = MyTripComponent.HOTEL_IMAGES;
     return {
       id,
       name:          h.name,
-      image:         'assets/images/hotel-water.jpeg',
+      image:         images[(id - 1) % images.length],
       pricePerNight: isNaN(numericPrice) ? 0 : numericPrice,
     };
   }

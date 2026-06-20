@@ -67,4 +67,6 @@ export interface Article {
   title: string;
   image: string;
   author: { name: string; avatar: string; };
+  excerpt?: string;
+  content?: string[];
 }

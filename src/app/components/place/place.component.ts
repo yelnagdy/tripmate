@@ -81,7 +81,7 @@ export class PlaceComponent implements OnInit {
 
   private getUserId(): number {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       if (!token) return 0;
       const payload = JSON.parse(atob(token.split('.')[1]));
       const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';

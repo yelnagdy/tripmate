@@ -70,7 +70,8 @@
                 <a
                   href="#"
                   class="keep-reading"
-                  [attr.aria-label]="'Keep reading: ' + article.title">
+                  [attr.aria-label]="'Keep reading: ' + article.title"
+                  (click)="$event.preventDefault(); articleClick.emit(article.id)">
                   Keep Reading <i class="fas fa-arrow-right" aria-hidden="true"></i>
                 </a>
               </div>

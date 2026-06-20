@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { PackageCardComponent } from './package-card/package-card.component';
+import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 import { Package } from '../../models/packages.models';
+import { BookingData } from '../../models/detail.models';
 import { PackageService } from '../../core/services/package.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { NavigationService } from '../../core/services/navigation.service';
@@ -137,7 +139,7 @@ const FALLBACK_PACKAGES: Package[] = [
   selector: 'app-backages',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PackageCardComponent],
+  imports: [PackageCardComponent, BookingDialogComponent],
   templateUrl: './backages.component.html',
   styleUrl: './backages.component.css',
 })
@@ -151,6 +153,11 @@ export class BackagesComponent implements OnInit {
   readonly error        = signal<string | null>(null);
   readonly searchQuery  = signal('');
   readonly filterOpen   = signal(false);
+
+  readonly dialogOpen    = signal(false);
+  readonly activeBooking = signal<BookingData | null>(null);
+
+  closeDialog(): void { this.dialogOpen.set(false); }
   readonly activeFilter = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
   readonly draftFilter  = signal<PackageFilter>({ categories: [], maxPrice: null, minRating: null });
   readonly packages     = signal<Package[]>([]);
@@ -279,6 +286,19 @@ export class BackagesComponent implements OnInit {
       pricePerNight: pkg.price,
       location:      pkg.category,
     });
+  }
+
+  onBookNow(pkg: Package): void {
+    this.activeBooking.set({
+      destinationId:  pkg.id,
+      date:           'Flexible',
+      from:           'Your Location',
+      to:             pkg.title,
+      flight:         'TripMate Package',
+      pricePerPerson: pkg.price,
+      durationDays:   pkg.days,
+    });
+    this.dialogOpen.set(true);
   }
 
   onToggleFavorite(pkgId: number): void {

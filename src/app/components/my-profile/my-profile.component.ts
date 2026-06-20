@@ -1,9 +1,13 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService, ApiRecentItem } from '../../core/services/auth.service';
 import { PostService, PostResult } from '../../core/services/post.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
+import { NavigationService } from '../../core/services/navigation.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { RecentlyViewedService } from '../../core/services/recently-viewed.service';
 import { ApiPost } from '../../models/api.models';
 import { CommonModule } from '@angular/common';
 import { SafeUrlPipe } from '../../core/utils/safe-url.pipe';
@@ -42,9 +46,13 @@ interface ProfileDraft {
 })
 export class MyProfileComponent implements OnInit, OnDestroy {
 
-  private readonly authService = inject(AuthService);
-  private readonly postService  = inject(PostService);
-  readonly userStats            = inject(UserStatsService);
+  private readonly authService      = inject(AuthService);
+  private readonly postService      = inject(PostService);
+  private readonly navService       = inject(NavigationService);
+  private readonly favoritesService = inject(FavoritesService);
+  private readonly recentlyViewed   = inject(RecentlyViewedService);
+  private readonly router           = inject(Router);
+  readonly userStats                = inject(UserStatsService);
 
   /* ── Online / offline detection ─────────────────────────── */
   readonly isOnline = signal(navigator.onLine);
@@ -63,7 +71,8 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   }
 
   /* ── Local draft persistence ─────────────────────────────── */
-  private readonly DRAFT_KEY = 'tripmate_post_draft';
+  private readonly DRAFT_KEY   = 'tripmate_post_draft';
+  private readonly AVATAR_KEY  = 'tripmate_avatar';
 
   readonly hasPendingDraft  = signal(false);
   readonly draftSavedAt     = signal('');
@@ -136,7 +145,24 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   });
 
   // stats now live in UserStatsService — see userStats.totalFavorites / totalBookings
-  readonly recentItems = signal<ApiRecentItem[]>([]);
+  private readonly _apiRecentItems = signal<ApiRecentItem[]>([]);
+
+  /** Local items (localStorage) shown immediately; API items fill in when local is empty. Always last 3. */
+  readonly recentItems = computed<ApiRecentItem[]>(() => {
+    const local = this.recentlyViewed.items();
+    const source = local.length > 0 ? local : this._apiRecentItems();
+    return source.slice(0, 3);
+  });
+
+  viewRecentItem(item: ApiRecentItem): void {
+    this.navService.goToDestination({
+      destinationId: item.id,
+      name:          item.name,
+      image:         item.imageUrl ?? '',
+      pricePerNight: item.price,
+      location:      item.city ? `${item.city}, ${item.country}` : item.country,
+    });
+  }
 
   /* ── Profile edit ───────────────────────────────────────── */
   readonly isEditing   = signal(false);
@@ -144,6 +170,33 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   readonly saveError   = signal('');
   readonly saveSuccess = signal(false);
   private saveSuccessTimer?: ReturnType<typeof setTimeout>;
+
+  /* ── Delete account ─────────────────────────────────────── */
+  readonly deleteConfirmOpen  = signal(false);
+  readonly deleteInProgress   = signal(false);
+  readonly deleteError        = signal('');
+
+  openDeleteConfirm(): void  { this.deleteConfirmOpen.set(true);  this.deleteError.set(''); }
+  closeDeleteConfirm(): void { this.deleteConfirmOpen.set(false); }
+
+  confirmDeleteAccount(): void {
+    this.deleteInProgress.set(true);
+    this.deleteError.set('');
+
+    this.authService.deleteAccount().subscribe(ok => {
+      if (!ok) {
+        this.deleteInProgress.set(false);
+        this.deleteError.set('Could not delete account — please try again.');
+        return;
+      }
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('refreshToken');
+      sessionStorage.removeItem(this.AVATAR_KEY);
+      this.favoritesService.clearStorage();
+      this.recentlyViewed.clear();
+      this.router.navigate(['/auth/login']);
+    });
+  }
 
   readonly draft = signal<ProfileDraft>({
     name: '', email: '', phone: '', country: '', currency: '',
@@ -233,12 +286,13 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       recent:  this.authService.getRecentActivity(userId).pipe(catchError(() => of([] as ApiRecentItem[]))),
     }).subscribe(({ profile: p, recent }) => {
       if (p) {
+        const cachedAvatar = localStorage.getItem(this.AVATAR_KEY);
         this.profile.set({
           name:     p.fullName  || '',
           email:    p.email     || '',
           phone:    p.phone     || '',
           joinDate: '',
-          avatar:   p.profileImageUrl || 'assets/images/profile-avatar.jpeg',
+          avatar:   cachedAvatar || p.profileImageUrl || 'assets/images/profile-avatar.jpeg',
         });
         this.preferences.set({
           country:   '',
@@ -250,9 +304,14 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           season:    p.preferredSeason   || '',
           airlines:  '',
         });
-        this.userStats.setStats(p.totalFavorites ?? 0, p.totalBookings ?? 0);
+        // Take the higher value: API might return 0/null while the session already has
+        // incremented the signal from add/remove actions earlier in the session.
+        this.userStats.setStats(
+          Math.max(p.totalFavorites ?? 0, this.userStats.totalFavorites()),
+          Math.max(p.totalBookings  ?? 0, this.userStats.totalBookings()),
+        );
       }
-      this.recentItems.set(Array.isArray(recent) ? recent : []);
+      this._apiRecentItems.set(Array.isArray(recent) ? recent : []);
       this.loading.set(false);
     });
   }
@@ -284,7 +343,14 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     this.saving.set(true);
     this.saveError.set('');
 
-    const imageUrl = d.avatar.startsWith('data:') ? '' : d.avatar;
+    // Always persist the avatar locally so it survives page refresh.
+    // The API only accepts URLs (not base64), so we strip data URIs from the
+    // API payload but keep them in localStorage for client-side display.
+    const isBase64 = d.avatar.startsWith('data:');
+    if (d.avatar && d.avatar !== 'assets/images/profile-avatar.jpeg') {
+      localStorage.setItem(this.AVATAR_KEY, d.avatar);
+    }
+    const imageUrl = isBase64 ? '' : d.avatar;
 
     this.authService.updateProfile(userId, {
       fullName:          d.name.trim()     || this.profile().name,
@@ -404,59 +470,50 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     }
 
     this.postError.set('');
-    this.postSubmitting.set(true);
 
     // Never send base64 data URIs — the API expects a URL string or empty
     const rawImage = this.previewUrl() ?? (this.editingPost()?.imageUrl ?? '');
     const imageUrl = rawImage.startsWith('data:') ? '' : rawImage;
 
     const body = { title, location, description: story, imageUrl, rating, userId };
-
     const editing = this.editingPost();
 
+    // Optimistic UI: update immediately so the user isn't blocked on the API
+    if (editing) {
+      this.myPosts.update(list =>
+        list.map(p => p.postId === editing.postId
+          ? { ...p, title, location, description: story, imageUrl, rating }
+          : p
+        )
+      );
+    } else {
+      const optimistic: ApiPost = {
+        postId:      -(Date.now()),
+        title, location,
+        description: story,
+        imageUrl,
+        rating,
+        userId,
+      };
+      this.myPosts.update(list => [optimistic, ...list]);
+    }
+
+    this.editingPost.set(null);
+    this.resetPostForm();
+    this.activeView.set('my-posts');
+
+    // Background API call — doesn't block the UI
     const req$ = editing
       ? this.postService.update(editing.postId, body)
       : this.postService.create(body);
 
     req$.subscribe((result: PostResult) => {
-      this.postSubmitting.set(false);
-
       if (result !== null) {
+        // API failed — keep draft for retry; post remains visible optimistically this session
         this.saveDraftLocally();
-        this.postError.set(result + ' Your draft has been saved locally.');
         return;
       }
-
       this.clearDraft();
-
-      if (editing) {
-        // Optimistic update for edits — patch the card in place immediately
-        this.myPosts.update(list =>
-          list.map(p => p.postId === editing.postId
-            ? { ...p, title, location, description: story, imageUrl, rating }
-            : p
-          )
-        );
-        this.editingPost.set(null);
-        this.resetPostForm();
-        this.activeView.set('my-posts');
-      } else {
-        // Optimistic add — show the new post right away without waiting for the server
-        const optimistic: ApiPost = {
-          postId:      -(Date.now()),   // temporary negative ID, replaced by sync below
-          title, location,
-          description: story,
-          imageUrl,
-          rating,
-          userId,
-        };
-        this.myPosts.update(list => [optimistic, ...list]);
-        this.editingPost.set(null);
-        this.resetPostForm();
-        this.activeView.set('my-posts');
-      }
-
-      // Silent background sync to replace optimistic data with real server data
       this.syncPostsSilently(userId);
     });
   }
@@ -529,8 +586,8 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  starsArray(n: number): number[] {
-    return Array.from({ length: 5 }, (_, i) => i + 1);
+  starsArray(count: number): number[] {
+    return Array.from({ length: count }, (_, i) => i + 1);
   }
 
   ngOnDestroy(): void {

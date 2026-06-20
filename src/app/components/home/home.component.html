@@ -119,7 +119,8 @@
 
 <app-news-guides
   [articles]="articles()"
-  (viewMore)="onViewMoreArticles()">
+  (viewMore)="onViewMoreArticles()"
+  (articleClick)="onViewArticle($event)">
 </app-news-guides>
 
 <app-newsletter

@@ -13,6 +13,9 @@ import { FlightDetailComponent }      from './components/flight-detail/flight-de
 import { HotelDetailComponent }       from './components/hotel-detail/hotel-detail.component';
 import { DestinationDetailComponent } from './components/destination-detail/destination-detail.component';
 import { UniversalDetailComponent }   from './components/universal-detail/universal-detail.component';
+import { NewsComponent }              from './components/news/news.component';
+import { NewsDetailComponent }        from './components/news-detail/news-detail.component';
+import { ApiTesterComponent }         from './components/api-tester/api-tester.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -34,7 +37,10 @@ export const routes: Routes = [
         {path : 'flight-detail/:id', component:FlightDetailComponent,     title : 'Flight Detail'},
         {path : 'hotel-detail',      component:HotelDetailComponent,      title : 'Hotel Detail'},
         {path : 'destination-detail',component:DestinationDetailComponent, title : 'Destination Detail'},
-        {path : 'item/:type/:id',    component:UniversalDetailComponent,   title : 'Details'}
+        {path : 'item/:type/:id',    component:UniversalDetailComponent,   title : 'Details'},
+        {path : 'news',              component:NewsComponent,               title : 'News & Guides'},
+        {path : 'news-detail/:id', component:NewsDetailComponent,         title : 'Article'},
+        {path : 'api-test',        component:ApiTesterComponent,          title : 'API Tester'}
     ]}
 
 ];

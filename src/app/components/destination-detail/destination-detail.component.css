@@ -514,6 +514,12 @@
   color: #fbbf24;
 }
 
+.score-count {
+  font-size: 0.75rem;
+  color: var(--body-clr);
+  margin-top: 0.2rem;
+}
+
 /* Rating bars */
 .rating-bars {
   flex: 1;
@@ -544,6 +550,14 @@
   background: var(--border-light);
   border-radius: 50px;
   overflow: hidden;
+}
+
+.bar-pct {
+  font-size: 0.7rem;
+  color: var(--body-clr);
+  width: 32px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .bar-fill {

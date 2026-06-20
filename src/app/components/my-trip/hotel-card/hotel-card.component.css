@@ -1,80 +1,134 @@
 :host { display: block; }
 
+/* ── Card shell ─────────────────────────────────────────────── */
 .hotel-card {
   position: relative;
   border-radius: 16px;
   overflow: hidden;
   height: 210px;
-  background-image: var(--hotel-img);
-  background-size: cover;
-  background-position: center;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.28s ease;
+  background: #1a1f2e; /* fallback while image loads */
 }
 
 .hotel-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
 }
 
-/* Gradient overlay — bottom 50% darkens for text legibility */
+/* ── Background image layer with full CSS enhancement ────────── */
+/* Separated into ::after so filter only touches the image,
+   not the gradient, text, or buttons above it.              */
+.hotel-card::after {
+  content: '';
+  position: absolute;
+  inset: -2px;              /* slight bleed to prevent white edges during scale */
+  background-image: var(--hotel-img);
+  background-size: cover;
+  background-position: center;
+
+  /* Enhancement pipeline:
+     brightness  → lifts shadows, corrects underexposed cabin shots
+     contrast    → perceived sharpness; edges pop without actual blur
+     saturate    → richer seat fabric, warmer cabin lighting
+     sepia       → very subtle warm cast to counteract the cool blue-screen tint  */
+  filter:
+    brightness(1.12)
+    contrast(1.22)
+    saturate(1.35)
+    sepia(0.06);
+
+  transform: scale(1.03);  /* micro-zoom removes any edge artifacts after filter */
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.35s ease;
+  z-index: 0;
+}
+
+/* Zoom-in and brighten image on hover for a premium feel */
+.hotel-card:hover::after {
+  transform: scale(1.09);
+  filter:
+    brightness(1.18)
+    contrast(1.25)
+    saturate(1.4)
+    sepia(0.04);
+}
+
+/* ── Gradient overlay — sits above image, below content ───────── */
 .hotel-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 55%);
+  /* Deeper, multi-stop gradient for richer text contrast */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.78)  0%,
+    rgba(0, 0, 0, 0.38) 40%,
+    rgba(0, 0, 0, 0.05) 70%,
+    transparent         100%
+  );
+  z-index: 1;
 }
 
-/* Invisible button that makes the whole card clickable */
+/* ── Stretch-link ─────────────────────────────────────────────── */
 .hc-stretch-link {
   position: absolute;
   inset: 0;
   background: transparent;
   border: none;
   cursor: pointer;
-  z-index: 1;
+  z-index: 2;
 }
 
+/* ── Text overlay ─────────────────────────────────────────────── */
 .hotel-overlay {
   position: absolute;
   bottom: 1rem;
   left: 1.1rem;
   right: 1.1rem;
-  z-index: 2;  /* sits above stretch-link */
+  z-index: 3;
 }
 
+.hotel-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.2rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+.hotel-price {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Actions ──────────────────────────────────────────────────── */
 .hotel-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
 }
 
 .hc-book-btn {
-  padding: 0.3rem 0.9rem;
+  padding: 0.35rem 1rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.72rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   background: #3b5bdb;
   color: #fff;
-  transition: opacity 0.15s;
-  position: relative;  /* stays above stretch-link */
-  z-index: 3;
+  letter-spacing: 0.2px;
+  transition: background 0.18s, transform 0.15s;
+  position: relative;
+  z-index: 4;
+  box-shadow: 0 2px 8px rgba(59, 91, 219, 0.45);
 }
 
-.hc-book-btn:hover { opacity: 0.85; }
-
-.hotel-name {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 0.2rem;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-}
-
-.hotel-price {
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.88);
-  margin: 0;
+.hc-book-btn:hover {
+  background: #2f4bc4;
+  transform: scale(1.04);
 }

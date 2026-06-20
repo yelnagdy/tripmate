@@ -15,6 +15,7 @@ import { BookingData } from '../../models/detail.models';
 import { HomeApiService } from '../../core/services/home-api.service';
 import { ApiDestination } from '../../models/api.models';
 import { safeUrl } from '../../core/utils/safe-url';
+import { FavoritesService } from '../../core/services/favorites.service';
 
 @Component({
   selector: 'app-home',
@@ -37,8 +38,9 @@ import { safeUrl } from '../../core/utils/safe-url';
 })
 export class HomeComponent implements OnInit {
 
-  private readonly router         = inject(Router);
-  private readonly homeApiService = inject(HomeApiService);
+  private readonly router            = inject(Router);
+  private readonly homeApiService    = inject(HomeApiService);
+  private readonly favoritesService  = inject(FavoritesService);
 
   /* ── Home API data ───────────────────────────────────────── */
   readonly homeLoading   = signal(true);
@@ -50,6 +52,13 @@ export class HomeComponent implements OnInit {
       this.recommended.set(data.recommended);
       this.popular.set(data.popular);
       this.homeLoading.set(false);
+    });
+
+    const tripIds = this.trips().map(t => t.id);
+    this.favoritesService.checkMany(tripIds, 'packge').subscribe(map => {
+      this.trips.update(list =>
+        list.map(t => ({ ...t, isFavorite: map[t.id] ?? t.isFavorite }))
+      );
     });
   }
 
@@ -197,9 +206,19 @@ export class HomeComponent implements OnInit {
   }
 
   onToggleFavorite(tripId: number): void {
+    const trip = this.trips().find(t => t.id === tripId);
+    if (!trip) return;
+
+    const nowFav = !trip.isFavorite;
     this.trips.update(list =>
-      list.map(t => t.id === tripId ? { ...t, isFavorite: !t.isFavorite } : t)
+      list.map(t => t.id === tripId ? { ...t, isFavorite: nowFav } : t)
     );
+
+    if (nowFav) {
+      this.favoritesService.add(tripId, 'packge').subscribe();
+    } else {
+      this.favoritesService.remove(tripId, 'packge').subscribe();
+    }
   }
 
   /* ── Why Choose Us features ─────────────────────────────── */
@@ -336,8 +355,11 @@ export class HomeComponent implements OnInit {
   }
 
   onViewMoreArticles(): void {
-    // TODO: navigate to /blog
-    console.log('View all articles');
+    this.router.navigate(['/main/news']);
+  }
+
+  onViewArticle(id: number): void {
+    this.router.navigate(['/main/news-detail', id]);
   }
 
   onNewsletterSubscribe(email: string): void {

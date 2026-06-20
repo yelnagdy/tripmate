@@ -137,7 +137,8 @@
         <app-package-card
           [pkg]="pkg"
           (viewMore)="onViewMore($event)"
-          (toggleFavorite)="onToggleFavorite($event)">
+          (toggleFavorite)="onToggleFavorite($event)"
+          (bookNow)="onBookNow($event)">
         </app-package-card>
       }
     } @else {
@@ -149,3 +150,10 @@
   </div>
 
 </div>
+
+@if (dialogOpen() && activeBooking()) {
+  <app-booking-dialog
+    [data]="activeBooking()!"
+    (closeDialog)="closeDialog()">
+  </app-booking-dialog>
+}

@@ -31,7 +31,12 @@ export class BookingService {
 
   getByUser(userId: number): Observable<ApiBooking[]> {
     return this.http.get<BookingListResponse>(`/api/Bookings/${userId}`).pipe(
-      map(res => res.data ?? []),
+      map(res => {
+        const bookings = res.data ?? [];
+        // Seed the reactive counter with the real server total
+        this.userStats.setStats(this.userStats.totalFavorites(), bookings.length);
+        return bookings;
+      }),
       catchError(() => of([]))
     );
   }
@@ -40,7 +45,10 @@ export class BookingService {
     return this.http.delete<{ success: boolean; message: string; data: string }>(
       `/api/Bookings/${bookingId}`
     ).pipe(
-      map(res => res.success === true),
+      map(res => {
+        if (res.success === true) this.userStats.decrementBookings();
+        return res.success === true;
+      }),
       catchError(() => of(false))
     );
   }

@@ -100,13 +100,15 @@
   <!-- Hotels -->
   @if (activeTab() === 'hotels') {
     @if (hotels().length) {
-      @for (hotel of hotels(); track hotel.id) {
-        <app-hotel-card
-          [hotel]="hotel"
-          (book)="onViewHotel($event)"
-          (viewPlace)="onViewHotel($event)">
-        </app-hotel-card>
-      }
+      <div class="hotels-grid">
+        @for (hotel of hotels(); track hotel.id) {
+          <app-hotel-card
+            [hotel]="hotel"
+            (book)="onViewHotel($event)"
+            (viewPlace)="onViewHotel($event)">
+          </app-hotel-card>
+        }
+      </div>
     } @else {
       <div class="empty-state">
         <i class="fas fa-hotel" aria-hidden="true"></i>

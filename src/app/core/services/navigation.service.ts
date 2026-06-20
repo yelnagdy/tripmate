@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { RecentlyViewedService } from './recently-viewed.service';
 
 export interface DestinationNavState {
   destinationId: number;
@@ -34,14 +35,31 @@ export type NavState =
 @Injectable({ providedIn: 'root' })
 export class NavigationService {
 
-  private readonly router = inject(Router);
+  private readonly router         = inject(Router);
+  private readonly recentlyViewed = inject(RecentlyViewedService);
 
   /** Typed shortcuts — use these whenever the type is known at compile time. */
   goToDestination(state: DestinationNavState): void {
+    this.recentlyViewed.add({
+      id:       state.destinationId,
+      name:     state.name,
+      imageUrl: state.image || null,
+      price:    state.pricePerNight ?? 0,
+      country:  state.location ?? '',
+      city:     null,
+    });
     this.router.navigate(['/main/destination-detail'], { state });
   }
 
   goToHotel(state: HotelNavState): void {
+    this.recentlyViewed.add({
+      id:       state.id,
+      name:     state.name,
+      imageUrl: state.image || null,
+      price:    state.pricePerNight ?? 0,
+      country:  'Hotel',
+      city:     null,
+    });
     this.router.navigate(['/main/hotel-detail'], { state });
   }
 

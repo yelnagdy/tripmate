@@ -126,7 +126,12 @@
       </h2>
       <div class="smart-strip-list">
         @for (place of smartPlaces(); track place.id) {
-          <div class="smart-strip-card">
+          <div class="smart-strip-card"
+               role="button"
+               tabindex="0"
+               (click)="onViewPlace(place)"
+               (keydown.enter)="onViewPlace(place)"
+               (keydown.space)="onViewPlace(place)">
             <img [src]="place.image" [alt]="place.name" class="ssc-img"
                  onerror="this.onerror=null; this.src='assets/images/place-manarola.jpeg'" />
             <div class="ssc-body">

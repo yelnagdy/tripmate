@@ -1,31 +1,34 @@
-
-
 import { inject, PLATFORM_ID } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 
-export const authGuard: CanActivateFn = (route, state) => {
-  const _router = inject(Router);
+/** Returns true if a JWT token string is present and not yet expired. */
+function isTokenValid(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // exp is Unix seconds; Date.now() is milliseconds
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+export const authGuard: CanActivateFn = (_route, _state) => {
+  const router     = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
-  // ✅ On the server (SSR), skip the guard — no sessionStorage available
   if (!isPlatformBrowser(platformId)) {
-    console.log('[Guard] Running on server — skipping auth check');
-    return true;
+    return true; // SSR: no localStorage, skip
   }
 
   const token = sessionStorage.getItem('token');
-  console.log('[Guard] Token check:', token ? '✔ found' : '✘ missing');
 
-  if (token) {
+  if (token && isTokenValid(token)) {
     return true;
   }
 
-  // ✅ Return a UrlTree instead of calling navigate() — cleaner and avoids double navigation
-  console.log('[Guard] No token — redirecting to /auth/login');
-  return _router.createUrlTree(['/auth/login']);
+  // Token missing or expired — clean up and redirect
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('refreshToken');
+  return router.createUrlTree(['/auth/login']);
 };
-
-
-
-

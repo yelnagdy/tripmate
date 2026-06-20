@@ -1,0 +1,68 @@
+<section class="news-page">
+
+  <div class="news-header">
+    <button type="button" class="back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Back
+    </button>
+    <div class="header-text">
+      <h1 class="page-title">News, Tips &amp; Guides</h1>
+      <p class="page-subtitle">Stay up to date with the latest travel stories, expert advice and hidden gems.</p>
+    </div>
+  </div>
+
+  <div class="articles-grid">
+    @for (article of visibleArticles(); track article.id) {
+      <article class="article-card">
+        <div class="card-image-wrap">
+          <img [src]="article.image" [alt]="article.title" class="card-image" loading="lazy" />
+          <span class="badge" [ngClass]="categoryClass(article.categoryColor)">{{ article.category }}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="meta-item">
+              <i class="far fa-calendar-alt"></i>
+              {{ article.date }}
+            </span>
+            <span class="meta-sep">·</span>
+            <span class="meta-item">
+              <i class="far fa-clock"></i>
+              {{ article.readTime }} read
+            </span>
+            <span class="meta-sep">·</span>
+            <span class="meta-item">
+              <i class="far fa-comment"></i>
+              {{ article.comments }}
+            </span>
+          </div>
+
+          <h2 class="card-title">{{ article.title }}</h2>
+
+          <div class="card-footer">
+            <div class="author">
+              <img [src]="article.author.avatar" [alt]="article.author.name" class="author-avatar" />
+              <span class="author-name">{{ article.author.name }}</span>
+            </div>
+            <a class="keep-reading" href="#"
+               (click)="$event.preventDefault(); goToArticle(article.id)">
+              Keep Reading
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+
+  <!-- Sentinel element for IntersectionObserver infinite scroll -->
+  @if (hasMore()) {
+    <div #sentinel class="scroll-sentinel" aria-hidden="true">
+      <i class="fas fa-spinner fa-spin"></i>
+      Loading more articles…
+    </div>
+  } @else {
+    <p class="end-label">You've read it all — happy travels!</p>
+  }
+
+</section>

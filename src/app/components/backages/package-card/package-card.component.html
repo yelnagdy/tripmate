@@ -103,14 +103,23 @@
 
     </div>
 
-    <!-- View More button -->
-    <button
-      type="button"
-      class="view-more-btn"
-      (click)="viewMore.emit(pkg())"
-      [attr.aria-label]="'View details for ' + pkg().title">
-      View More
-    </button>
+    <!-- Actions row -->
+    <div class="card-actions">
+      <button
+        type="button"
+        class="view-more-btn"
+        (click)="viewMore.emit(pkg())"
+        [attr.aria-label]="'View details for ' + pkg().title">
+        View More
+      </button>
+      <button
+        type="button"
+        class="book-now-btn"
+        (click)="$event.stopPropagation(); bookNow.emit(pkg())"
+        [attr.aria-label]="'Book ' + pkg().title">
+        Book Now
+      </button>
+    </div>
 
   </div>
 

@@ -24,14 +24,25 @@ export class RatingService {
     const params = `itemId=${itemId}&itemType=${encodeURIComponent(itemType)}`;
     return this.http
       .get<number>(`/api/ratings/count?${params}`)
-      .pipe(catchError(() => of(0)));
+      .pipe(map(v => v ?? 0), catchError(() => of(0)));
   }
 
   getAverage(itemId: number, itemType: string): Observable<number> {
     const params = `itemId=${itemId}&itemType=${encodeURIComponent(itemType)}`;
     return this.http
       .get<number>(`/api/ratings/average?${params}`)
-      .pipe(catchError(() => of(0)));
+      .pipe(map(v => v ?? 0), catchError(() => of(0)));
+  }
+
+  getUserRating(itemId: number, itemType: string): Observable<number> {
+    const userId = this.getUserId();
+    if (!userId) return of(0);
+
+    const params = `userId=${userId}&itemId=${itemId}&itemType=${encodeURIComponent(itemType)}`;
+    return this.http
+      .get<number | null>(`/api/ratings/user?${params}`)
+      // 204 No Content → body is null → treat as 0 (user hasn't rated yet)
+      .pipe(map(v => v ?? 0), catchError(() => of(0)));
   }
 
   remove(itemId: number, itemType: string): Observable<boolean> {
@@ -49,7 +60,7 @@ export class RatingService {
 
   private getUserId(): number {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       if (!token) return 0;
       const payload = JSON.parse(atob(token.split('.')[1]));
       const claim   = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';

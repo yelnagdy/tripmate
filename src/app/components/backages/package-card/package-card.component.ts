@@ -17,6 +17,7 @@ export class PackageCardComponent implements OnInit {
 
   viewMore        = output<Package>();
   toggleFavorite  = output<number>();
+  bookNow         = output<Package>();
 
   private readonly ratingService = inject(RatingService);
   private successTimer?: ReturnType<typeof setTimeout>;

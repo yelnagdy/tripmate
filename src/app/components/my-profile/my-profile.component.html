@@ -305,7 +305,7 @@
               </div>
               <div class="recent-scroll">
                 @for (item of recentItems(); track item.id) {
-                  <div class="recent-card">
+                  <div class="recent-card" role="button" tabindex="0" (click)="viewRecentItem(item)" (keydown.enter)="viewRecentItem(item)" (keydown.space)="viewRecentItem(item)">
                     <div class="recent-img-wrap">
                       <img
                         [src]="item.imageUrl | safeUrl:'assets/images/fav-santorini.jpeg'"
@@ -358,6 +358,66 @@
               <i class="fas fa-check-circle" aria-hidden="true"></i>
               Profile updated successfully!
             </p>
+          }
+
+          <!-- Danger Zone -->
+          <div class="danger-zone">
+            <h4 class="danger-zone__title">
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              Danger Zone
+            </h4>
+            <p class="danger-zone__desc">
+              Permanently delete your account and all associated data. This cannot be undone.
+            </p>
+            <button
+              type="button"
+              class="btn-delete-account"
+              [disabled]="deleteInProgress()"
+              (click)="openDeleteConfirm()">
+              Delete My Account
+            </button>
+          </div>
+
+          <!-- Delete confirmation modal -->
+          @if (deleteConfirmOpen()) {
+            <div class="delete-overlay" role="dialog" aria-modal="true" aria-labelledby="del-title">
+              <div class="delete-dialog">
+                <h4 id="del-title" class="delete-dialog__title">
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                  Delete Account?
+                </h4>
+                <p class="delete-dialog__body">
+                  This will permanently remove your account, posts, bookings, and favourites.
+                  There is no way to undo this action.
+                </p>
+                @if (deleteError()) {
+                  <p class="delete-dialog__error">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    {{ deleteError() }}
+                  </p>
+                }
+                <div class="delete-dialog__actions">
+                  <button
+                    type="button"
+                    class="btn-cancel"
+                    [disabled]="deleteInProgress()"
+                    (click)="closeDeleteConfirm()">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-delete-confirm"
+                    [disabled]="deleteInProgress()"
+                    (click)="confirmDeleteAccount()">
+                    @if (deleteInProgress()) {
+                      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Deleting…
+                    } @else {
+                      Yes, Delete My Account
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
           }
 
         </div>

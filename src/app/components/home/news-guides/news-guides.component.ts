@@ -9,6 +9,7 @@ import { Article } from '../../../models/home.models';
   styleUrl: './news-guides.component.css',
 })
 export class NewsGuidesComponent {
-  articles = input.required<Article[]>();
-  viewMore  = output<void>();
+  articles     = input.required<Article[]>();
+  viewMore     = output<void>();
+  articleClick = output<number>();
 }

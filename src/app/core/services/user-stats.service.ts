@@ -20,4 +20,5 @@ export class UserStatsService {
   incrementFavorites(): void { this.totalFavorites.update(n => n + 1); }
   decrementFavorites(): void { this.totalFavorites.update(n => Math.max(0, n - 1)); }
   incrementBookings():  void { this.totalBookings.update(n => n + 1); }
+  decrementBookings():  void { this.totalBookings.update(n => Math.max(0, n - 1)); }
 }

@@ -1,17 +1,10 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
-// Prevents multiple parallel 401 responses from triggering multiple redirects.
-let isRedirectingToLogin = false;
-
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const platformId = inject(PLATFORM_ID);
-  const router = inject(Router);
-
-  if (!isPlatformBrowser(platformId)) {
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) {
     return next(req);
   }
 
@@ -23,12 +16,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401 && !isRedirectingToLogin) {
-        isRedirectingToLogin = true;
+      // On 401: clear the stale token so the guard redirects on the next
+      // navigation, but do NOT navigate here — the individual services already
+      // handle errors gracefully, and forcing a redirect on every 401 (e.g.
+      // from the home page's API calls right after login) causes a redirect loop.
+      if (err.status === 401 && token) {
         sessionStorage.removeItem('token');
-        router.navigate(['/auth/login']).then(() => {
-          isRedirectingToLogin = false;
-        });
+        sessionStorage.removeItem('refreshToken');
       }
       return throwError(() => err);
     })
