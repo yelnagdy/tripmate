@@ -142,87 +142,76 @@
       <form [formGroup]="paymentForm" (ngSubmit)="onPay()" novalidate>
         <div class="info-card">
 
-          <!-- Payment method pill -->
-          <div class="method-pill">
-            <i class="fas fa-credit-card" aria-hidden="true"></i>
-            <span>Credit Card</span>
+          <!-- Order summary -->
+          <div class="pay-summary">
+            <div class="pay-summary-row">
+              <span class="pay-summary-label">Destination</span>
+              <span class="pay-summary-value">{{ display().to }}</span>
+            </div>
+            <div class="pay-summary-row">
+              <span class="pay-summary-label">Guests</span>
+              <span class="pay-summary-value">{{ guests() }}</span>
+            </div>
+            <div class="pay-summary-row pay-summary-total">
+              <span class="pay-summary-label">Total</span>
+              <span class="pay-summary-value">${{ total() }}</span>
+            </div>
           </div>
 
-          <!-- Card number -->
-          <div class="pay-field">
-            <label class="pay-label" for="cardNumber">Card Number</label>
-            <input
-              id="cardNumber"
-              type="text"
-              class="pay-input"
-              [class.pay-input--err]="hasError('cardNumber')"
-              formControlName="cardNumber"
-              placeholder="1234567890121234"
-              maxlength="16"
-              inputmode="numeric" />
-            @if (hasError('cardNumber')) {
-              <span class="err-msg">16-digit card number required</span>
-            }
-          </div>
+          <!-- Divider -->
+          <div class="pay-divider"></div>
 
-          <!-- Expiry + CVV -->
+          <!-- Billing details -->
+          <p class="pay-section-label">Billing Details</p>
+
           <div class="pay-row">
             <div class="pay-field">
-              <label class="pay-label" for="expiry">Ex Date</label>
+              <label class="pay-label" for="firstName">First Name</label>
               <input
-                id="expiry"
+                id="firstName"
                 type="text"
                 class="pay-input"
-                [class.pay-input--err]="hasError('expiry')"
-                formControlName="expiry"
-                placeholder="MM/YY"
-                maxlength="5" />
-              @if (hasError('expiry')) {
-                <span class="err-msg">MM/YY</span>
-              }
-            </div>
-            <div class="pay-field">
-              <label class="pay-label" for="cvv">CVV</label>
-              <input
-                id="cvv"
-                type="text"
-                class="pay-input"
-                [class.pay-input--err]="hasError('cvv')"
-                formControlName="cvv"
-                placeholder="123"
-                maxlength="3"
-                inputmode="numeric" />
-              @if (hasError('cvv')) {
-                <span class="err-msg">3 digits</span>
-              }
-            </div>
-          </div>
-
-          <!-- Country + Zip -->
-          <div class="pay-row">
-            <div class="pay-field">
-              <label class="pay-label" for="country">Country</label>
-              <input
-                id="country"
-                type="text"
-                class="pay-input"
-                [class.pay-input--err]="hasError('country')"
-                formControlName="country"
-                placeholder="BD" />
-            </div>
-            <div class="pay-field">
-              <label class="pay-label" for="zip">Zip Code</label>
-              <input
-                id="zip"
-                type="text"
-                class="pay-input"
-                [class.pay-input--err]="hasError('zip')"
-                formControlName="zip"
-                placeholder="12345" />
-              @if (hasError('zip')) {
+                [class.pay-input--err]="hasError('firstName')"
+                formControlName="firstName"
+                placeholder="Yousef" />
+              @if (hasError('firstName')) {
                 <span class="err-msg">Required</span>
               }
             </div>
+            <div class="pay-field">
+              <label class="pay-label" for="lastName">Last Name</label>
+              <input
+                id="lastName"
+                type="text"
+                class="pay-input"
+                [class.pay-input--err]="hasError('lastName')"
+                formControlName="lastName"
+                placeholder="Elnagdy" />
+              @if (hasError('lastName')) {
+                <span class="err-msg">Required</span>
+              }
+            </div>
+          </div>
+
+          <div class="pay-field">
+            <label class="pay-label" for="payEmail">Email</label>
+            <input
+              id="payEmail"
+              type="email"
+              class="pay-input"
+              [class.pay-input--err]="hasError('email')"
+              formControlName="email"
+              placeholder="you@email.com" />
+            @if (hasError('email')) {
+              <span class="err-msg">Valid email required</span>
+            }
+          </div>
+
+          <!-- Paymob branding -->
+          <div class="paymob-note">
+            <i class="fas fa-lock" aria-hidden="true"></i>
+            Secure payment powered by <strong>Paymob</strong>.
+            You will be redirected to complete payment.
           </div>
 
         </div>
@@ -230,9 +219,9 @@
         <button type="submit" class="action-btn" [disabled]="paying()">
           @if (paying()) {
             <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-            Processing…
+            Redirecting to Paymob…
           } @else {
-            Pay ${{ total() }}
+            Pay ${{ total() }} with Paymob
           }
         </button>
       </form>

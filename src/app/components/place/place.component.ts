@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { PlaceCardComponent } from './place-card/place-card.component';
 import { Place } from '../../models/place.models';
 import { DestinationService } from '../../core/services/destination.service';
@@ -49,21 +50,24 @@ export class PlaceComponent implements OnInit {
   readonly draftFilter        = signal<PlaceFilter>({ categories: [], maxPrice: null, minRating: null });
   readonly places             = signal<Place[]>([]);
   readonly serverFilterResult = signal<Place[] | null>(null);
+  readonly serverSearchResult = signal<Place[] | null>(null);
   readonly smartPlaces        = signal<Place[]>([]);
   readonly apiCategories      = signal<ApiCategory[]>([]);
 
   readonly ratingOptions: number[] = [3, 4, 5];
+
+  // Backend search — debounced, cancels in-flight requests via switchMap
+  private readonly search$ = new Subject<string>();
 
   /* ── Load from API ──────────────────────────────────────────── */
   ngOnInit(): void {
     const userId = this.getUserId();
 
     this.destinationService.getAll().subscribe(apiData => {
-      const list = apiData.length > 0 ? apiData.map(d => this.mapToPlace(d)) : FALLBACK_PLACES;
+      const list = apiData.length >= 4 ? apiData.map(d => this.mapToPlace(d)) : FALLBACK_PLACES;
       this.places.set(list);
       this.loading.set(false);
 
-      // Hydrate isFavorite from API
       const ids = list.map(p => p.id);
       this.favoritesService.checkMany(ids, 'destination').subscribe(favMap => {
         this.places.update(ps => ps.map(p => ({ ...p, isFavorite: favMap[p.id] ?? false })));
@@ -77,6 +81,21 @@ export class PlaceComponent implements OnInit {
     }
 
     this.categoryService.getAll().subscribe(cats => this.apiCategories.set(cats));
+
+    // Wire backend search: debounce 350 ms, skip unchanged values, cancel stale requests
+    this.search$.pipe(
+      debounceTime(350),
+      distinctUntilChanged(),
+      switchMap(q => q.length >= 2
+        ? this.destinationService.search(q)
+        : of([])
+      ),
+    ).subscribe(apiResults => {
+      // Use API results if available; null clears so filteredPlaces falls back to client-side
+      this.serverSearchResult.set(
+        apiResults.length > 0 ? apiResults.map(d => this.mapToPlace(d)) : null
+      );
+    });
   }
 
   private getUserId(): number {
@@ -90,20 +109,22 @@ export class PlaceComponent implements OnInit {
   }
 
   private mapToPlace(d: ApiDestination): Place {
-    const safeCity = (d.city && d.city !== 'null' && d.city !== 'undefined') ? d.city.trim() : '';
+    const safeCity    = (d.city    && d.city    !== 'null' && d.city    !== 'undefined') ? d.city.trim()    : '';
+    const safeCountry = (d.country && d.country !== 'null' && d.country !== 'undefined') ? d.country.trim() : '';
+    const location    = safeCity ? `${safeCountry || 'Unknown'}, ${safeCity}` : (safeCountry || 'Unknown');
     return {
-      id:           d.id,
-      name:         d.name,
-      location:     safeCity ? `${d.country}, ${safeCity}` : d.country,
-      image:        safeUrl(d.imageUrl, 'assets/images/place-manarola.jpeg'),
-      imageCount:   5,
-      hotelStars:   Math.min(5, Math.max(1, Math.round(d.rating))),
-      amenities:    20,
-      reviewScore:  d.rating,
-      reviewLabel:  this.ratingLabel(d.rating),
-      reviewCount:  0,
+      id:            d.id,
+      name:          d.name,
+      location,
+      image:         safeUrl(d.imageUrl, 'assets/images/place-manarola.jpeg'),
+      imageCount:    5,
+      hotelStars:    Math.min(5, Math.max(1, Math.round(d.rating || 0))),
+      amenities:     20,
+      reviewScore:   d.rating || 0,
+      reviewLabel:   this.ratingLabel(d.rating || 0),
+      reviewCount:   0,
       pricePerNight: d.price,
-      isFavorite:   false,
+      isFavorite:    false,
     };
   }
 
@@ -129,24 +150,45 @@ export class PlaceComponent implements OnInit {
   });
 
   readonly filteredPlaces = computed(() => {
-    const q      = this.searchQuery().toLowerCase().trim();
-    const f      = this.activeFilter();
-    const base   = this.serverFilterResult() ?? this.places();
+    const q    = this.searchQuery().toLowerCase().trim();
+    const f    = this.activeFilter();
+
+    // Priority: server search > server filter > all places
+    const base = this.serverSearchResult() ?? this.serverFilterResult() ?? this.places();
+
+    const apiCats = this.apiCategories();
+    const usingTravelTypes = apiCats.length > 0;
 
     return base.filter(p => {
       const country     = p.location.split(',')[0].trim();
-      const matchSearch = !q || p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q);
-      // Skip country/price filters client-side when server already filtered
-      const matchCat    = this.serverFilterResult() || f.categories.length === 0 || f.categories.includes(country);
-      const matchPrice  = this.serverFilterResult() || f.maxPrice === null || p.pricePerNight <= f.maxPrice;
+      // Skip client-side text search when server already filtered by query
+      const matchSearch = this.serverSearchResult()
+                          || !q
+                          || p.name.toLowerCase().includes(q)
+                          || p.location.toLowerCase().includes(q);
+      const matchCat    = this.serverFilterResult()
+                          || this.serverSearchResult()
+                          || f.categories.length === 0
+                          || usingTravelTypes
+                          || f.categories.includes(country);
+      const matchPrice  = this.serverFilterResult() || this.serverSearchResult() || f.maxPrice === null || p.pricePerNight <= f.maxPrice;
       const matchRating = f.minRating === null || p.hotelStars >= f.minRating;
       return matchSearch && matchCat && matchPrice && matchRating;
     });
   });
 
   /* ── Search & filter actions ────────────────────────────────── */
-  onSearch(value: string): void { this.searchQuery.set(value); }
-  clearSearch(): void { this.searchQuery.set(''); }
+  onSearch(value: string): void {
+    this.searchQuery.set(value);
+    this.search$.next(value.trim());
+    if (!value.trim()) this.serverSearchResult.set(null);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.serverSearchResult.set(null);
+    this.search$.next('');
+  }
 
   toggleFilterPanel(): void {
     if (!this.filterOpen()) {
@@ -179,7 +221,11 @@ export class PlaceComponent implements OnInit {
     this.activeFilter.set({ ...draft, categories: [...draft.categories] });
     this.filterOpen.set(false);
 
-    const hasServerParams = draft.categories.length > 0 || draft.maxPrice !== null;
+    // Only call the server filter when we have country-derived categories
+    // (API categories empty) — travel-type categories can't be sent as country names.
+    const usingTravelTypes = this.apiCategories().length > 0;
+    const hasServerParams  = !usingTravelTypes && (draft.categories.length > 0 || draft.maxPrice !== null);
+
     if (!hasServerParams) {
       this.serverFilterResult.set(null);
       return;
@@ -187,14 +233,13 @@ export class PlaceComponent implements OnInit {
 
     this.filterLoading.set(true);
     this.destinationService.filter({
-      country:  draft.categories[0],           // API takes one country value
-      budget:   draft.maxPrice ?? undefined,
+      country: draft.categories[0],
+      budget:  draft.maxPrice ?? undefined,
     }).subscribe(apiData => {
       if (apiData.length > 0) {
-        const mapped = apiData.map(d => this.mapToPlace(d));
-        this.serverFilterResult.set(mapped);
+        this.serverFilterResult.set(apiData.map(d => this.mapToPlace(d)));
       } else {
-        this.serverFilterResult.set(null);     // fall back to client-side
+        this.serverFilterResult.set(null);
       }
       this.filterLoading.set(false);
     });
@@ -218,6 +263,10 @@ export class PlaceComponent implements OnInit {
 
   removeRatingChip(): void {
     this.activeFilter.update(f => ({ ...f, minRating: null }));
+  }
+
+  scrollRow(el: HTMLElement, dir: 1 | -1): void {
+    el?.scrollBy({ left: dir * 180, behavior: 'smooth' });
   }
 
   onViewPlace(place: Place): void {

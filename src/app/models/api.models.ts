@@ -92,16 +92,18 @@ export interface ApiUserProfile {
 }
 
 export interface ApiRecentItem {
-  id:          number;
-  name:        string;
-  country:     string;
-  city:        string | null;
-  description: string | null;
-  imageUrl:    string | null;
-  price:       number;
+  id:           number;
+  name:         string;
+  country:      string;
+  city:         string | null;
+  airportCode:  string | null;
+  description:  string | null;
+  imageUrl:     string | null;
+  price:        number;
   durationDays: number | null;
-  activities:  string | null;
-  rating:      number;
+  itinerary:    string | null;
+  activities:   string | null;
+  rating:       number;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -158,15 +160,18 @@ export interface ApiCategoryCreateResponse {
    PACKAGES  — /api/packages/*
 ══════════════════════════════════════════════════════════ */
 export interface ApiPackage {
-  id:          number;
-  title:       string;
-  description: string;
-  price:       number;
+  id:           number;
+  title:        string;
+  description:  string;
+  price:        number;
   durationDays: number;
-  imageUrl:    string;
-  startDate:   string;
-  endDate:     string;
-  maxGuests?:  number | null;
+  imageUrl:     string | null;
+  startDate:    string;
+  endDate:      string;
+  maxGuests?:   number | null;
+  destination?: ApiDestination | null;
+  hotels?:      ApiHotel[]     | null;
+  flights?:     ApiSmartFlight[] | null;
 }
 
 export interface CreatePackageRequest {
@@ -203,7 +208,7 @@ export interface ApiPackageCreateResponse {
 export interface ApiExternalPackage {
   destination:  ApiDestination;
   hotels:       ApiHotel[];
-  flights:      ApiFlightResult[];
+  flights:      ApiSmartFlight[];
   id:           number;
   title:        string | null;
   price:        number;
@@ -272,16 +277,26 @@ export interface ApiBooking {
 }
 
 export interface ApiBookingDetails {
-  bookingId:     number;
-  userId:        number;
-  packageId?:    number;
-  packageTitle?: string;
-  destination?:  string;
-  startDate?:    string;
-  endDate?:      string;
-  guests?:       number;
-  totalPrice?:   number;
-  status?:       string;
+  id:              number;
+  userId:          number;
+  destinationId?:  number;
+  bookingDate?:    string;
+  numberOfPeople?: number;
+  status?:         string;
+  bookingNumber?:  string;
+  bookingType?:    string;
+  totalPrice?:     number;
+  currency?:       string;
+  paymentStatus?:  string;
+  destinationName?: string | null;
+  packageName?:    string | null;
+  // Fields set by the component from the list endpoint (ApiBooking)
+  bookingId?:      number;
+  packageTitle?:   string | null;
+  destination?:    string | null;
+  startDate?:      string;
+  endDate?:        string;
+  guests?:         number;
 }
 
 /* ══════════════════════════════════════════════════════════

@@ -8,7 +8,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -21,8 +21,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // handle errors gracefully, and forcing a redirect on every 401 (e.g.
       // from the home page's API calls right after login) causes a redirect loop.
       if (err.status === 401 && token) {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('refreshToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
       }
       return throwError(() => err);
     })

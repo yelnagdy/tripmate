@@ -33,22 +33,6 @@
               }
             </div>
 
-             <div class="mb-3">
-              <label for="fullname" class="form-label">full name</label>
-              <input formControlName="fullname" type="text" class="form-control" id="fullname" placeholder="Enter your full name" />
-              @if (RegisterForm.get('fullname')?.errors && RegisterForm.get('fullname')?.touched) {
-                <div class="alert alert-warning my-2 p-2 fs-6 fw-bold rounded-2">
-                  @if (RegisterForm.get('fullname')?.getError('required')) {
-                    <p class="m-2">Full name is required</p>
-                  } @else if (RegisterForm.get('fullname')?.getError('minlength')) {
-                    <p class="m-2">Full name length at least 3</p>
-                  } @else if (RegisterForm.get('fullname')?.getError('maxlength')) {
-                    <p class="m-2">Full name length must be max 50</p>
-                  }
-                </div>
-              }
-            </div>
-
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
               <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter your email" />

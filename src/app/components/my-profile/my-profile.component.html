@@ -49,10 +49,14 @@
 
       <div class="sidebar-meta">
         @if (profile().email) {
-          <span><i class="fas fa-envelope" aria-hidden="true"></i> {{ profile().email }}</span>
+          <a [href]="'mailto:' + profile().email">
+            <i class="fas fa-envelope" aria-hidden="true"></i> {{ profile().email }}
+          </a>
         }
         @if (profile().phone) {
-          <span><i class="fas fa-phone" aria-hidden="true"></i> {{ profile().phone }}</span>
+          <a [href]="'tel:' + profile().phone">
+            <i class="fas fa-phone" aria-hidden="true"></i> {{ profile().phone }}
+          </a>
         }
       </div>
 

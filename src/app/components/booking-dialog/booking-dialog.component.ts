@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BookingData } from '../../models/detail.models';
 import { BookingService } from '../../core/services/booking.service';
+import { PaymentService } from '../../core/services/payment.service';
 
 type EditableField = 'date' | 'from' | 'to' | 'flight';
 
@@ -27,18 +28,19 @@ export class BookingDialogComponent {
 
   private readonly router          = inject(Router);
   private readonly bookingService  = inject(BookingService);
+  private readonly paymentService  = inject(PaymentService);
 
   /* ── Step state ─────────────────────────────────────────────── */
   readonly currentStep = signal<Step>(1);
-  readonly paying      = signal(false);
+  readonly paying         = signal(false);
+  readonly payError       = signal<string | null>(null);
+  readonly confirmedLocal = signal<string | null>(null); // local booking id after confirm
 
   /* ── Inline field editing ───────────────────────────────────── */
-  // Local overrides applied on top of the immutable input()
   readonly overrides    = signal<Partial<BookingData>>({});
   readonly editingField = signal<EditableField | null>(null);
   readonly editDraft    = signal('');
 
-  // Merged view: input data + any saved overrides
   readonly display = computed(() => ({ ...this.data(), ...this.overrides() }));
 
   startEdit(field: EditableField): void {
@@ -50,15 +52,11 @@ export class BookingDialogComponent {
     const field = this.editingField();
     if (!field) return;
     const value = this.editDraft().trim();
-    if (value) {
-      this.overrides.update(o => ({ ...o, [field]: value }));
-    }
+    if (value) this.overrides.update(o => ({ ...o, [field]: value }));
     this.editingField.set(null);
   }
 
-  cancelEdit(): void {
-    this.editingField.set(null);
-  }
+  cancelEdit(): void { this.editingField.set(null); }
 
   /* ── Guests counter ─────────────────────────────────────────── */
   readonly guests = signal(2);
@@ -68,36 +66,37 @@ export class BookingDialogComponent {
   /* ── Total price ────────────────────────────────────────────── */
   readonly total = computed(() => this.guests() * this.data().pricePerPerson);
 
-  /* ── Payment reactive form ──────────────────────────────────── */
+  /* ── Payment form — name/email for Paymob ───────────────────── */
   readonly paymentForm = new FormGroup({
-    cardNumber: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^\d{16}$/),
-    ]),
-    expiry: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^\d{2}\/\d{2}$/),
-    ]),
-    cvv: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^\d{3}$/),
-    ]),
-    country: new FormControl('', Validators.required),
-    zip:     new FormControl('', Validators.required),
+    firstName: new FormControl(this.prefillFirstName(), Validators.required),
+    lastName:  new FormControl(this.prefillLastName(),  Validators.required),
+    email:     new FormControl(this.prefillEmail(),     [Validators.required, Validators.email]),
   });
+
+  private prefillFirstName(): string {
+    const full = localStorage.getItem('userFullName') ?? '';
+    return this.paymentService.parseFullName(full).firstName;
+  }
+
+  private prefillLastName(): string {
+    const full = localStorage.getItem('userFullName') ?? '';
+    return this.paymentService.parseFullName(full).lastName;
+  }
+
+  private prefillEmail(): string {
+    return localStorage.getItem('userEmail') ?? '';
+  }
 
   /* ── Navigation ─────────────────────────────────────────────── */
   goBack(): void {
     const s = this.currentStep();
-    if (s === 1) {
-      this.closeDialog.emit();
-    } else {
-      this.currentStep.set((s - 1) as Step);
-    }
+    if (s === 1) this.closeDialog.emit();
+    else         this.currentStep.set((s - 1) as Step);
   }
 
   onContinue(): void {
     this.currentStep.set(2);
+    this.payError.set(null);
   }
 
   onPay(): void {
@@ -106,12 +105,65 @@ export class BookingDialogComponent {
       return;
     }
 
-    const d = this.display();
-    this.paying.set(true);
+    const d      = this.display();
+    const guests = this.guests();
+    const total  = this.total();
+    const form   = this.paymentForm.value;
 
-    this.bookingService.create(d.destinationId ?? 1, this.guests()).subscribe(() => {
+    this.paying.set(true);
+    this.payError.set(null);
+
+    const userId = this.paymentService.getUserId();
+
+    this.paymentService.createPayment({
+      userId,
+      amount:    total,
+      email:     form.email     ?? '',
+      firstName: form.firstName ?? '',
+      lastName:  form.lastName  ?? '',
+      bookingId: 0,
+      items: [{
+        itemType: 'destination',
+        itemId:   d.destinationId ?? 0,
+        price:    total,
+      }],
+    }).subscribe(paymentUrl => {
       this.paying.set(false);
-      this.currentStep.set(3);
+
+      // Save booking locally so My Trip is updated regardless of payment outcome
+      this.bookingService.saveLocal({
+        destination: d.to     || 'Unknown',
+        from:        d.from   || '',
+        to:          d.to     || '',
+        flight:      d.flight || '',
+        date:        d.date   || '',
+        guests,
+        totalPrice:  total,
+        status:      'Pending Payment',
+      });
+
+      if (paymentUrl) {
+        // Open Paymob in a new tab so the user keeps app state
+        window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+        this.bookingService.create(d.destinationId ?? 1, guests).subscribe();
+        // Confirm payment with bookingId=0 (no backend bookingId yet from create response)
+        this.paymentService.confirmPayment(0).subscribe(confirmed => {
+          if (confirmed) {
+            // Upgrade local booking status from "Pending Payment" → "Confirmed"
+            const locals = this.bookingService.localBookings();
+            const pending = locals.find(b => b.status === 'Pending Payment');
+            if (pending) {
+              this.bookingService.removeLocal(pending.id);
+              this.bookingService.saveLocal({ ...pending, status: 'Confirmed' });
+              this.confirmedLocal.set(pending.id);
+            }
+          }
+        });
+        this.currentStep.set(3);
+      } else {
+        this.payError.set('Payment gateway unavailable. Your booking is saved — please retry later.');
+        this.currentStep.set(3);
+      }
     });
   }
 
@@ -120,7 +172,6 @@ export class BookingDialogComponent {
     this.router.navigate(['/main/my-trip']);
   }
 
-  /* ── Field error helper ─────────────────────────────────────── */
   hasError(field: string): boolean {
     const ctrl = this.paymentForm.get(field);
     return !!(ctrl?.invalid && ctrl?.touched);

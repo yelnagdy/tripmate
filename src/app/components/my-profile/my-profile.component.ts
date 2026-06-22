@@ -8,6 +8,7 @@ import { UserStatsService } from '../../core/services/user-stats.service';
 import { NavigationService } from '../../core/services/navigation.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { RecentlyViewedService } from '../../core/services/recently-viewed.service';
+import { BookingService } from '../../core/services/booking.service';
 import { ApiPost } from '../../models/api.models';
 import { CommonModule } from '@angular/common';
 import { SafeUrlPipe } from '../../core/utils/safe-url.pipe';
@@ -51,6 +52,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   private readonly navService       = inject(NavigationService);
   private readonly favoritesService = inject(FavoritesService);
   private readonly recentlyViewed   = inject(RecentlyViewedService);
+  private readonly bookingService   = inject(BookingService);
   private readonly router           = inject(Router);
   readonly userStats                = inject(UserStatsService);
 
@@ -155,12 +157,14 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   });
 
   viewRecentItem(item: ApiRecentItem): void {
+    const safeCity    = (item.city    && item.city    !== 'null') ? item.city.trim()    : '';
+    const safeCountry = (item.country && item.country !== 'null') ? item.country.trim() : '';
     this.navService.goToDestination({
       destinationId: item.id,
       name:          item.name,
       image:         item.imageUrl ?? '',
       pricePerNight: item.price,
-      location:      item.city ? `${item.city}, ${item.country}` : item.country,
+      location:      safeCity ? `${safeCity}, ${safeCountry}` : (safeCountry || 'Unknown'),
     });
   }
 
@@ -310,6 +314,9 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           Math.max(p.totalFavorites ?? 0, this.userStats.totalFavorites()),
           Math.max(p.totalBookings  ?? 0, this.userStats.totalBookings()),
         );
+        // Always count local bookings — the API may return 0 if the backend
+        // hasn't persisted them yet, but localStorage is authoritative locally.
+        this.userStats.seedBookings(this.bookingService.localBookings().length);
       }
       this._apiRecentItems.set(Array.isArray(recent) ? recent : []);
       this.loading.set(false);

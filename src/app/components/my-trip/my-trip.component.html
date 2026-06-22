@@ -63,7 +63,14 @@
 
   <!-- Packages -->
   @if (activeTab() === 'packages') {
-    @if (packages().length) {
+    @if (localPackages().length || packages().length) {
+      @for (pkg of localPackages(); track pkg.id) {
+        <app-favourite-card
+          [item]="pkg"
+          (viewPlace)="onViewPackage($event)"
+          (remove)="onTogglePackageFav($event)">
+        </app-favourite-card>
+      }
       @for (pkg of packages(); track pkg.id) {
         <app-favourite-card
           [item]="pkg"
@@ -99,7 +106,38 @@
 
   <!-- Hotels -->
   @if (activeTab() === 'hotels') {
-    @if (hotels().length) {
+
+    <!-- City search bar -->
+    <div class="hotel-search-bar">
+      <div class="hotel-search-input-wrap">
+        <i class="fas fa-search hotel-search-icon" aria-hidden="true"></i>
+        <input
+          class="hotel-search-input"
+          type="text"
+          placeholder="Search hotels by city (e.g. cairo, dubai)"
+          [value]="hotelSearch()"
+          (input)="onHotelCityInput($any($event.target).value)"
+          (keyup.enter)="onHotelCitySearch()" />
+      </div>
+      <button
+        type="button"
+        class="hotel-search-btn"
+        [disabled]="hotelsLoading()"
+        (click)="onHotelCitySearch()">
+        @if (hotelsLoading()) {
+          <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        } @else {
+          Search
+        }
+      </button>
+    </div>
+
+    @if (hotelsLoading()) {
+      <div class="empty-state">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Finding hotels in {{ hotelCity() }}…
+      </div>
+    } @else if (hotels().length) {
       <div class="hotels-grid">
         @for (hotel of hotels(); track hotel.id) {
           <app-hotel-card
@@ -112,7 +150,7 @@
     } @else {
       <div class="empty-state">
         <i class="fas fa-hotel" aria-hidden="true"></i>
-        No hotels booked yet.
+        No hotels found in "{{ hotelCity() }}".
       </div>
     }
   }

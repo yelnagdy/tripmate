@@ -9,7 +9,7 @@ import { Flight } from '../../models/my-trip.models';
 import { BookingData } from '../../models/detail.models';
 import { PackageService } from '../../core/services/package.service';
 import { FlightNavState } from '../../core/services/navigation.service';
-import { ApiDestination, ApiFlightResult, ApiSmartFlight } from '../../models/api.models';
+import { ApiDestination, ApiSmartFlight } from '../../models/api.models';
 
 type FlightClass = 'economy' | 'first-class' | 'business-class';
 
@@ -19,26 +19,14 @@ interface ClassOption {
 }
 
 const FALLBACK_FLIGHTS: Flight[] = [
-  {
-    id: 1,
-    onTimePercent: 100,
-    departureTime: '7:30 AM',
-    departureCity: 'Cairo',
-    arrivalTime:   '9:30 AM',
-    arrivalCity:   'Rome',
-    duration:      '2h 40m',
-    pricePerPerson: 150,
-  },
-  {
-    id: 2,
-    onTimePercent: 90,
-    departureTime: '11:00 AM',
-    departureCity: 'Cairo',
-    arrivalTime:   '1:30 PM',
-    arrivalCity:   'Rome',
-    duration:      '2h 30m',
-    pricePerPerson: 180,
-  },
+  { id: 1, onTimePercent: 98, departureTime: '07:30', departureCity: 'Cairo', arrivalTime: '10:10', arrivalCity: 'Dubai',    duration: '4h 00m', pricePerPerson: 95  },
+  { id: 2, onTimePercent: 92, departureTime: '11:00', departureCity: 'Cairo', arrivalTime: '14:50', arrivalCity: 'Dubai',    duration: '4h 00m', pricePerPerson: 120 },
+  { id: 3, onTimePercent: 95, departureTime: '14:30', departureCity: 'Cairo', arrivalTime: '18:30', arrivalCity: 'Dubai',    duration: '4h 00m', pricePerPerson: 85  },
+  { id: 4, onTimePercent: 97, departureTime: '22:00', departureCity: 'Cairo', arrivalTime: '02:00', arrivalCity: 'Dubai',    duration: '4h 00m', pricePerPerson: 75  },
+  { id: 5, onTimePercent: 96, departureTime: '07:30', departureCity: 'Cairo', arrivalTime: '10:10', arrivalCity: 'Rome',     duration: '2h 40m', pricePerPerson: 150 },
+  { id: 6, onTimePercent: 90, departureTime: '11:00', departureCity: 'Cairo', arrivalTime: '13:30', arrivalCity: 'Rome',     duration: '2h 30m', pricePerPerson: 180 },
+  { id: 7, onTimePercent: 94, departureTime: '09:15', departureCity: 'Cairo', arrivalTime: '13:45', arrivalCity: 'Paris',    duration: '4h 30m', pricePerPerson: 210 },
+  { id: 8, onTimePercent: 91, departureTime: '06:00', departureCity: 'Cairo', arrivalTime: '08:30', arrivalCity: 'Istanbul', duration: '2h 30m', pricePerPerson: 120 },
 ];
 
 @Component({
@@ -86,24 +74,30 @@ export class FlightDetailComponent implements OnInit {
       this.loading.set(false);
     }
 
-    this.packageService.getExternal('cairo', 'dubai').subscribe(external => {
-      if (external) {
-        this.destination.set(external.destination);
-      }
+    const fromCity = nav?.departureCity ?? 'cairo';
+    const toCity   = nav?.arrivalCity   ?? 'dubai';
+
+    this.packageService.getExternal(fromCity, toCity).subscribe(external => {
+      // Destination may be the old dummy (rating:0, city:null) — apply null-safe fields
+      const raw  = external?.destination ?? null;
+      const dest = raw ?? {
+        id: 7, name: 'Dubai', country: 'UAE', city: 'Dubai', airportCode: 'DXB',
+        description: 'Luxury in the desert', imageUrl: 'assets/images/destination-dubai.jpeg',
+        price: 820, durationDays: 5, itinerary: '', activities: 'Burj Khalifa, Desert Safari', rating: 4.8,
+      };
+      this.destination.set(dest);
 
       const externalFlights = external?.flights ?? [];
 
       if (externalFlights.length > 0) {
-        this.allFlights.set(externalFlights.map((f, i) => this.mapToFlight(f, i + 1)));
+        this.allFlights.set(externalFlights.map((f, i) => this.mapSmartToFlight(f, i + 1)));
         this.loading.set(false);
       } else {
         this.packageService.getSmart(1, 2000, 'CAI').subscribe(smart => {
           const flights = (smart ?? []).flatMap(p => p.flights ?? []);
           if (flights.length > 0) {
             this.allFlights.set(flights.map((f, i) => this.mapSmartToFlight(f, i + 1)));
-            if (!external && smart[0]) {
-              this.destination.set(smart[0].destination);
-            }
+            if (smart[0]?.destination) this.destination.set(smart[0].destination);
           } else if (!nav?.departureCity) {
             this.allFlights.set(FALLBACK_FLIGHTS);
           }
@@ -117,19 +111,6 @@ export class FlightDetailComponent implements OnInit {
 
   selectFlight(flight: Flight): void {
     this.router.navigate(['/main/flight-detail', flight.id], { replaceUrl: true });
-  }
-
-  private mapToFlight(f: ApiFlightResult, id: number): Flight {
-    return {
-      id,
-      onTimePercent:  95,
-      departureTime:  f.departureTime,
-      departureCity:  f.from,
-      arrivalTime:    f.arrivalTime,
-      arrivalCity:    f.to,
-      duration:       f.duration,
-      pricePerPerson: f.price,
-    };
   }
 
   private mapSmartToFlight(f: ApiSmartFlight, id: number): Flight {

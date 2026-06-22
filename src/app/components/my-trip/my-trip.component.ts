@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { FavouriteCardComponent } from '../favourite/favourite-card/favourite-card.component';
 import { FlightCardComponent }    from './flight-card/flight-card.component';
 import { HotelCardComponent }     from './hotel-card/hotel-card.component';
@@ -10,6 +10,7 @@ import { HotelService }           from '../../core/services/hotel.service';
 import { BookingService }         from '../../core/services/booking.service';
 import { NavigationService }      from '../../core/services/navigation.service';
 import { ApiBooking, ApiBookingDetails, ApiHotel } from '../../models/api.models';
+import { LocalBooking } from '../../core/services/booking.service';
 
 type Tab = 'packages' | 'flights' | 'hotels';
 
@@ -42,7 +43,14 @@ export class MyTripComponent implements OnInit {
 
   /* ── Packages (bookings) ────────────────────────────────── */
   readonly packagesLoading = signal(true);
-  readonly packages        = signal<FavouriteItem[]>([]);
+
+  /** Reactive local bookings — updates instantly when saveLocal() is called anywhere */
+  readonly localPackages = computed(() =>
+    this.bookingService.localBookings().map(b => this.mapLocalBooking(b))
+  );
+
+  /** API bookings (non-reactive, loaded once in ngOnInit) */
+  readonly packages = signal<FavouriteItem[]>([]);
 
 
   private mapBooking(b: ApiBooking): FavouriteItem {
@@ -62,6 +70,28 @@ export class MyTripComponent implements OnInit {
     };
   }
 
+  private mapLocalBooking(b: LocalBooking): FavouriteItem {
+    const guestLabel = `${b.guests} guest${b.guests !== 1 ? 's' : ''}`;
+    return {
+      id:            parseInt(b.id.replace('local_', ''), 10),
+      itemType:      'packge',
+      name:          b.destination,
+      location:      b.to,
+      image:         'assets/images/place-manarola.jpeg',
+      imageCount:    5,
+      hotelStars:    4,
+      amenities:     15,
+      reviewScore:   4.0,
+      reviewLabel:   `${b.status} · ${guestLabel} · ${b.date}`,
+      reviewCount:   b.guests,
+      pricePerNight: b.totalPrice,
+    };
+  }
+
+  private localNumericId(b: LocalBooking): number {
+    return parseInt(b.id.replace('local_', ''), 10);
+  }
+
   onViewPackage(item: FavouriteItem): void {
     this.navService.goToDestination({
       destinationId: item.destinationId ?? item.id,
@@ -73,15 +103,20 @@ export class MyTripComponent implements OnInit {
   }
 
   onTogglePackageFav(id: number): void {
-    // Optimistic remove
+    const localMatch = this.bookingService.localBookings()
+      .find(b => this.localNumericId(b) === id);
+
+    if (localMatch) {
+      this.packages.update(list => list.filter(p => p.id !== id));
+      this.bookingService.removeLocal(localMatch.id);
+      return;
+    }
+
+    // API booking — optimistic remove then revert on failure
     const prev = this.packages();
     this.packages.update(list => list.filter(p => p.id !== id));
-
     this.bookingService.cancel(id).subscribe(ok => {
-      if (!ok) {
-        // Revert if API call failed
-        this.packages.set(prev);
-      }
+      if (!ok) this.packages.set(prev);
     });
   }
 
@@ -148,12 +183,14 @@ export class MyTripComponent implements OnInit {
   }
 
   /* ── Hotels ─────────────────────────────────────────────── */
-  readonly hotels = signal<Hotel[]>([]);
+  readonly hotels       = signal<Hotel[]>([]);
+  readonly hotelCity    = signal('cairo');
+  readonly hotelSearch  = signal('cairo');
 
-  ngOnInit(): void {
-    this.hotelService.getByCity('italy').subscribe(apiData => {
+  private loadHotels(city: string): void {
+    this.hotelsLoading.set(true);
+    this.hotelService.getByCity(city).subscribe(apiData => {
       if (apiData.length > 0) {
-        // Deduplicate by name (API sometimes returns the same property multiple times)
         const seen = new Set<string>();
         const unique = apiData.filter(h => {
           const key = h.name.toLowerCase().trim();
@@ -167,27 +204,52 @@ export class MyTripComponent implements OnInit {
       }
       this.hotelsLoading.set(false);
     });
+  }
+
+  onHotelCityInput(value: string): void { this.hotelSearch.set(value); }
+
+  onHotelCitySearch(): void {
+    const city = this.hotelSearch().trim();
+    if (!city) return;
+    this.hotelCity.set(city);
+    this.loadHotels(city);
+  }
+
+  ngOnInit(): void {
+    this.loadHotels('cairo');
+
+    // localPackages computed already covers localStorage reactively — no manual load needed
+    this.packagesLoading.set(false);
 
     const userId = this.getUserId();
     if (userId) {
       this.bookingService.getByUser(userId).subscribe(bookings => {
-        this.packages.set(bookings.map(b => this.mapBooking(b)));
-        this.packagesLoading.set(false);
+        // API bookings go into the separate packages signal (de-duplicated against local)
+        const localNames = new Set(
+          this.bookingService.localBookings().map(b => b.destination.toLowerCase())
+        );
+        this.packages.set(
+          bookings
+            .filter(b => !localNames.has((b.packageName ?? b.destinationName ?? '').toLowerCase()))
+            .map(b => this.mapBooking(b))
+        );
 
         const latest = bookings[0];
         if (latest) {
           this.bookingDetails.set({
+            id:           latest.id,
             bookingId:    latest.id,
             userId:       latest.userId,
-            packageTitle: latest.packageName  ?? undefined,
+            packageTitle: latest.packageName     ?? undefined,
             destination:  latest.destinationName ?? undefined,
+            destinationName: latest.destinationName,
+            packageName:  latest.packageName,
             totalPrice:   latest.totalPrice,
             status:       latest.status,
+            paymentStatus: latest.paymentStatus  ?? undefined,
           });
         }
       });
-    } else {
-      this.packagesLoading.set(false);
     }
   }
 

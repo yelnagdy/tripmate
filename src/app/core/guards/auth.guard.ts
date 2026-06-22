@@ -21,14 +21,14 @@ export const authGuard: CanActivateFn = (_route, _state) => {
     return true; // SSR: no localStorage, skip
   }
 
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
   if (token && isTokenValid(token)) {
     return true;
   }
 
   // Token missing or expired — clean up and redirect
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('refreshToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
   return router.createUrlTree(['/auth/login']);
 };

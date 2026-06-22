@@ -42,6 +42,21 @@ export class HomeComponent implements OnInit {
   private readonly homeApiService    = inject(HomeApiService);
   private readonly favoritesService  = inject(FavoritesService);
 
+  /* ── Horizontal scroll helper (template passes native element directly) ── */
+  scrollRow(el: HTMLElement, dir: 1 | -1): void {
+    el?.scrollBy({ left: dir * 220, behavior: 'smooth' });
+  }
+
+  destImage(imageUrl: string | null | undefined): string {
+    return safeUrl(imageUrl ?? '', 'assets/images/place-manarola.jpeg');
+  }
+
+  destCountry(dest: ApiDestination): string {
+    const safeCity    = (dest.city    && dest.city    !== 'null') ? dest.city.trim()    : '';
+    const safeCountry = (dest.country && dest.country !== 'null') ? dest.country.trim() : '';
+    return safeCity ? `${safeCity}, ${safeCountry}` : (safeCountry || 'Unknown');
+  }
+
   /* ── Home API data ───────────────────────────────────────── */
   readonly homeLoading   = signal(true);
   readonly recommended   = signal<ApiDestination[]>([]);
@@ -63,14 +78,15 @@ export class HomeComponent implements OnInit {
   }
 
   onViewDestination(dest: ApiDestination): void {
-    const safeCity = (dest.city && dest.city !== 'null' && dest.city !== 'undefined') ? dest.city.trim() : '';
+    const safeCity    = (dest.city    && dest.city    !== 'null' && dest.city    !== 'undefined') ? dest.city.trim()    : '';
+    const safeCountry = (dest.country && dest.country !== 'null' && dest.country !== 'undefined') ? dest.country.trim() : '';
     this.router.navigate(['/main/destination-detail'], {
       state: {
         destinationId: dest.id,
         name:          dest.name,
         image:         safeUrl(dest.imageUrl, ''),
         pricePerNight: dest.price,
-        location:      safeCity ? `${safeCity}, ${dest.country}` : dest.country,
+        location:      safeCity ? `${safeCity}, ${safeCountry}` : (safeCountry || 'Unknown'),
       },
     });
   }

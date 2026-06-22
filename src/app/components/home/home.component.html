@@ -29,35 +29,28 @@
 
   @if (recommended().length) {
     <section class="smart-section">
-      <h2 class="smart-title">Recommended for You</h2>
-      <p class="smart-sub">Personalised picks based on your budget from Cairo</p>
-      <div class="smart-list">
+      <div class="smart-header">
+        <div>
+          <h2 class="smart-title"><i class="fas fa-pencil-alt smart-icon"></i> Recommended for You</h2>
+          <p class="smart-sub">Personalised picks based on your budget from Cairo</p>
+        </div>
+        <div class="smart-nav">
+          <button class="smart-nav-btn" type="button" aria-label="Scroll left"  (click)="scrollRow(recScroll, -1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="smart-nav-btn" type="button" aria-label="Scroll right" (click)="scrollRow(recScroll,  1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="smart-scroll" #recScroll>
         @for (dest of recommended(); track dest.id) {
-          <div class="smart-card" (click)="onViewDestination(dest)">
-            <div class="sc-left">
+          <div class="dest-card" (click)="onViewDestination(dest)" role="button" tabindex="0">
+            <div class="dest-card-img" [style.background-image]="'url(' + destImage(dest.imageUrl) + ')'">
               @if (dest.rating) {
-                <div class="sc-badge">
-                  <i class="fas fa-star"></i> {{ dest.rating }}
-                  @if (ratingLabel(dest.rating)) {
-                    <span class="sc-badge-label">{{ ratingLabel(dest.rating) }}</span>
-                  }
-                </div>
+                <span class="dest-card-badge"><i class="fas fa-star"></i> {{ dest.rating }}</span>
               }
-              <h3 class="sc-name">{{ dest.name }}</h3>
-              <p class="sc-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ (dest.city && dest.city !== 'null') ? dest.city + ', ' : '' }}{{ dest.country }}
-              </p>
-              @if (dest.activities && dest.activities !== 'string' && dest.activities !== 'null') {
-                <p class="sc-activities">{{ dest.activities }}</p>
-              }
-              <p class="sc-duration"><i class="fas fa-calendar-alt"></i> {{ dest.durationDays }} days</p>
             </div>
-            <div class="sc-right">
-              <p class="sc-price-from">from</p>
-              <p class="sc-price">${{ dest.price }}</p>
-              <p class="sc-price-unit">per person</p>
-              <button type="button" class="sc-book-btn" (click)="$event.stopPropagation(); onViewDestination(dest)">Book Now</button>
+            <div class="dest-card-body">
+              <h3 class="dest-card-name">{{ dest.name }}</h3>
+              <p class="dest-card-loc"><i class="fas fa-map-marker-alt"></i> {{ destCountry(dest) }}</p>
+              <p class="dest-card-price">${{ dest.price }}</p>
             </div>
           </div>
         }
@@ -67,35 +60,28 @@
 
   @if (popular().length) {
     <section class="smart-section">
-      <h2 class="smart-title">Popular Destinations</h2>
-      <p class="smart-sub">Top-rated trips loved by travellers</p>
-      <div class="smart-list">
+      <div class="smart-header">
+        <div>
+          <h2 class="smart-title"><i class="fas fa-fire smart-icon"></i> Popular Destinations</h2>
+          <p class="smart-sub">Top-rated trips loved by travellers</p>
+        </div>
+        <div class="smart-nav">
+          <button class="smart-nav-btn" type="button" aria-label="Scroll left"  (click)="scrollRow(popScroll, -1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="smart-nav-btn" type="button" aria-label="Scroll right" (click)="scrollRow(popScroll,  1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="smart-scroll" #popScroll>
         @for (dest of popular(); track dest.id) {
-          <div class="smart-card" (click)="onViewDestination(dest)">
-            <div class="sc-left">
+          <div class="dest-card" (click)="onViewDestination(dest)" role="button" tabindex="0">
+            <div class="dest-card-img" [style.background-image]="'url(' + destImage(dest.imageUrl) + ')'">
               @if (dest.rating) {
-                <div class="sc-badge">
-                  <i class="fas fa-star"></i> {{ dest.rating }}
-                  @if (ratingLabel(dest.rating)) {
-                    <span class="sc-badge-label">{{ ratingLabel(dest.rating) }}</span>
-                  }
-                </div>
+                <span class="dest-card-badge"><i class="fas fa-star"></i> {{ dest.rating }}</span>
               }
-              <h3 class="sc-name">{{ dest.name }}</h3>
-              <p class="sc-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ (dest.city && dest.city !== 'null') ? dest.city + ', ' : '' }}{{ dest.country }}
-              </p>
-              @if (dest.activities && dest.activities !== 'string' && dest.activities !== 'null') {
-                <p class="sc-activities">{{ dest.activities }}</p>
-              }
-              <p class="sc-duration"><i class="fas fa-calendar-alt"></i> {{ dest.durationDays }} days</p>
             </div>
-            <div class="sc-right">
-              <p class="sc-price-from">from</p>
-              <p class="sc-price">${{ dest.price }}</p>
-              <p class="sc-price-unit">per person</p>
-              <button type="button" class="sc-book-btn" (click)="$event.stopPropagation(); onViewDestination(dest)">Book Now</button>
+            <div class="dest-card-body">
+              <h3 class="dest-card-name">{{ dest.name }}</h3>
+              <p class="dest-card-loc"><i class="fas fa-map-marker-alt"></i> {{ destCountry(dest) }}</p>
+              <p class="dest-card-price">${{ dest.price }}</p>
             </div>
           </div>
         }

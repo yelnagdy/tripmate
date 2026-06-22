@@ -17,6 +17,11 @@ export class UserStatsService {
     this.totalBookings.set(Math.max(0, bookings));
   }
 
+  /** Raises totalBookings to at least `count` without lowering it — safe to call at startup */
+  seedBookings(count: number): void {
+    this.totalBookings.update(n => Math.max(n, count));
+  }
+
   incrementFavorites(): void { this.totalFavorites.update(n => n + 1); }
   decrementFavorites(): void { this.totalFavorites.update(n => Math.max(0, n - 1)); }
   incrementBookings():  void { this.totalBookings.update(n => n + 1); }

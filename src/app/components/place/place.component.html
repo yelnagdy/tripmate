@@ -121,10 +121,16 @@
   <!-- Smart Recommendations -->
   @if (smartPlaces().length) {
     <div class="smart-strip">
-      <h2 class="smart-strip-title">
-        <i class="fas fa-magic"></i> Recommended for You
-      </h2>
-      <div class="smart-strip-list">
+      <div class="smart-strip-header">
+        <h2 class="smart-strip-title">
+          <i class="fas fa-magic"></i> Recommended for You
+        </h2>
+        <div class="ssc-nav">
+          <button class="ssc-nav-btn" type="button" aria-label="Scroll left"  (click)="scrollRow(recScroll, -1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="ssc-nav-btn" type="button" aria-label="Scroll right" (click)="scrollRow(recScroll,  1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="smart-strip-list" #recScroll>
         @for (place of smartPlaces(); track place.id) {
           <div class="smart-strip-card"
                role="button"
@@ -152,27 +158,29 @@
     </p>
   }
 
-  <!-- Places list -->
-  <div class="places-list" aria-label="Places results">
-    @if (loading()) {
-      <div class="loading-state" role="status" aria-live="polite">
-        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-        Loading places...
-      </div>
-    } @else if (filteredPlaces().length) {
+  <!-- Places grid -->
+  @if (loading()) {
+    <div class="loading-state" role="status" aria-live="polite">
+      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+      Loading places...
+    </div>
+  } @else if (filteredPlaces().length) {
+    <div class="row g-3" aria-label="Places results">
       @for (place of filteredPlaces(); track place.id) {
-        <app-place-card
-          [place]="place"
-          (viewPlace)="onViewPlace($event)"
-          (toggleFavorite)="onToggleFavorite($event)">
-        </app-place-card>
+        <div class="col-12">
+          <app-place-card
+            [place]="place"
+            (viewPlace)="onViewPlace($event)"
+            (toggleFavorite)="onToggleFavorite($event)">
+          </app-place-card>
+        </div>
       }
-    } @else {
-      <div class="empty-state" role="status" aria-live="polite">
-        <i class="fas fa-map-marker-slash" aria-hidden="true"></i>
-        No places match your search.
-      </div>
-    }
-  </div>
+    </div>
+  } @else {
+    <div class="empty-state" role="status" aria-live="polite">
+      <i class="fas fa-map-marker-slash" aria-hidden="true"></i>
+      No places match your search.
+    </div>
+  }
 
 </div>

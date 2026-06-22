@@ -1,8 +1,21 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ApiBooking, ApiBookingCreateRequest, ApiBookingDetails } from '../../models/api.models';
 import { UserStatsService } from './user-stats.service';
+
+export interface LocalBooking {
+  id:          string;   // 'local_<timestamp>'
+  destination: string;
+  from:        string;
+  to:          string;
+  flight:      string;
+  date:        string;
+  guests:      number;
+  totalPrice:  number;
+  status:      string;
+  bookedAt:    string;   // ISO date
+}
 
 interface BookingListResponse {
   success: boolean;
@@ -16,11 +29,58 @@ interface BookingResponse {
   data: ApiBookingDetails | string;
 }
 
+const LOCAL_KEY = 'tripmate_bookings';
+
 @Injectable({ providedIn: 'root' })
 export class BookingService {
 
   private readonly http      = inject(HttpClient);
   private readonly userStats = inject(UserStatsService);
+
+  /* ── localStorage-backed bookings (instant, no API wait) ──── */
+  private readonly _local = signal<LocalBooking[]>(this.loadLocal());
+
+  readonly localBookings = this._local.asReadonly();
+
+  constructor() {
+    // Seed the stats counter from localStorage on startup so the profile shows
+    // the correct count even for bookings made in previous sessions.
+    this.userStats.seedBookings(this._local().length);
+  }
+
+  saveLocal(b: Omit<LocalBooking, 'id' | 'bookedAt'>): void {
+    const entry: LocalBooking = {
+      ...b,
+      id:       `local_${Date.now()}`,
+      bookedAt: new Date().toISOString(),
+    };
+    this._local.update(list => {
+      const next = [entry, ...list];
+      this.persistLocal(next);
+      return next;
+    });
+    this.userStats.incrementBookings();
+  }
+
+  removeLocal(id: string): void {
+    this._local.update(list => {
+      const next = list.filter(b => b.id !== id);
+      this.persistLocal(next);
+      return next;
+    });
+    this.userStats.decrementBookings();
+  }
+
+  private loadLocal(): LocalBooking[] {
+    try {
+      const raw = localStorage.getItem(LOCAL_KEY);
+      return raw ? (JSON.parse(raw) as LocalBooking[]) : [];
+    } catch { return []; }
+  }
+
+  private persistLocal(items: LocalBooking[]): void {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(items)); } catch {}
+  }
 
   getAll(): Observable<ApiBooking[]> {
     return this.http.get<BookingListResponse>('/api/Bookings').pipe(

@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://dk7tnnm6-7265.uks1.devtunnels.ms",
+    "target": "http://tripmate.runasp.net",
     "secure": false,
     "changeOrigin": true,
     "headers": {

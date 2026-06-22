@@ -35,6 +35,8 @@ export class RecentlyViewedService {
       description:  null,
       durationDays: null,
       activities:   null,
+      airportCode:  null,
+      itinerary:    null,
       viewedAt:     Date.now(),
     };
 
