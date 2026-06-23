@@ -66,16 +66,9 @@ export class SignUpComponent {
           userId = jwt[claim] ?? '';
         } catch { /* malformed token */ }
 
-        // Always use localStorage — sessionStorage is wiped on tab close
-        localStorage.setItem('token', token);
-        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-        if (userId)       localStorage.setItem('userId',       userId);
-        if (email)        localStorage.setItem('userEmail',    email);
-        if (fullName)     localStorage.setItem('userFullName', fullName);
-
-        console.log('[Register] Success — auto-login, userId:', userId);
-        this.successMsg = 'Account created! Taking you in…';
-        this._router.navigate(['/main/home']);
+        console.log('[Register] Success — redirecting to login, userId:', userId);
+        this.successMsg = 'Account created! Please log in.';
+        this._router.navigate(['/auth/login']);
       },
 
       error: (err) => {
