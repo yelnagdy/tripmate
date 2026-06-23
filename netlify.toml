@@ -5,17 +5,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
-[[plugins]]
-  package = "@netlify/angular-runtime"
-
-# Proxy /api/* to the live backend BEFORE the SSR function sees the request
+# Proxy /api/* to the live backend
 [[redirects]]
   from   = "/api/*"
   to     = "http://tripmate.runasp.net/api/:splat"
   status = 200
   force  = true
 
-# Angular SPA fallback — all other routes serve the SSR function
+# Angular SPA — all client-side routes serve index.html
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
