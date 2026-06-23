@@ -1,0 +1,106 @@
+[33mcommit 2c7f476db983d0811bb820e1457c323f8057ecf3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 23 03:35:28 2026 +0300
+
+    fix: update budget limits for initial and component styles in angular.json
+
+[33mcommit 92ae1a64a6979fecc315486bd8eb2eaeeaa062fb[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 23 03:27:53 2026 +0300
+
+    refactor: remove SSR configurations and related dependencies from project setup
+
+[33mcommit aa8b8ba5f4e7cffc71a60120cae379bb0efaa182[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 23 03:19:21 2026 +0300
+
+    feat: add Netlify configuration for SSR and build settings
+
+[33mcommit 38762c23d2043033e253fa0f7aaabd6599f8a677[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 23 02:53:20 2026 +0300
+
+    refactor: remove fullname field from sign-up form and update registration logic
+    
+    feat: implement localStorage for token management in auth guard and interceptor
+    
+    feat: add localStorage-backed booking management in BookingService
+    
+    feat: seed default categories in CategoryService if none exist
+    
+    feat: seed destinations in DestinationService when database is empty
+    
+    feat: add fallback flight data in FlightService for empty API responses
+    
+    feat: implement fallback data for home page in HomeApiService
+    
+    feat: enhance package management with seeding logic in PackageService
+    
+    fix: add recently viewed item properties in RecentlyViewedService
+    
+    feat: add user stats seeding method in UserStatsService
+    
+    fix: update Api models to include new fields for booking and package details
+    
+    feat: create PaymentService for handling payment requests and confirmations
+
+[33mcommit f8ff8996a65c718f63bf120bcaae5fe49dfa49fc[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Sat Jun 20 20:01:05 2026 +0300
+
+    feat: add news component with infinite scroll and article display
+    
+    - Implemented news.component.html for displaying articles in a grid layout with lazy loading.
+    - Created news.component.ts to manage article visibility and handle navigation.
+    - Added news-data.service.ts to provide article data and related functionalities.
+    - Introduced recently-viewed.service.ts to track recently viewed items.
+    - Developed test-api.mjs for comprehensive API endpoint testing.
+
+[33mcommit 3f527f99731e546d792ae5bde5dab8827cdc742c[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Thu Jun 18 20:44:58 2026 +0300
+
+    feat: add universal card and detail components with styling
+    
+    - Implemented `UniversalCardComponent` for displaying item previews with image, title, location, rating, and price.
+    - Created `UniversalDetailComponent` for detailed item view including loading states, descriptions, and booking options.
+    - Added CSS styles for both components to enhance visual presentation.
+    - Introduced services for booking, navigation, and user stats to manage application state and interactions.
+    - Developed utility functions for safe URL handling and defined models for universal items and item type configurations.
+
+[33mcommit f24bf5573085a7384166b89361670f37c4325d65[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Wed Jun 17 01:35:52 2026 +0300
+
+    feat: implement loading states and booking dialogs across components; add services for destinations, flights, hotels, and packages
+
+[33mcommit a3c6f88515a35fca06e1cf9ebe7917e31dd84bd9[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 16 22:52:45 2026 +0300
+
+    Refactor code structure for improved readability and maintainability
+
+[33mcommit 88126d47276271904640492ff6cdc3af51a8e066[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Jun 16 22:47:08 2026 +0300
+
+    feat: add new components for backages, favourite, footer, login, my-trip, nav-bar, place, home, and sign-up
+    
+    - Created BackagesComponent with HTML and CSS files.
+    - Created FavouriteComponent with HTML and CSS files.
+    - Created FooterComponent with HTML and CSS files.
+    - Created LoginComponent with HTML and CSS files.
+    - Created MyTripComponent with HTML and CSS files.
+    - Created NavBarComponent with HTML and CSS files.
+    - Created PlaceComponent with HTML and CSS files.
+    - Created HomeComponent with HTML and CSS files.
+    - Created SignUpComponent with HTML and CSS files.
+    - Updated app.component.ts to include new components.
+    - Added global styles in styles.css.
+    - Updated tsconfig.json to set rootDir to ./src.
+
+[33mcommit 314f93e852fec886d185a23bd8795117abe318c3[m
+Author: cipher <yousef.nagdy24@gmail.com>
+Date:   Tue Apr 21 00:16:49 2026 +0200
+
+    initial commit
