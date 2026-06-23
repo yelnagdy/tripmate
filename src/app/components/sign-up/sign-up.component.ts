@@ -68,7 +68,7 @@ export class SignUpComponent {
 
         console.log('[Register] Success — redirecting to login, userId:', userId);
         this.successMsg = 'Account created! Please log in.';
-        this._router.navigate(['/auth/login']);
+        this._router.navigate(['/main/home']);
       },
 
       error: (err) => {
