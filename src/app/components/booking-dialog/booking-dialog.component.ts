@@ -130,8 +130,8 @@ export class BookingDialogComponent {
     }).subscribe(paymentUrl => {
       this.paying.set(false);
 
-      // Save booking locally so My Trip is updated regardless of payment outcome
-      this.bookingService.saveLocal({
+      // Save as Pending first, capture the returned ID for immediate upgrade
+      const localId = this.bookingService.saveLocal({
         destination: d.to     || 'Unknown',
         from:        d.from   || '',
         to:          d.to     || '',
@@ -146,19 +146,9 @@ export class BookingDialogComponent {
         // Open Paymob in a new tab so the user keeps app state
         window.open(paymentUrl, '_blank', 'noopener,noreferrer');
         this.bookingService.create(d.destinationId ?? 1, guests).subscribe();
-        // Confirm payment with bookingId=0 (no backend bookingId yet from create response)
-        this.paymentService.confirmPayment(0).subscribe(confirmed => {
-          if (confirmed) {
-            // Upgrade local booking status from "Pending Payment" → "Confirmed"
-            const locals = this.bookingService.localBookings();
-            const pending = locals.find(b => b.status === 'Pending Payment');
-            if (pending) {
-              this.bookingService.removeLocal(pending.id);
-              this.bookingService.saveLocal({ ...pending, status: 'Confirmed' });
-              this.confirmedLocal.set(pending.id);
-            }
-          }
-        });
+        // Payment URL received → user has initiated payment → mark as Confirmed
+        this.bookingService.updateLocalStatus(localId, 'Confirmed');
+        this.confirmedLocal.set(localId);
         this.currentStep.set(3);
       } else {
         this.payError.set('Payment gateway unavailable. Your booking is saved — please retry later.');

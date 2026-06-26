@@ -48,10 +48,11 @@ export class BookingService {
     this.userStats.seedBookings(this._local().length);
   }
 
-  saveLocal(b: Omit<LocalBooking, 'id' | 'bookedAt'>): void {
+  saveLocal(b: Omit<LocalBooking, 'id' | 'bookedAt'>): string {
+    const id = `local_${Date.now()}`;
     const entry: LocalBooking = {
       ...b,
-      id:       `local_${Date.now()}`,
+      id,
       bookedAt: new Date().toISOString(),
     };
     this._local.update(list => {
@@ -60,6 +61,15 @@ export class BookingService {
       return next;
     });
     this.userStats.incrementBookings();
+    return id;
+  }
+
+  updateLocalStatus(id: string, status: string): void {
+    this._local.update(list => {
+      const next = list.map(b => b.id === id ? { ...b, status } : b);
+      this.persistLocal(next);
+      return next;
+    });
   }
 
   removeLocal(id: string): void {
