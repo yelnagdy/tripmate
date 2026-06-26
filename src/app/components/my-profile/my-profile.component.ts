@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService, ApiRecentItem } from '../../core/services/auth.service';
@@ -41,7 +40,7 @@ interface ProfileDraft {
   selector: 'app-my-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CommonModule, SafeUrlPipe],
+  imports: [CommonModule, SafeUrlPipe],
   templateUrl: './my-profile.component.html',
   styleUrl: './my-profile.component.scss',
 })

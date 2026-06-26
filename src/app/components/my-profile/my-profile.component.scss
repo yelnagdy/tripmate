@@ -88,7 +88,7 @@
   cursor: pointer;
   transition: background 0.2s;
 
-  &:hover { background: darken(#3b5bdb, 10%); }
+  &:hover { background: #2f4ac4; }
 }
 
 .sidebar-name {
@@ -463,9 +463,10 @@
   i { font-size: 0.6rem; }
 }
 
-// ── Save feedback ───────────────────────────────────────────────
+// ── Save / post feedback ─────────────────────────────────────────
 .save-success,
-.save-error {
+.save-error,
+.post-feedback {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -473,18 +474,13 @@
   font-weight: 600;
   border-radius: 8px;
   padding: 0.5rem 0.85rem;
-  margin-top: 0.75rem;
 }
 
-.save-success {
-  color: #16a34a;
-  background: #dcfce7;
-}
+.save-success, .save-error { margin-top: 0.75rem; }
+.post-feedback             { margin-bottom: 0.75rem; }
 
-.save-error {
-  color: #dc2626;
-  background: #fee2e2;
-}
+.save-success, .post-feedback--ok  { color: #16a34a; background: #dcfce7; }
+.save-error,   .post-feedback--err { color: #dc2626; background: #fee2e2; }
 
 // ── Back button ─────────────────────────────────────────────────
 .back-row { margin-bottom: 1rem; }
@@ -709,21 +705,6 @@
   font-size: 0.78rem;
   color: var(--body-clr);
 }
-
-// ── Post feedback ───────────────────────────────────────────────
-.post-feedback {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 0.5rem 0.85rem;
-  margin-bottom: 0.75rem;
-
-}
-.post-feedback--ok  { color: #16a34a; background: #dcfce7; }
-.post-feedback--err { color: #dc2626; background: #fee2e2; }
 
 // ── My Posts header ─────────────────────────────────────────────
 .posts-header {
