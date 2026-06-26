@@ -108,16 +108,30 @@ export class MyTripComponent implements OnInit {
       .find(b => this.localNumericId(b) === id);
 
     if (localMatch) {
-      this.packages.update(list => list.filter(p => p.id !== id));
+      // Local-only booking: no backend record exists, safe to remove immediately
       this.bookingService.removeLocal(localMatch.id);
       return;
     }
 
-    // API booking — optimistic remove then revert on failure
+    // API booking: optimistic remove, call backend, revert + reload on failure
     const prev = this.packages();
     this.packages.update(list => list.filter(p => p.id !== id));
+
     this.bookingService.cancel(id).subscribe(ok => {
-      if (!ok) this.packages.set(prev);
+      if (ok) return;
+
+      // Revert optimistic remove and reload from server to get fresh state
+      this.packages.set(prev);
+      const userId = this.getUserId();
+      if (userId) {
+        this.bookingService.getByUser(userId).subscribe(bookings => {
+          this.packages.set(
+            bookings
+              .filter(b => b.status !== 'Cancelled')
+              .map(b => this.mapBooking(b))
+          );
+        });
+      }
     });
   }
 
@@ -225,29 +239,29 @@ export class MyTripComponent implements OnInit {
     const userId = this.getUserId();
     if (userId) {
       this.bookingService.getByUser(userId).subscribe(bookings => {
-        // API bookings go into the separate packages signal (de-duplicated against local)
         const localNames = new Set(
           this.bookingService.localBookings().map(b => b.destination.toLowerCase())
         );
-        this.packages.set(
-          bookings
-            .filter(b => !localNames.has((b.packageName ?? b.destinationName ?? '').toLowerCase()))
-            .map(b => this.mapBooking(b))
+        // Exclude cancelled bookings and any already represented by a local entry
+        const active = bookings.filter(b =>
+          b.status !== 'Cancelled' &&
+          !localNames.has((b.packageName ?? b.destinationName ?? '').toLowerCase())
         );
+        this.packages.set(active.map(b => this.mapBooking(b)));
 
-        const latest = bookings[0];
+        const latest = active[0];
         if (latest) {
           this.bookingDetails.set({
-            id:           latest.id,
-            bookingId:    latest.id,
-            userId:       latest.userId,
-            packageTitle: latest.packageName     ?? undefined,
-            destination:  latest.destinationName ?? undefined,
+            id:              latest.id,
+            bookingId:       latest.id,
+            userId:          latest.userId,
+            packageTitle:    latest.packageName     ?? undefined,
+            destination:     latest.destinationName ?? undefined,
             destinationName: latest.destinationName,
-            packageName:  latest.packageName,
-            totalPrice:   latest.totalPrice,
-            status:       latest.status,
-            paymentStatus: latest.paymentStatus  ?? undefined,
+            packageName:     latest.packageName,
+            totalPrice:      latest.totalPrice,
+            status:          latest.status,
+            paymentStatus:   latest.paymentStatus  ?? undefined,
           });
         }
       });
