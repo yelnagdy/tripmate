@@ -5,6 +5,7 @@ import {
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { BookingData } from '../../models/detail.models';
 import { BookingService } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
@@ -115,22 +116,27 @@ export class BookingDialogComponent {
 
     const userId = this.paymentService.getUserId();
 
-    this.paymentService.createPayment({
-      userId,
-      amount:    total,
-      email:     form.email     ?? '',
-      firstName: form.firstName ?? '',
-      lastName:  form.lastName  ?? '',
-      bookingId: 0,
-      items: [{
-        itemType: 'destination',
-        itemId:   d.destinationId ?? 0,
-        price:    total,
-      }],
-    }).subscribe(paymentUrl => {
+    // Step 1: create booking → get real bookingId
+    // Step 2: create payment using that bookingId
+    this.bookingService.create(d.destinationId ?? 1, guests).pipe(
+      switchMap(bookingId =>
+        this.paymentService.createPayment({
+          userId,
+          amount:    total,
+          email:     form.email     ?? '',
+          firstName: form.firstName ?? '',
+          lastName:  form.lastName  ?? '',
+          bookingId: bookingId ?? 0,
+          items: [{
+            itemType: 'Destination',
+            itemId:   d.destinationId ?? 0,
+            price:    d.pricePerPerson,
+          }],
+        })
+      )
+    ).subscribe(paymentUrl => {
       this.paying.set(false);
 
-      // Save as Confirmed immediately — payment has been initiated
       const localId = this.bookingService.saveLocal({
         destination: d.to     || 'Unknown',
         from:        d.from   || '',
@@ -141,12 +147,10 @@ export class BookingDialogComponent {
         totalPrice:  total,
         status:      'Confirmed',
       });
-
       this.confirmedLocal.set(localId);
 
       if (paymentUrl) {
         window.open(paymentUrl, '_blank', 'noopener,noreferrer');
-        this.bookingService.create(d.destinationId ?? 1, guests).subscribe();
       } else {
         this.payError.set('Payment gateway unavailable. Your booking is saved — please retry later.');
       }

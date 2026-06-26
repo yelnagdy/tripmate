@@ -192,3 +192,179 @@
   opacity: 0.65;
   cursor: not-allowed;
 }
+
+/* ── Booking card wrapper ──────────────────────────────────── */
+.booking-card-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Delete button ─────────────────────────────────────────── */
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.52rem 1rem;
+  background: #fff;
+  color: #dc2626;
+  border: 1.5px solid #fca5a5;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+.btn-delete:active:not(:disabled) {
+  background: #fee2e2;
+}
+
+.btn-delete:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+}
+
+/* ── Toast notification ────────────────────────────────────── */
+.trip-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #166534;
+  color: #fff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  z-index: 1100;
+  white-space: nowrap;
+  animation: toast-in 0.22s ease;
+}
+
+.trip-toast--error {
+  background: #991b1b;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Confirmation overlay ──────────────────────────────────── */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fade-in 0.18s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.confirm-dialog {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 1.5rem 1.5rem;
+  max-width: 360px;
+  width: calc(100% - 2rem);
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  animation: slide-up 0.22s ease;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.confirm-icon {
+  width: 52px;
+  height: 52px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.4rem;
+  color: #dc2626;
+}
+
+.confirm-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.5rem;
+}
+
+.confirm-body {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.btn-keep {
+  flex: 1;
+  padding: 0.6rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-keep:hover {
+  background: #f9fafb;
+}
+
+.btn-confirm-delete {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 10px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: background 0.15s;
+}
+
+.btn-confirm-delete:hover {
+  background: #b91c1c;
+}

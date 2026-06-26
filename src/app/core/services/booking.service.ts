@@ -123,15 +123,20 @@ export class BookingService {
     );
   }
 
-  create(destinationId: number, numberOfPeople: number): Observable<boolean> {
+  create(destinationId: number, numberOfPeople: number): Observable<number | null> {
     const body: ApiBookingCreateRequest = { destinationId, numberOfPeople };
-    return this.http.post<{ success: boolean; message: string; data: string }>('/api/Bookings', body).pipe(
+    return this.http.post<{ success: boolean; message: string; data: number | string }>(
+      '/api/Bookings', body
+    ).pipe(
       map(res => {
-        const ok = res.success === true;
-        if (ok) this.userStats.incrementBookings();
-        return ok;
+        if (res.success !== true) return null;
+        this.userStats.incrementBookings();
+        const id = typeof res.data === 'number'
+          ? res.data
+          : parseInt(String(res.data), 10);
+        return isNaN(id) ? null : id;
       }),
-      catchError(() => of(false))
+      catchError(() => of(null))
     );
   }
 

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { FavouriteCardComponent } from '../favourite/favourite-card/favourite-card.component';
 import { FlightCardComponent }    from './flight-card/flight-card.component';
 import { HotelCardComponent }     from './hotel-card/hotel-card.component';
@@ -27,11 +27,82 @@ const FALLBACK_HOTELS: Hotel[] = [
   templateUrl: './my-trip.component.html',
   styleUrl: './my-trip.component.css',
 })
-export class MyTripComponent implements OnInit {
+export class MyTripComponent implements OnInit, OnDestroy {
 
   private readonly hotelService    = inject(HotelService);
   private readonly bookingService  = inject(BookingService);
   private readonly navService      = inject(NavigationService);
+
+  /* ── Delete flow ────────────────────────────────────────── */
+  readonly deletingIds   = signal<Set<number>>(new Set());
+  readonly confirmTarget = signal<{ id: number; label: string } | null>(null);
+  readonly toast         = signal<{ msg: string; ok: boolean } | null>(null);
+
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private showToast(msg: string, ok: boolean): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toast.set({ msg, ok });
+    this.toastTimer = setTimeout(() => this.toast.set(null), 3500);
+  }
+
+  onRequestDelete(id: number, label: string): void {
+    this.confirmTarget.set({ id, label });
+  }
+
+  cancelDelete(): void {
+    this.confirmTarget.set(null);
+  }
+
+  confirmDelete(): void {
+    const target = this.confirmTarget();
+    if (!target) return;
+    this.confirmTarget.set(null);
+    this.onDeleteBooking(target.id);
+  }
+
+  onDeleteBooking(id: number): void {
+    const localMatch = this.bookingService.localBookings()
+      .find(b => this.localNumericId(b) === id);
+
+    if (localMatch) {
+      this.bookingService.removeLocal(localMatch.id);
+      this.showToast('Booking removed successfully.', true);
+      return;
+    }
+
+    // API booking: show spinner, call backend, update signal on success
+    this.deletingIds.update(s => new Set([...s, id]));
+
+    this.bookingService.cancel(id).subscribe(ok => {
+      this.deletingIds.update(s => {
+        const next = new Set(s);
+        next.delete(id);
+        return next;
+      });
+
+      if (ok) {
+        this.packages.update(list => list.filter(p => p.id !== id));
+        this.showToast('Booking cancelled successfully.', true);
+      } else {
+        this.showToast('Could not cancel booking. Please try again.', false);
+        const userId = this.getUserId();
+        if (userId) {
+          this.bookingService.getByUser(userId).subscribe(bookings => {
+            this.packages.set(
+              bookings
+                .filter(b => !['cancelled', 'deleted'].includes(b.status?.toLowerCase() ?? ''))
+                .map(b => this.mapBooking(b))
+            );
+          });
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+  }
 
   /* ── Active booking from API ─────────────────────────────── */
   readonly bookingDetails = signal<ApiBookingDetails | null>(null);
@@ -127,7 +198,7 @@ export class MyTripComponent implements OnInit {
         this.bookingService.getByUser(userId).subscribe(bookings => {
           this.packages.set(
             bookings
-              .filter(b => b.status !== 'Cancelled')
+              .filter(b => !['cancelled', 'deleted'].includes(b.status?.toLowerCase() ?? ''))
               .map(b => this.mapBooking(b))
           );
         });
@@ -242,9 +313,9 @@ export class MyTripComponent implements OnInit {
         const localNames = new Set(
           this.bookingService.localBookings().map(b => b.destination.toLowerCase())
         );
-        // Exclude cancelled bookings and any already represented by a local entry
+        // Exclude cancelled/deleted bookings and any already represented by a local entry
         const active = bookings.filter(b =>
-          b.status !== 'Cancelled' &&
+          !['cancelled', 'deleted'].includes(b.status?.toLowerCase() ?? '') &&
           !localNames.has((b.packageName ?? b.destinationName ?? '').toLowerCase())
         );
         this.packages.set(active.map(b => this.mapBooking(b)));
