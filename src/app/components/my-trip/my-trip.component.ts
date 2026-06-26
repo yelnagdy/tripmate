@@ -71,7 +71,8 @@ export class MyTripComponent implements OnInit {
   }
 
   private mapLocalBooking(b: LocalBooking): FavouriteItem {
-    const guestLabel = `${b.guests} guest${b.guests !== 1 ? 's' : ''}`;
+    const guestLabel  = `${b.guests} guest${b.guests !== 1 ? 's' : ''}`;
+    const statusLabel = b.status === 'Confirmed' ? 'Confirmed' : 'Pending Payment';
     return {
       id:            parseInt(b.id.replace('local_', ''), 10),
       itemType:      'packge',
@@ -82,7 +83,7 @@ export class MyTripComponent implements OnInit {
       hotelStars:    4,
       amenities:     15,
       reviewScore:   4.0,
-      reviewLabel:   `${b.status} · ${guestLabel} · ${b.date}`,
+      reviewLabel:   `${statusLabel} · ${guestLabel} · ${b.date}`,
       reviewCount:   b.guests,
       pricePerNight: b.totalPrice,
     };

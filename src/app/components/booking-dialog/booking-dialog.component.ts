@@ -130,7 +130,7 @@ export class BookingDialogComponent {
     }).subscribe(paymentUrl => {
       this.paying.set(false);
 
-      // Save as Pending first, capture the returned ID for immediate upgrade
+      // Save as Confirmed immediately — payment has been initiated
       const localId = this.bookingService.saveLocal({
         destination: d.to     || 'Unknown',
         from:        d.from   || '',
@@ -139,21 +139,19 @@ export class BookingDialogComponent {
         date:        d.date   || '',
         guests,
         totalPrice:  total,
-        status:      'Pending Payment',
+        status:      'Confirmed',
       });
 
+      this.confirmedLocal.set(localId);
+
       if (paymentUrl) {
-        // Open Paymob in a new tab so the user keeps app state
         window.open(paymentUrl, '_blank', 'noopener,noreferrer');
         this.bookingService.create(d.destinationId ?? 1, guests).subscribe();
-        // Payment URL received → user has initiated payment → mark as Confirmed
-        this.bookingService.updateLocalStatus(localId, 'Confirmed');
-        this.confirmedLocal.set(localId);
-        this.currentStep.set(3);
       } else {
         this.payError.set('Payment gateway unavailable. Your booking is saved — please retry later.');
-        this.currentStep.set(3);
       }
+
+      this.currentStep.set(3);
     });
   }
 
