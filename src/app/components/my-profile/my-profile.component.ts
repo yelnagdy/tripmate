@@ -285,9 +285,10 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     if (!userId) { this.loading.set(false); return; }
 
     forkJoin({
-      profile: this.authService.getMyProfile().pipe(catchError(() => of(null))),
-      recent:  this.authService.getRecentActivity(userId).pipe(catchError(() => of([] as ApiRecentItem[]))),
-    }).subscribe(({ profile: p, recent }) => {
+      profile:  this.authService.getMyProfile().pipe(catchError(() => of(null))),
+      recent:   this.authService.getRecentActivity(userId).pipe(catchError(() => of([] as ApiRecentItem[]))),
+      bookings: this.bookingService.getByUser(userId).pipe(catchError(() => of([]))),
+    }).subscribe(({ profile: p, recent, bookings }) => {
       if (p) {
         const cachedAvatar = localStorage.getItem(this.AVATAR_KEY);
         this.profile.set({
@@ -307,15 +308,18 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           season:    p.preferredSeason   || '',
           airlines:  '',
         });
-        // Take the higher value: API might return 0/null while the session already has
-        // incremented the signal from add/remove actions earlier in the session.
-        this.userStats.setStats(
-          Math.max(p.totalFavorites ?? 0, this.userStats.totalFavorites()),
-          Math.max(p.totalBookings  ?? 0, this.userStats.totalBookings()),
-        );
-        // Always count local bookings — the API may return 0 if the backend
-        // hasn't persisted them yet, but localStorage is authoritative locally.
-        this.userStats.seedBookings(this.bookingService.localBookings().length);
+
+        // Count only active (non-cancelled) API bookings — excludes historical deleted ones
+        const activeApiBookings = bookings.filter(
+          b => !['cancelled', 'deleted'].includes(b.status?.toLowerCase() ?? '')
+        ).length;
+        // Local bookings are authoritative for items not yet synced to backend
+        const localCount = this.bookingService.localBookings().length;
+
+        // Favorites: localStorage is the authoritative real-time source
+        const favCount = this.favoritesService.getLocalCount();
+
+        this.userStats.setStats(favCount, activeApiBookings + localCount);
       }
       this._apiRecentItems.set(Array.isArray(recent) ? recent : []);
       this.loading.set(false);

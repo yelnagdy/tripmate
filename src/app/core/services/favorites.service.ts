@@ -98,6 +98,11 @@ export class FavoritesService {
     return of(true);  // always succeeds from the UI perspective
   }
 
+  /** Exact count of favorited items stored locally — authoritative for UI display. */
+  getLocalCount(): number {
+    return this.favSet.size;
+  }
+
   /** Instant check from localStorage — no network call. */
   isActive(itemId: number, itemType: string): boolean {
     return this.favSet.has(this.favKey(itemId, itemType));
