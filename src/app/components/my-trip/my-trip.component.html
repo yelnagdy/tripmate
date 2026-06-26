@@ -101,8 +101,9 @@
         <div class="booking-card-wrap">
           <app-favourite-card
             [item]="pkg"
+            [showRemove]="isFavorite(pkg.id, pkg.itemType)"
             (viewPlace)="onViewPackage($event)"
-            (remove)="onTogglePackageFav($event)">
+            (remove)="removeFavorite($event, pkg.itemType)">
           </app-favourite-card>
           <button
             type="button"
@@ -121,8 +122,9 @@
         <div class="booking-card-wrap">
           <app-favourite-card
             [item]="pkg"
+            [showRemove]="isFavorite(pkg.id, pkg.itemType)"
             (viewPlace)="onViewPackage($event)"
-            (remove)="onTogglePackageFav($event)">
+            (remove)="removeFavorite($event, pkg.itemType)">
           </app-favourite-card>
           <button
             type="button"

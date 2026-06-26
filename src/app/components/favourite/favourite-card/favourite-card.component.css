@@ -270,6 +270,7 @@
 
 .view-btn:hover { background: #2f4ac4; transform: translateY(-1px); }
 .view-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.view-btn--full { flex: unset; width: 100%; }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 575.98px) {

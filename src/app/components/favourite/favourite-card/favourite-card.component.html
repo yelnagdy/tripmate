@@ -91,17 +91,20 @@
 
     <!-- Bottom: heart + CTA -->
     <div class="fav-actions">
-      <button
-        type="button"
-        class="remove-btn"
-        (click)="remove.emit(item().id)"
-        aria-label="Remove from favourites">
-        <i class="fas fa-heart" aria-hidden="true"></i>
-      </button>
+      @if (showRemove()) {
+        <button
+          type="button"
+          class="remove-btn"
+          (click)="remove.emit(item().id)"
+          aria-label="Remove from favourites">
+          <i class="fas fa-heart" aria-hidden="true"></i>
+        </button>
+      }
 
       <button
         type="button"
         class="view-btn"
+        [class.view-btn--full]="!showRemove()"
         (click)="viewPlace.emit(item())"
         [attr.aria-label]="'View ' + item().name">
         View Place

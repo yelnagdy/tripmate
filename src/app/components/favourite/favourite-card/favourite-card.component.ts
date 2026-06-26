@@ -14,9 +14,10 @@ import { RatingService } from '../../../core/services/rating.service';
 })
 export class FavouriteCardComponent implements OnInit {
 
-  item      = input.required<FavouriteItem>();
-  viewPlace = output<FavouriteItem>();
-  remove    = output<number>();
+  item       = input.required<FavouriteItem>();
+  viewPlace  = output<FavouriteItem>();
+  remove     = output<number>();
+  showRemove = input<boolean>(true);
 
   private readonly destroyRef    = inject(DestroyRef);
   private readonly ratingService = inject(RatingService);

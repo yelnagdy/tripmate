@@ -8,6 +8,7 @@ import { Flight, Hotel }          from '../../models/my-trip.models';
 import { BookingData }            from '../../models/detail.models';
 import { HotelService }           from '../../core/services/hotel.service';
 import { BookingService }         from '../../core/services/booking.service';
+import { FavoritesService }       from '../../core/services/favorites.service';
 import { NavigationService }      from '../../core/services/navigation.service';
 import { ApiBooking, ApiBookingDetails, ApiHotel } from '../../models/api.models';
 import { LocalBooking } from '../../core/services/booking.service';
@@ -29,9 +30,10 @@ const FALLBACK_HOTELS: Hotel[] = [
 })
 export class MyTripComponent implements OnInit, OnDestroy {
 
-  private readonly hotelService    = inject(HotelService);
-  private readonly bookingService  = inject(BookingService);
-  private readonly navService      = inject(NavigationService);
+  private readonly hotelService      = inject(HotelService);
+  private readonly bookingService    = inject(BookingService);
+  private readonly favoritesService  = inject(FavoritesService);
+  private readonly navService        = inject(NavigationService);
 
   /* ── Delete flow ────────────────────────────────────────── */
   readonly deletingIds   = signal<Set<number>>(new Set());
@@ -174,36 +176,18 @@ export class MyTripComponent implements OnInit, OnDestroy {
     });
   }
 
-  onTogglePackageFav(id: number): void {
-    const localMatch = this.bookingService.localBookings()
-      .find(b => this.localNumericId(b) === id);
+  /** True when the booking is also saved as a favourite — drives heart visibility. */
+  isFavorite(id: number, itemType: string): boolean {
+    return this.favoritesService.isActive(id, itemType);
+  }
 
-    if (localMatch) {
-      // Local-only booking: no backend record exists, safe to remove immediately
-      this.bookingService.removeLocal(localMatch.id);
-      return;
-    }
-
-    // API booking: optimistic remove, call backend, revert + reload on failure
-    const prev = this.packages();
-    this.packages.update(list => list.filter(p => p.id !== id));
-
-    this.bookingService.cancel(id).subscribe(ok => {
-      if (ok) return;
-
-      // Revert optimistic remove and reload from server to get fresh state
-      this.packages.set(prev);
-      const userId = this.getUserId();
-      if (userId) {
-        this.bookingService.getByUser(userId).subscribe(bookings => {
-          this.packages.set(
-            bookings
-              .filter(b => !['cancelled', 'deleted'].includes(b.status?.toLowerCase() ?? ''))
-              .map(b => this.mapBooking(b))
-          );
-        });
-      }
-    });
+  /**
+   * Heart button: remove from favourites ONLY.
+   * The booking card stays — only the heart disappears.
+   */
+  removeFavorite(id: number, itemType: string): void {
+    this.favoritesService.remove(id, itemType as any).subscribe();
+    this.showToast('Removed from favourites.', true);
   }
 
   /* ── Flights ────────────────────────────────────────────── */
