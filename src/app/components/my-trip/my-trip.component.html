@@ -96,29 +96,13 @@
 
   <!-- Packages -->
   @if (activeTab() === 'packages') {
-    @if (localPackages().length || packages().length) {
-      @for (pkg of localPackages(); track pkg.id) {
-        <div class="booking-card-wrap">
-          <app-favourite-card
-            [item]="pkg"
-            [showRemove]="isFavorite(pkg.id, pkg.itemType)"
-            (viewPlace)="onViewPackage($event)"
-            (remove)="removeFavorite($event, pkg.itemType)">
-          </app-favourite-card>
-          <button
-            type="button"
-            class="btn-delete"
-            [disabled]="deletingIds().has(pkg.id)"
-            (click)="onRequestDelete(pkg.id, pkg.name)">
-            @if (deletingIds().has(pkg.id)) {
-              <i class="fas fa-spinner fa-spin"></i> Deleting…
-            } @else {
-              <i class="fas fa-trash-alt"></i> Delete Booking
-            }
-          </button>
-        </div>
-      }
-      @for (pkg of packages(); track pkg.id) {
+    @if (packagesLoading()) {
+      <div class="empty-state">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        Loading your bookings…
+      </div>
+    } @else if (bookings().length) {
+      @for (pkg of bookings(); track pkg.id) {
         <div class="booking-card-wrap">
           <app-favourite-card
             [item]="pkg"

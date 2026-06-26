@@ -5,7 +5,7 @@ import {
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { BookingData } from '../../models/detail.models';
 import { BookingService } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
@@ -32,10 +32,10 @@ export class BookingDialogComponent {
   private readonly paymentService  = inject(PaymentService);
 
   /* ── Step state ─────────────────────────────────────────────── */
-  readonly currentStep = signal<Step>(1);
+  readonly currentStep    = signal<Step>(1);
   readonly paying         = signal(false);
   readonly payError       = signal<string | null>(null);
-  readonly confirmedLocal = signal<string | null>(null); // local booking id after confirm
+  readonly confirmedLocal = signal<number | null>(null); // booking id from backend after confirm
 
   /* ── Inline field editing ───────────────────────────────────── */
   readonly overrides    = signal<Partial<BookingData>>({});
@@ -116,8 +116,8 @@ export class BookingDialogComponent {
 
     const userId = this.paymentService.getUserId();
 
-    // Step 1: create booking → get real bookingId
-    // Step 2: create payment using that bookingId
+    // Step 1: create booking on backend → get real bookingId
+    // Step 2: use bookingId to initiate payment
     this.bookingService.create(d.destinationId ?? 1, guests).pipe(
       switchMap(bookingId =>
         this.paymentService.createPayment({
@@ -132,22 +132,22 @@ export class BookingDialogComponent {
             itemId:   d.destinationId ?? 0,
             price:    d.pricePerPerson,
           }],
-        })
+        }).pipe(map(url => ({ url, bookingId })))
       )
-    ).subscribe(paymentUrl => {
+    ).subscribe(({ url: paymentUrl, bookingId }) => {
       this.paying.set(false);
 
-      const localId = this.bookingService.saveLocal({
-        destination: d.to     || 'Unknown',
-        from:        d.from   || '',
-        to:          d.to     || '',
-        flight:      d.flight || '',
-        date:        d.date   || '',
-        guests,
-        totalPrice:  total,
-        status:      'Confirmed',
-      });
-      this.confirmedLocal.set(localId);
+      if (bookingId) {
+        // Reflect the new booking in my-trip immediately (no localStorage needed)
+        this.bookingService.addOptimistic({
+          id:              bookingId,
+          destinationId:   d.destinationId ?? 0,
+          destinationName: d.to || 'Unknown',
+          numberOfPeople:  guests,
+          totalPrice:      total,
+        });
+        this.confirmedLocal.set(bookingId);
+      }
 
       if (paymentUrl) {
         window.open(paymentUrl, '_blank', 'noopener,noreferrer');
