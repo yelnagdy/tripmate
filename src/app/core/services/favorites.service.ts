@@ -173,6 +173,27 @@ export class FavoritesService {
     );
   }
 
+  /**
+   * Pull the server's favorites list and overwrite the local cache.
+   * Call this once after login / on app startup so cross-device state is consistent.
+   */
+  syncFromServer(): void {
+    const userId = this.getUserId();
+    if (!userId) return;
+
+    this.http.get<ApiFavorite[]>(`/api/favorites/${userId}`).pipe(
+      catchError(() => of(null))          // keep local cache on network failure
+    ).subscribe(favorites => {
+      if (favorites === null) return;
+
+      // Server is the source of truth — replace local cache entirely
+      this.favSet.clear();
+      favorites.forEach(f => this.favSet.add(this.favKey(f.itemId, f.itemType)));
+      this.writeStorage();
+      this.userStats.setStats(this.favSet.size, this.userStats.totalBookings());
+    });
+  }
+
   /** Full list from API — still needed by the Favourites page to get item details. */
   getAll(): Observable<ApiFavorite[]> {
     const userId = this.getUserId();
