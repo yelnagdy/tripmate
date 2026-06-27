@@ -17,10 +17,12 @@ import { NewsComponent }              from './components/news/news.component';
 import { NewsDetailComponent }        from './components/news-detail/news-detail.component';
 import { ApiTesterComponent }         from './components/api-tester/api-tester.component';
 import { authGuard } from './core/guards/auth.guard';
+import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
 
 export const routes: Routes = [
 
        { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+       { path: 'payment-callback', component: PaymentCallbackComponent, title: 'Payment Complete' },
         {path : 'auth',component:AuthComponent,children:[
         {path : '', redirectTo : 'login', pathMatch : 'full'},
         {path : 'login',component:LoginComponent, title : 'Login'},

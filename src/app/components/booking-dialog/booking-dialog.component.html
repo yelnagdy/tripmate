@@ -130,102 +130,142 @@
 
   <!-- ── STEP 2 : Payment ──────────────────────────────────── -->
   @if (currentStep() === 2) {
-    <div class="bd-inner">
 
-      <div class="bd-head">
-        <button type="button" class="bd-back" aria-label="Back" (click)="goBack()">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <h2 class="bd-title">Payment</h2>
-      </div>
+    <!-- Phase A: billing details form (before iframe loads) -->
+    @if (!iframeUrl()) {
+      <div class="bd-inner">
 
-      <form [formGroup]="paymentForm" (ngSubmit)="onPay()" novalidate>
-        <div class="info-card">
-
-          <!-- Order summary -->
-          <div class="pay-summary">
-            <div class="pay-summary-row">
-              <span class="pay-summary-label">Destination</span>
-              <span class="pay-summary-value">{{ display().to }}</span>
-            </div>
-            <div class="pay-summary-row">
-              <span class="pay-summary-label">Guests</span>
-              <span class="pay-summary-value">{{ guests() }}</span>
-            </div>
-            <div class="pay-summary-row pay-summary-total">
-              <span class="pay-summary-label">Total</span>
-              <span class="pay-summary-value">${{ total() }}</span>
-            </div>
-          </div>
-
-          <!-- Divider -->
-          <div class="pay-divider"></div>
-
-          <!-- Billing details -->
-          <p class="pay-section-label">Billing Details</p>
-
-          <div class="pay-row">
-            <div class="pay-field">
-              <label class="pay-label" for="firstName">First Name</label>
-              <input
-                id="firstName"
-                type="text"
-                class="pay-input"
-                [class.pay-input--err]="hasError('firstName')"
-                formControlName="firstName"
-                placeholder="Yousef" />
-              @if (hasError('firstName')) {
-                <span class="err-msg">Required</span>
-              }
-            </div>
-            <div class="pay-field">
-              <label class="pay-label" for="lastName">Last Name</label>
-              <input
-                id="lastName"
-                type="text"
-                class="pay-input"
-                [class.pay-input--err]="hasError('lastName')"
-                formControlName="lastName"
-                placeholder="Elnagdy" />
-              @if (hasError('lastName')) {
-                <span class="err-msg">Required</span>
-              }
-            </div>
-          </div>
-
-          <div class="pay-field">
-            <label class="pay-label" for="payEmail">Email</label>
-            <input
-              id="payEmail"
-              type="email"
-              class="pay-input"
-              [class.pay-input--err]="hasError('email')"
-              formControlName="email"
-              placeholder="you@email.com" />
-            @if (hasError('email')) {
-              <span class="err-msg">Valid email required</span>
-            }
-          </div>
-
-          <!-- Paymob branding -->
-          <div class="paymob-note">
-            <i class="fas fa-lock" aria-hidden="true"></i>
-            Secure payment powered by <strong>Paymob</strong>.
-            You will be redirected to complete payment.
-          </div>
-
+        <div class="bd-head">
+          <button type="button" class="bd-back" aria-label="Back" (click)="goBack()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h2 class="bd-title">Payment</h2>
         </div>
 
-        <button type="submit" class="action-btn" [disabled]="paying()">
-          @if (paying()) {
-            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-            Redirecting to Paymob…
-          } @else {
-            Pay ${{ total() }} with Paymob
-          }
+        <form [formGroup]="paymentForm" (ngSubmit)="onPay()" novalidate>
+          <div class="info-card">
+
+            <!-- Order summary -->
+            <div class="pay-summary">
+              <div class="pay-summary-row">
+                <span class="pay-summary-label">Destination</span>
+                <span class="pay-summary-value">{{ display().to }}</span>
+              </div>
+              <div class="pay-summary-row">
+                <span class="pay-summary-label">Guests</span>
+                <span class="pay-summary-value">{{ guests() }}</span>
+              </div>
+              <div class="pay-summary-row pay-summary-total">
+                <span class="pay-summary-label">Total</span>
+                <span class="pay-summary-value">${{ total() }}</span>
+              </div>
+            </div>
+
+            <div class="pay-divider"></div>
+
+            <p class="pay-section-label">Billing Details</p>
+
+            <div class="pay-row">
+              <div class="pay-field">
+                <label class="pay-label" for="firstName">First Name</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  class="pay-input"
+                  [class.pay-input--err]="hasError('firstName')"
+                  formControlName="firstName"
+                  placeholder="Yousef" />
+                @if (hasError('firstName')) {
+                  <span class="err-msg">Required</span>
+                }
+              </div>
+              <div class="pay-field">
+                <label class="pay-label" for="lastName">Last Name</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  class="pay-input"
+                  [class.pay-input--err]="hasError('lastName')"
+                  formControlName="lastName"
+                  placeholder="Elnagdy" />
+                @if (hasError('lastName')) {
+                  <span class="err-msg">Required</span>
+                }
+              </div>
+            </div>
+
+            <div class="pay-field">
+              <label class="pay-label" for="payEmail">Email</label>
+              <input
+                id="payEmail"
+                type="email"
+                class="pay-input"
+                [class.pay-input--err]="hasError('email')"
+                formControlName="email"
+                placeholder="you@email.com" />
+              @if (hasError('email')) {
+                <span class="err-msg">Valid email required</span>
+              }
+            </div>
+
+            <div class="paymob-note">
+              <i class="fas fa-lock" aria-hidden="true"></i>
+              Secure payment powered by <strong>Paymob</strong>.
+              Card details are entered securely on this page.
+            </div>
+
+            @if (payError()) {
+              <p class="err-msg err-msg--block">{{ payError() }}</p>
+            }
+
+          </div>
+
+          <button type="submit" class="action-btn" [disabled]="paying()">
+            @if (paying()) {
+              <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+              Loading payment form…
+            } @else {
+              Pay ${{ total() }} with Paymob
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- Phase B: embedded Paymob iframe -->
+    @if (iframeUrl()) {
+      <div class="bd-inner bd-inner--iframe">
+
+        <div class="bd-head">
+          <button type="button" class="bd-back" aria-label="Back" (click)="goBack()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h2 class="bd-title">Enter Card Details</h2>
+        </div>
+
+        <div class="paymob-iframe-wrap">
+          <iframe
+            class="paymob-iframe"
+            [src]="iframeUrl()"
+            title="Paymob Secure Payment"
+            allow="payment"
+            scrolling="yes"
+            frameborder="0">
+          </iframe>
+        </div>
+
+        <p class="iframe-note">
+          <i class="fas fa-lock" aria-hidden="true"></i>
+          Card details are handled securely by Paymob — TripMate never sees your card number.
+        </p>
+
+        <button type="button" class="action-btn action-btn--ghost" (click)="onPaymentDone()">
+          I've completed payment
         </button>
-      </form>
-    </div>
+
+      </div>
+    }
+
   }
 
   <!-- ── STEP 3 : Congratulations ─────────────────────────── -->
