@@ -187,8 +187,14 @@ export class BookingDialogComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Close the Paymob modal without advancing — user can retry or go back. */
+  closeIframeModal(): void {
+    this.iframeUrl.set(null);
+  }
+
   /** Fallback: user clicks "I've completed payment" after finishing inside the iframe. */
   onPaymentDone(): void {
+    this.iframeUrl.set(null);
     this.currentStep.set(3);
   }
 
