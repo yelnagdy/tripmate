@@ -13,7 +13,7 @@ import { PaymentService } from '../../core/services/payment.service';
 
 type EditableField = 'date' | 'from' | 'to' | 'flight';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2;
 
 @Component({
   selector: 'app-booking-dialog',
@@ -99,7 +99,9 @@ export class BookingDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.paymentMessageHandler = (event: MessageEvent) => {
       if (event.data?.type === 'TRIPMATE_PAYMENT_SUCCESS') {
-        this.currentStep.set(3);
+        this.iframeUrl.set(null);
+        this.closeDialog.emit();
+        this.router.navigate(['/main/payment-success']);
       }
     };
     window.addEventListener('message', this.paymentMessageHandler);
@@ -192,15 +194,11 @@ export class BookingDialogComponent implements OnInit, OnDestroy {
     this.iframeUrl.set(null);
   }
 
-  /** Fallback: user clicks "I've completed payment" after finishing inside the iframe. */
+  /** Fallback: user confirms they paid inside the iframe; navigate to success page. */
   onPaymentDone(): void {
     this.iframeUrl.set(null);
-    this.currentStep.set(3);
-  }
-
-  backToHome(): void {
     this.closeDialog.emit();
-    this.router.navigate(['/main/my-trip']);
+    this.router.navigate(['/main/payment-success']);
   }
 
   hasError(field: string): boolean {

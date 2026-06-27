@@ -322,69 +322,6 @@
   color: var(--danger);
 }
 
-/* ── Congratulations screen ─────────────────────────────────── */
-.congrats-inner {
-  min-height: 340px;
-  justify-content: flex-start;
-}
-
-.congrats-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  flex: 1;
-  gap: 1rem;
-  position: relative;
-  padding: 1rem 0 0.5rem;
-}
-
-/* Star ring */
-.stars-ring {
-  position: relative;
-  width: 180px;
-  height: 100px;
-  margin-bottom: -1.5rem;
-}
-
-.cstar {
-  position: absolute;
-  color: #f59e0b;
-  font-size: 1.1rem;
-  animation: twinkle 1.6s ease-in-out infinite alternate;
-}
-
-.cs1 { top: 0;   left: 20px;  font-size: 0.8rem; animation-delay: 0s; }
-.cs2 { top: 0;   left: 50%;   transform: translateX(-50%); font-size: 1.3rem; animation-delay: 0.2s; }
-.cs3 { top: 0;   right: 20px; font-size: 0.8rem; animation-delay: 0.4s; }
-.cs4 { top: 30px; left: 0;    font-size: 1rem;   animation-delay: 0.6s; }
-.cs5 { top: 30px; right: 0;   font-size: 1rem;   animation-delay: 0.8s; }
-.cs6 { top: 60px; left: 30px; font-size: 0.7rem; animation-delay: 0.3s; }
-.cs7 { top: 60px; right: 30px;font-size: 0.7rem; animation-delay: 0.5s; }
-.cs8 { top: 15px; left: 38%;  font-size: 0.65rem;animation-delay: 0.9s; }
-
-@keyframes twinkle {
-  from { opacity: 0.4; transform: scale(0.9); }
-  to   { opacity: 1;   transform: scale(1.15); }
-}
-
-.congrats-title {
-  font-family: 'Dancing Script', 'Brush Script MT', cursive;
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: var(--title-clr);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.congrats-sub {
-  font-size: 0.82rem;
-  color: var(--body-clr);
-  line-height: 1.7;
-  margin: 0;
-  max-width: 280px;
-}
 
 /* ── Payment step — summary + Paymob ───────────────────────── */
 .pay-summary {

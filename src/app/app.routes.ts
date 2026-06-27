@@ -18,6 +18,7 @@ import { NewsDetailComponent }        from './components/news-detail/news-detail
 import { ApiTesterComponent }         from './components/api-tester/api-tester.component';
 import { authGuard } from './core/guards/auth.guard';
 import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
+import { PaymentSuccessComponent }  from './components/payment-success/payment-success.component';
 
 export const routes: Routes = [
 
@@ -42,7 +43,8 @@ export const routes: Routes = [
         {path : 'item/:type/:id',    component:UniversalDetailComponent,   title : 'Details'},
         {path : 'news',              component:NewsComponent,               title : 'News & Guides'},
         {path : 'news-detail/:id', component:NewsDetailComponent,         title : 'Article'},
-        {path : 'api-test',        component:ApiTesterComponent,          title : 'API Tester'}
+        {path : 'api-test',        component:ApiTesterComponent,          title : 'API Tester'},
+        {path : 'payment-success', component:PaymentSuccessComponent,     title : 'Booking Confirmed'}
     ]}
 
 ];

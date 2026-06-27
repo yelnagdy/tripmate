@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+.success-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #f0f0f0;
+}
+
+.success-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.5rem 2rem 2rem;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Stars arc ───────────────────────────────────────────────── */
+.stars-ring {
+  position: relative;
+  width: 200px;
+  height: 110px;
+  margin-bottom: -0.5rem;
+}
+
+.cstar {
+  position: absolute;
+  color: #f59e0b;
+  animation: twinkle 1.6s ease-in-out infinite alternate;
+}
+
+.cs1 { top: 10px;  left: 20px;  font-size: 0.85rem; animation-delay: 0s;   }
+.cs2 { top: 0;     left: 48%;   font-size: 1.4rem;  animation-delay: 0.2s; }
+.cs3 { top: 10px;  right: 20px; font-size: 0.85rem; animation-delay: 0.4s; }
+.cs4 { top: 40px;  left: 4px;   font-size: 1.05rem; animation-delay: 0.6s; }
+.cs5 { top: 40px;  right: 4px;  font-size: 1.05rem; animation-delay: 0.8s; }
+.cs6 { top: 72px;  left: 36px;  font-size: 0.75rem; animation-delay: 0.3s; }
+.cs7 { top: 72px;  right: 36px; font-size: 0.75rem; animation-delay: 0.5s; }
+.cs8 { top: 20px;  left: 42%;   font-size: 0.7rem;  animation-delay: 0.9s; }
+
+@keyframes twinkle {
+  from { opacity: 0.35; transform: scale(0.88); }
+  to   { opacity: 1;    transform: scale(1.18); }
+}
+
+/* ── Text ────────────────────────────────────────────────────── */
+.congrats-title {
+  font-family: 'Dancing Script', 'Brush Script MT', cursive;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.congrats-sub {
+  font-size: 0.84rem;
+  color: #6b7280;
+  line-height: 1.75;
+  margin: 0;
+  max-width: 300px;
+}
+
+/* ── Button ──────────────────────────────────────────────────── */
+.view-btn {
+  margin-top: 0.5rem;
+  padding: 0.7rem 2.25rem;
+  border-radius: 8px;
+  border: none;
+  background: #3b5bdb;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.view-btn:hover {
+  background: #2f4ac4;
+  transform: translateY(-1px);
+}
+
+/* ── Mobile ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .success-card {
+    border-radius: 16px;
+    padding: 2rem 1.25rem 1.75rem;
+  }
+
+  .congrats-title { font-size: 2.2rem; }
+}
