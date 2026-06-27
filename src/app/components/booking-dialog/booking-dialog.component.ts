@@ -111,6 +111,11 @@ export class BookingDialogComponent {
     const total  = this.total();
     const form   = this.paymentForm.value;
 
+    // Open a blank window NOW — synchronously, still inside the user-gesture call stack.
+    // Mobile browsers (Safari/Chrome iOS) block window.open() called from async callbacks.
+    // We set the actual URL after the API responds.
+    const paymentWindow = window.open('', '_blank', 'noopener,noreferrer');
+
     this.paying.set(true);
     this.payError.set(null);
 
@@ -138,7 +143,6 @@ export class BookingDialogComponent {
       this.paying.set(false);
 
       if (bookingId) {
-        // Reflect the new booking in my-trip immediately (no localStorage needed)
         this.bookingService.addOptimistic({
           id:              bookingId,
           destinationId:   d.destinationId ?? 0,
@@ -150,8 +154,18 @@ export class BookingDialogComponent {
       }
 
       if (paymentUrl) {
-        window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+        if (paymentWindow && !paymentWindow.closed) {
+          // Happy path (desktop + most mobile): set URL on the pre-opened window
+          paymentWindow.location.href = paymentUrl;
+        } else {
+          // Fallback: popup was blocked despite the trick — redirect the current tab.
+          // The user will return from Paymob to the app's root URL.
+          window.location.href = paymentUrl;
+          return; // skip step 3 — page is navigating away
+        }
       } else {
+        // API returned no URL — close the blank window so it doesn't hang open
+        paymentWindow?.close();
         this.payError.set('Payment gateway unavailable. Your booking is saved — please retry later.');
       }
 
